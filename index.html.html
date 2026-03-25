@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 2: Kit di Sopravvivenza Emotiva</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --dark: #2d3436;
+            --light: #f8f9fa;
+            --success: #00b894;
+            --danger: #d63031;
+            --warning: #fdcb6e;
+            --joy: #f1c40f; --trust: #e67e22; --fear: #27ae60; --surprise: #9b59b6;
+            --sad: #3498db; --disgust: #16a085; --anger: #e74c3c; --anticipation: "#fdcb6e";
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            height: 100vh;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            overflow: hidden;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 1100px;
+            height: 100vh;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* --- HEADER --- */
+        header {
+            padding: 15px 30px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        .logo { font-size: 1.2em; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 10px; }
+        .logo i { color: var(--primary); }
+        
+        .stats-bar { display: flex; align-items: center; gap: 20px; }
+        .stat-box { font-size: 0.9em; font-weight: bold; color: #555; }
+        .progress-container { width: 120px; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 50%; transition: width 0.5s; background: linear-gradient(90deg, var(--danger), var(--warning), var(--success)); }
+
+        /* --- MAIN --- */
+        main { flex: 1; position: relative; overflow-y: auto; }
+        
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; padding: 30px; 
+            flex-direction: column; 
+            animation: fadeIn 0.4s;
+        }
+        .screen.active { display: flex; }
+        
+        /* --- START SCREEN --- */
+        #scr-start { justify-content: center; align-items: center; text-align: center; }
+        .hero-icon { font-size: 5em; color: var(--primary); margin-bottom: 20px; text-shadow: 0 5px 15px rgba(108, 92, 231, 0.2); }
+        h1 { font-size: 2em; margin: 0 0 10px 0; color: var(--dark); }
+        p.intro { max-width: 600px; color: #666; line-height: 1.6; margin-bottom: 30px; }
+        .btn-start {
+            background: var(--primary); color: white; border: none;
+            padding: 15px 50px; font-size: 1.2em; border-radius: 40px;
+            cursor: pointer; box-shadow: 0 10px 25px rgba(108, 92, 231, 0.3);
+            transition: transform 0.2s;
+        }
+        .btn-start:hover { transform: translateY(-3px); }
+
+        /* --- GAME SCREEN --- */
+        .game-layout { display: flex; gap: 20px; height: 100%; flex: 1; }
+        
+        .col-scenario { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .card-scenario {
+            background: #fff; border-radius: 20px; padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center;
+            border: 1px solid #f0f0f0; position: relative;
+        }
+        .cat-tag {
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            background: var(--dark); color: white; padding: 5px 15px;
+            border-radius: 15px; font-size: 0.8em; font-weight: bold; text-transform: uppercase;
+        }
+        .scene-icon {
+            width: 100px; height: 100px; border-radius: 50%; margin: 20px auto;
+            display: flex; align-items: center; justify-content: center; font-size: 3em;
+            color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .scene-text { font-size: 1.3em; font-weight: 600; color: var(--dark); line-height: 1.4; }
+
+        .col-options { flex: 1.5; display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+        
+        .opt-btn {
+            background: white; border: 2px solid #eee; border-radius: 12px;
+            padding: 15px; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 15px; text-align: left;
+        }
+        .opt-btn:hover { border-color: var(--primary); transform: translateX(5px); box-shadow: 0 5px 10px rgba(0,0,0,0.05); }
+        
+        .opt-icon { width: 40px; height: 40px; border-radius: 10px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; color: #555; font-size: 1.2em; flex-shrink: 0; }
+        .opt-text { font-size: 1.05em; font-weight: 500; color: var(--dark); }
+
+        /* --- OVERLAY FEEDBACK --- */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98); z-index: 100;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            text-align: center; padding: 40px;
+        }
+        .overlay.active { display: flex; animation: fadeIn 0.3s; }
+        
+        .emo-badge {
+            display: inline-block; padding: 8px 25px; border-radius: 20px;
+            color: white; font-weight: bold; font-size: 1.2em; margin-top: 20px;
+            text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* --- ACTIVITY SCREEN --- */
+        #scr-activity { padding: 0; height: 100%; }
+        .activity-layout { display: flex; height: 100%; width: 100%; }
+        
+        .side-bridge {
+            flex: 1; background: #fff; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 30px;
+            border-right: 1px solid #eee;
+        }
+        
+        .wheel-container { position: relative; width: 200px; height: 200px; margin-bottom: 20px; }
+        .plutchik-wheel {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(
+                var(--joy) 0deg 45deg, var(--trust) 45deg 90deg,
+                var(--fear) 90deg 135deg, var(--surprise) 135deg 180deg,
+                var(--sad) 180deg 225deg, var(--disgust) 225deg 270deg,
+                var(--anger) 270deg 315deg, var(--warning) 315deg 360deg
+            );
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 3s ease;
+        }
+        .wheel-center {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 90px; height: 90px; background: white; border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            border: 4px solid #fff;
+        }
+        .center-icon { font-size: 2em; margin-bottom: 2px; }
+        .center-text { font-size: 0.8em; font-weight: bold; text-transform: uppercase; text-align: center; padding: 0 5px; }
+
+        .report-card {
+            background: #f8f9fa; border-radius: 15px; padding: 20px;
+            text-align: left; max-width: 350px; border-left: 5px solid var(--primary);
+        }
+        .report-title { font-weight: 800; font-size: 1.1em; color: var(--dark); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .report-text { font-size: 0.9em; line-height: 1.5; color: #555; }
+        
+        .inspiration-box { margin-top: 20px; text-align: center; width: 100%; max-width: 350px; }
+        .inspiration-card {
+            background: white; border-left: 4px solid var(--primary);
+            padding: 15px; text-align: left; border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 10px;
+            font-style: italic; font-size: 0.9em;
+            display: none; 
+        }
+        .btn-inspire {
+            background: white; border: 2px solid var(--dark); color: var(--dark);
+            padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9em; font-weight: bold;
+            transition: 0.2s; margin-top: 10px;
+        }
+        .btn-inspire:hover { background: var(--dark); color: white; }
+
+        .side-form {
+            flex: 1.5; background: #fafafa; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 20px;
+        }
+        .postit {
+            background: #fff740; padding: 25px; width: 100%; max-width: 450px;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.1); transform: rotate(-1deg);
+            border-radius: 2px;
+        }
+        .postit h3 { margin-top: 0; border-bottom: 2px solid rgba(0,0,0,0.1); padding-bottom: 8px; }
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; font-size: 0.9em; margin-bottom: 4px; }
+        .form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+        textarea.form-input { resize: none; height: 60px; }
+        .btn-submit {
+            background: var(--dark); color: white; border: none;
+            padding: 10px; width: 100%; border-radius: 20px; cursor: pointer; font-size: 1em; margin-top: 5px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    
+    <!-- HEADER -->
+    <header>
+        <div class="logo"><i class="fas fa-brain"></i> Phase 2: Survival Kit</div>
+        <div class="stats-bar">
+            <div class="stat-box">Scenario: <span id="r-num">1</span>/40</div>
+            <div class="progress-container"><div class="progress-fill" id="p-bar"></div></div>
+            <div class="stat-box">Equilibrio: <span id="p-val">50%</span></div>
+        </div>
+    </header>
+
+    <main>
+        <!-- START SCREEN -->
+        <div id="scr-start" class="screen active">
+            <i class="fas fa-compass hero-icon"></i>
+            <h1>Kit di Sopravvivenza Emotiva</h1>
+            <p class="intro">
+                Affronta 40 scenari realistici per testare le tue reazioni.<br>
+                Al termine riceverai un profilo psicologico e potrai condividere la tua esperienza.
+            </p>
+            <button class="btn-start" onclick="startGame()"><i class="fas fa-play"></i> Inizia la Simulazione</button>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="scr-game" class="screen">
+            <div class="game-layout">
+                <div class="col-scenario">
+                    <div class="card-scenario">
+                        <div class="cat-tag" id="s-cat">Categoria</div>
+                        <div class="scene-icon" id="s-icon"><i class="fas fa-question"></i></div>
+                        <div class="scene-text" id="s-txt">Testo situazione</div>
+                    </div>
+                </div>
+                <div class="col-options" id="opts-box">
+                    <!-- Opzioni generate qui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVITY SCREEN -->
+        <div id="scr-activity" class="screen">
+            <div class="activity-layout">
+                <div class="side-bridge">
+                    <h2 style="color: var(--dark); font-size: 1.2em;">Il Tuo Profilo</h2>
+                    
+                    <div class="wheel-container">
+                        <div class="plutchik-wheel"></div>
+                        <div class="wheel-center" id="wheel-center">
+                            <i class="fas fa-question center-icon"></i>
+                            <span class="center-text">IO</span>
+                        </div>
+                    </div>
+
+                    <div class="report-card" id="report-card">
+                        <div class="report-title"><i class="fas fa-user-circle"></i> Analisi</div>
+                        <div class="report-text" id="report-text">Analisi in corso...</div>
+                    </div>
+
+                    <div class="inspiration-box">
+                        <div id="inspiration-card" class="inspiration-card"></div>
+                        <button class="btn-inspire" onclick="generateInspiration()">
+                            <i class="fas fa-lightbulb"></i> Cerca Ispirazione
+                        </button>
+                    </div>
+                </div>
+
+                <div class="side-form">
+                    <h3 style="margin-bottom: 15px;"><i class="fas fa-pencil-alt"></i> Voci dalla Classe</h3>
+                    <div class="postit">
+                        <h3>Il tuo Post-it Reale</h3>
+                        <div class="form-group">
+                            <label>SITUAZIONE</label>
+                            <input type="text" id="f-sit" class="form-input" placeholder="Es. Ieri ho litigato con mio padre">
+                        </div>
+                        <div class="form-group">
+                            <label>EMOZIONE (Plutchik)</label>
+                            <select id="f-emo" class="form-input">
+                                <option value="Gioia">Gioia</option>
+                                <option value="Fiducia">Fiducia</option>
+                                <option value="Paura">Paura</option>
+                                <option value="Sorpresa">Sorpresa</option>
+                                <option value="Tristezza">Tristezza</option>
+                                <option value="Disgusto">Disgusto</option>
+                                <option value="Rabbia">Rabbia</option>
+                                <option value="Attesa">Attesa</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>REAZIONE</label>
+                            <textarea id="f-rea" class="form-input" placeholder="Es. Me ne sono andato in camera sbattendo la porta"></textarea>
+                        </div>
+                        <button class="btn-submit" onclick="saveActivity()">Aggiungi alla Board</button>
+                    </div>
+                    <div id="saved-msg" style="display:none; margin-top:15px; color:var(--success);">Grazie! Il tuo contributo è stato salvato.</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FEEDBACK OVERLAY -->
+    <div class="overlay" id="overlay">
+        <h2>Hai provato:</h2>
+        <div id="fb-emo" class="emo-badge">Emozione</div>
+        <p id="fb-desc" style="font-size: 1.1em; max-width: 400px; margin: 20px 0;"></p>
+        
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 10px; margin-bottom: 20px;">
+            <small>Impatto sull'Equilibrio:</small><br>
+            <strong id="fb-val" style="font-size: 1.5em;">+10</strong>
+        </div>
+
+        <button class="btn-start" style="padding: 10px 40px; font-size: 1em;" onclick="nextRound()">
+            Continua
+        </button>
+    </div>
+
+</div>
+
+<script>
+    // --- DATABASE: 40 SCENARI (AGGIORNATI) ---
+    const DB = [
+        // 1. SCUOLA
+        { c: "Scuola", i: "fa-graduation-cap", col: "#3498db", t: "Il prof ti restituisce il compito in classe con un voto basso, davanti a tutti.", o: [
+            { txt: "Fingo che non mi importi e rido.", val: -5, emo: "Indifferenza", col: "#95a5a6" },
+            { txt: "Mi arrabbio e accartoccio il foglio.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Chiedo spiegazioni per capire gli errori.", val: 15, emo: "Interesse", col: "#e67e22" },
+            { txt: "Mi vergogno e abbasso lo sguardo.", val: -10, emo: "Vergogna", col: "#9b59b6" }
+        ]},
+        // 2. SCUOLA
+        { c: "Scuola", i: "fa-book-open", col: "#2980b9", t: "Hai studiato l'argomento sbagliato per l'interrogazione.", o: [
+            { txt: "Vado nel panico totale.", val: -15, emo: "Terrore", col: "#27ae60" },
+            { txt: "Provo a improvvisare sulle domande generiche.", val: 5, emo: "Attesa", col: "#f39c12" },
+            { txt: "Chiedo subito di poter posticipare.", val: -5, emo: "Insicurezza", col: "#fdcb6e" },
+            { txt: "Accetto la mia responsabilità e spiego cosa so.", val: 10, emo: "Coraggio", col: "#00b894" }
+        ]},
+        // 3. SCUOLA
+        { c: "Scuola", i: "fa-users", col: "#8e44ad", t: "Nel lavoro di gruppo ti senti escluso e ignorato.", o: [
+            { txt: "Mi isolo e controllo il telefono.", val: -10, emo: "Tristezza", col: "#3498db" },
+            { txt: "Urlo contro il gruppo per farmi ascoltare.", val: -10, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Propongo un'idea concreta per contribuire.", val: 15, emo: "Fiducia", col: "#e67e22" },
+            { txt: "Parlo male di loro con altri compagni.", val: -15, emo: "Rancore", col: "#c0392b" }
+        ]},
+        // 4. SCUOLA
+        { c: "Scuola", i: "fa-chalkboard-teacher", col: "#2c3e50", t: "L'insegnante ti sgrida ingiustamente per un rumore non fatto da te.", o: [
+            { txt: "Rispondo male urlando la verità.", val: -10, emo: "Furore", col: "#c0392b" },
+            { txt: "Taccio e provo rancore verso il compagno colpevole.", val: -5, emo: "Risentimento", col: "#636e72" },
+            { txt: "Spiego con calma che non sono stato io.", val: 15, emo: "Calma", col: "#00b894" },
+            { txt: "Scoppio a piangere per l'ingiustizia.", val: -10, emo: "Impotenza", col: "#2980b9" }
+        ]},
+        // 5. SCUOLA
+        { c: "Scuola", i: "fa-bullhorn", col: "#16a085", t: "Viene annunciata una verifica a sorpresa per domani.", o: [
+            { txt: "Mi agito e protesto con la classe.", val: -10, emo: "Frustrazione", col: "#d35400" },
+            { txt: "Organizzo subito lo studio per la sera.", val: 15, emo: "Determinazione", col: "#e67e22" },
+            { txt: "Mi rassegno, tanto andrà come andrà.", val: -5, emo: "Rassegnazione", col: "#95a5a6" },
+            { txt: "Ho paura di fallire miseramente.", val: -10, emo: "Paura", col: "#27ae60" }
+        ]},
+        // 6. SCUOLA
+        { c: "Scuola", i: "fa-mobile-alt", col: "#e74c3c", t: "Invii per sbaglio uno screenshot personale al gruppo WhatsApp della classe.", o: [
+            { txt: "Cancello subito il messaggio sperando nessuno l'abbia visto.", val: -10, emo: "Panico", col: "#e74c3c" },
+            { txt: "Scrivo 'Ops, errore mio' e ci rido su.", val: 10, emo: "Autoironia", col: "#f1c40f" },
+            { txt: "Lascio il gruppo immediatamente.", val: -15, emo: "Vergogna", col: "#9b59b6" },
+            { txt: "Incolpo un amico dicendo che mi ha rubato il telefono.", val: -5, emo: "Bugia", col: "#636e72" }
+        ]},
+        // 7. SCUOLA (MODIFICATO: Tradimento segreti)
+        { c: "Scuola", i: "fa-user-secret", col: "#34495e", t: "Scopri che il tuo migliore amico ha raccontato in giro i tuoi segreti.", o: [
+            { txt: "Lo affronto davanti a tutti.", val: -10, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Faccio finta di nulla ma smetto di parlargli.", val: -10, emo: "Rancore", col: "#2d3436" },
+            { txt: "Gli chiedo spiegazioni in privato.", val: 10, emo: "Attesa", col: "#f39c12" },
+            { txt: "Mi chiudo in me stesso.", val: -15, emo: "Tristezza", col: "#3498db" }
+        ]},
+        // 8. SCUOLA
+        { c: "Scuola", i: "fa-medal", col: "#f1c40f", t: "Viene premiato un tuo compagno che ti ha precedentemente insultato.", o: [
+            { txt: "Batto le mani ma guardo altrove.", val: -5, emo: "Invidia", col: "#27ae60" },
+            { txt: "Vado a congratularmi personalmente.", val: 15, emo: "Stima", col: "#e84393" },
+            { txt: "Faccio una battuta sarcastica ai suoi danni.", val: -10, emo: "Gelosia", col: "#e74c3c" },
+            { txt: "Sospiro rumorosamente durante l'applauso.", val: -10, emo: "Disprezzo", col: "#16a085" }
+        ]},
+        // 9. SCUOLA (MODIFICATO: Nota collettiva)
+        { c: "Scuola", i: "fa-alarm-clock", col: "#e67e22", t: "Viene distribuita una nota disciplinare a tutta la classe per colpa di uno solo.", o: [
+            { txt: "Protesto ad alta voce con il prof.", val: -5, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Faccio il nome del colpevole.", val: -10, emo: "Spietà", col: "#95a5a6" },
+            { txt: "Accetto la punizione in silenzio.", val: -10, emo: "Impotenza", col: "#636e72" },
+            { txt: "Organizzo una discussione con la classe.", val: 10, emo: "Leadership", col: "#00b894" }
+        ]},
+        // 10. SCUOLA (MODIFICATO: Vuoto di memoria lavagna)
+        { c: "Scuola", i: "fa-microphone-alt", col: "#9b59b6", t: "Il professore ti chiama alla lavagna e hai un vuoto di memoria totale.", o: [
+            { txt: "Resto immobile in silenzio.", val: -10, emo: "Vergogna", col: "#9b59b6" },
+            { txt: "Chiedo di poter guardare gli appunti.", val: 5, emo: "Umiltà", col: "#f39c12" },
+            { txt: "Provo a inventare qualcosa.", val: -5, emo: "Imbarazzo", col: "#fdcb6e" },
+            { txt: "Dico onestamente che non ricordo.", val: 10, emo: "Coraggio", col: "#00b894" }
+        ]},
+
+        // 11. SPORT
+        { c: "Sport", i: "fa-futbol", col: "#27ae60", t: "L'arbitro fischia un fallo inesistente contro di te.", o: [
+            { txt: "Urlo contro l'arbitro insultandolo.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Alzo le spalle e continuo a giocare.", val: 10, emo: "Autocontrollo", col: "#2c3e50" },
+            { txt: "Mi siedo a terra per protesta.", val: -10, emo: "Disobbedienza", col: "#d35400" },
+            { txt: "Ridacchio con i compagni.", val: 0, emo: "Ironia", col: "#9b59b6" }
+        ]},
+        // 12. SPORT
+        { c: "Sport", i: "fa-medal", col: "#f1c40f", t: "Segni un gol decisivo all'ultimo minuto.", o: [
+            { txt: "Esulto correndo da tutti.", val: 15, emo: "Estasi", col: "#f1c40f" },
+            { txt: "Guardo i perdenti con sufficienza.", val: -10, emo: "Arroganza", col: "#8e44ad" },
+            { txt: "Abbraccio la squadra commosso.", val: 15, emo: "Gioia", col: "#f1c40f" },
+            { txt: "Sono felice ma esausto.", val: 5, emo: "Soddisfazione", col: "#00b894" }
+        ]},
+        // 13. SPORT (MODIFICATO: Errore decisivo)
+        { c: "Sport", i: "fa-medkit", col: "#e67e22", t: "Sbagli un rigore decisivo agli ultimi secondi della partita.", o: [
+            { txt: "Scappo negli spogliatoi.", val: -15, emo: "Vergogna", col: "#9b59b6" },
+            { txt: "Piango di disperazione.", val: -10, emo: "Tristezza", col: "#3498db" },
+            { txt: "Mi scuso con la squadra.", val: 5, emo: "Responsabilità", col: "#2c3e50" },
+            { txt: "Ci rido sopra per non pensarci.", val: -5, emo: "Maschera", col: "#95a5a6" }
+        ]},
+        // 14. SPORT
+        { c: "Sport", i: "fa-dumbbell", col: "#95a5a6", t: "Non hai voglia di allenarti ma c'è la partita tra tre giorni.", o: [
+            { txt: "Chiamo l'allenatore e fingo un malore.", val: -10, emo: "Bugia", col: "#636e72" },
+            { txt: "Vado solo perché ci sono i miei amici.", val: 5, emo: "Lealtà", col: "#e67e22" },
+            { txt: "Trovo una motivazione extra (musica, sfida).", val: 15, emo: "Determinazione", col: "#e67e22" },
+            { txt: "Vado ma faccio il minimo indispensabile.", val: -5, emo: "Apatia", col: "#95a5a6" }
+        ]},
+        // 15. SPORT
+        { c: "Sport", i: "fa-trophy", col: "#f39c12", t: "Il mister ti lascia fuori dalla formazione titolare.", o: [
+            { txt: "Minacci di andartene dalla squadra.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Chiedi spiegazioni e ti alleni di più.", val: 10, emo: "Ambizione", col: "#e67e22" },
+            { txt: "Fai il muso lungo in panchina.", val: -5, emo: "Tristezza", col: "#3498db" },
+            { txt: "Tifi i compagni dal bordo campo.", val: 10, emo: "Spirito di squadra", col: "#00b894" }
+        ]},
+        // 16. SPORT
+        { c: "Sport", i: "fa-tshirt", col: "#8e44ad", t: "Il mister ti fa entrare in campo solo all'ultimo minuto, anche se ti sei allenato tutto l'anno.", o: [
+            { txt: "Entro controvoglia e sbatto la palla via.", val: -10, emo: "Dispetto", col: "#d35400" },
+            { txt: "Do il massimo anche se sono solo 5 minuti.", val: 10, emo: "Professionalità", col: "#00b894" },
+            { txt: "Rimango immobile in campo per protesta.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Lo insulto dalla panchina.", val: -20, emo: "Mancanza di rispetto", col: "#c0392b" }
+        ]},
+        // 17. SPORT
+        { c: "Sport", i: "fa-stopwatch", col: "#d35400", t: "Arrivi ultimo nella gara di atletica.", o: [
+            { txt: "Butti le scarpe nell'immondizia.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Ti complimenti con il vincitore.", val: 10, emo: "Lealtà", col: "#00b894" },
+            { txt: "Piangi nascosto negli spogliatoi.", val: -10, emo: "Vergogna", col: "#9b59b6" },
+            { txt: "Dici che non ti importava nulla.", val: -5, emo: "Negazione", col: "#95a5a6" }
+        ]},
+        // 18. SPORT
+        { c: "Sport", i: "fa-biking", col: "#2c3e50", t: "Sei in bici in città e un'auto ti sorpassa strettissima rischiando di farti cadere.", o: [
+            { txt: "Urlo insulti e gli vado dietro.", val: -15, emo: "Furore", col: "#c0392b" },
+            { txt: "Mi fermo un attimo per ritrovare la calma.", val: 10, emo: "Autocontrollo", col: "#00b894" },
+            { txt: "Ho una crisi di panico per lo spavento.", val: -10, emo: "Terrore", col: "#27ae60" },
+            { txt: "Segno la targa e faccio una segnalazione.", val: 5, emo: "Ragionevolezza", col: "#2c3e50" }
+        ]},
+
+        // 19. FAMIGLIA
+        { c: "Famiglia", i: "fa-home", col: "#e17055", t: "Tua madre entra in camera tua senza bussare.", o: [
+            { txt: "Urlo e le dico di uscire subito.", val: -15, emo: "Furore", col: "#c0392b" },
+            { txt: "Smetto di fare quello che stavo facendo.", val: -5, emo: "Invasione", col: "#95a5a6" },
+            { txt: "Le spiego gentilmente che ho bisogno di privacy.", val: 10, emo: "Assertività", col: "#00b894" },
+            { txt: "Sbatto la porta e chiudo a chiave.", val: -10, emo: "Rabbia", col: "#e74c3c" }
+        ]},
+        // 20. FAMIGLIA
+        { c: "Famiglia", i: "fa-users", col: "#fd79a8", t: "A cena dalla zia, tuo zio fa commenti sarcastici sul tuo modo di vestire.", o: [
+            { txt: "Gli rispondo a tono insultandolo.", val: -10, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Arrossisco e abbasso lo sguardo.", val: -10, emo: "Vergogna", col: "#9b59b6" },
+            { txt: "Rido con lui facendo finta di nulla.", val: -5, emo: "Maschera", col: "#95a5a6" },
+            { txt: "Gli dico che mi vesto come mi pare.", val: 10, emo: "Assertività", col: "#00b894" }
+        ]},
+        // 21. FAMIGLIA
+        { c: "Famiglia", i: "fa-dog", col: "#16a085", t: "Il tuo cane scappa di casa e non riesci a trovarlo da un'ora.", o: [
+            { txt: "Esco disperato a cercarlo chiamandolo a squarciagola.", val: -5, emo: "Angoscia", col: "#3498db" },
+            { txt: "Mi attivo subito stampando volantini e avvisando i vicini.", val: 10, emo: "Pragmatismo", col: "#2c3e50" },
+            { txt: "Piango seduto sul marciapiede.", val: -10, emo: "Tristezza", col: "#2980b9" },
+            { txt: "Incolpo i miei genitori di aver lasciato aperto il cancello.", val: -10, emo: "Colpevolizzazione", col: "#e74c3c" }
+        ]},
+        // 22. FAMIGLIA
+        { c: "Famiglia", i: "fa-mobile-alt", col: "#00cec9", t: "Tua madre ti chiede il telefono per 'controllare una cosa' e inizia a scorrere le chat.", o: [
+            { txt: "Glielo strappo di mano urlando.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Glielo lascio guardare, non ho nulla da nascondere.", val: 5, emo: "Tranquillità", col: "#00b894" },
+            { txt: "Mi innervosisco ma non dico nulla.", val: -5, emo: "Ansia", col: "#fdcb6e" },
+            { txt: "Le dico che è una violazione della mia privacy.", val: 10, emo: "Assertività", col: "#6c5ce7" }
+        ]},
+        // 23. FAMIGLIA
+        { c: "Famiglia", i: "fa-utensils", col: "#e17055", t: "A cena i tuoi parlano solo di voti scolastici.", o: [
+            { txt: "Sbatto le posate nel piatto rumorosamente.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Elenco i voti velocemente e cambio discorso.", val: 0, emo: "Fretta", col: "#f39c12" },
+            { txt: "Spiego che i voti non definiscono chi sono.", val: 10, emo: "Assertività", col: "#00b894" },
+            { txt: "Abbasso la testa e mangio in silenzio.", val: -10, emo: "Chiusura", col: "#636e72" }
+        ]},
+        // 24. FAMIGLIA
+        { c: "Famiglia", i: "fa-door-open", col: "#636e72", t: "Torni a casa dopo il coprifuoco.", o: [
+            { txt: "Dico che l'orologio di casa è indietro.", val: -10, emo: "Bugia", col: "#636e72" },
+            { txt: "Mi scuso dicendo che non me ne sono accorto.", val: 5, emo: "Scusa", col: "#fdcb6e" },
+            { txt: "Dico che sono grande e decido io.", val: -15, emo: "Ribellione", col: "#16a085" },
+            { txt: "Ammetto di aver perso la nozione del tempo.", val: 10, emo: "Onestà", col: "#2c3e50" }
+        ]},
+        // 25. FAMIGLIA
+        { c: "Famiglia", i: "fa-car", col: "#dfe6e9", t: "I tuoi genitori iniziano a litigare pesantemente mentre stai dando un passaggio a un amico.", o: [
+            { txt: "Fingo che non stia succedendo nulla.", val: -10, emo: "Imbarazzo", col: "#fdcb6e" },
+            { txt: "Chiedo loro di smettere immediatamente.", val: 10, emo: "Coraggio", col: "#00b894" },
+            { txt: "Chiedo all'amico di scendere alla fermata dopo.", val: -5, emo: "Vergogna", col: "#9b59b6" },
+            { txt: "Metto le cuffie per non sentire.", val: -10, emo: "Fuga", col: "#95a5a6" }
+        ]},
+        // 26. FAMIGLIA
+        { c: "Famiglia", i: "fa-money-bill-wave", col: "#f39c12", t: "I tuoi genitori non possono darti la paghetta questo mese.", o: [
+            { txt: "Faccio una scenata isterica.", val: -15, emo: "Capriccio", col: "#e74c3c" },
+            { txt: "Dico che capisco e non serve.", val: 10, emo: "Maturità", col: "#00b894" },
+            { txt: "Provo a negoziare un prestito per dopo.", val: 0, emo: "Negoziazione", col: "#f39c12" },
+            { txt: "Mi chiudo in camera imbronciato.", val: -10, emo: "Rancore", col: "#2d3436" }
+        ]},
+        // 27. FAMIGLIA
+        { c: "Famiglia", i: "fa-users", col: "#e84393", t: "I tuoi genitori litigano violentemente davanti a te.", o: [
+            { txt: "Metto le cuffie al massimo volume.", val: -10, emo: "Isolamento", col: "#636e72" },
+            { txt: "Provo a farli ridere per smorzare.", val: 5, emo: "Distrazione", col: "#f1c40f" },
+            { txt: "Piango in silenzio.", val: -10, emo: "Tristezza", col: "#3498db" },
+            { txt: "Esco dalla stanza sbattendo la porta.", val: -5, emo: "Rabbia", col: "#e74c3c" }
+        ]},
+        // 28. FAMIGLIA
+        { c: "Famiglia", i: "fa-wifi", col: "#3498db", t: "Tua madre spegne il Wi-Fi mentre stai giocando online.", o: [
+            { txt: "Urlo e faccio una tragedia.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Ne approfitto per fare altro.", val: 10, emo: "Adattabilità", col: "#00b894" },
+            { txt: "Le tieni il muso per ore.", val: -10, emo: "Rancore", col: "#2d3436" },
+            { txt: "Provi a riaccenderlo di nascosto.", val: -5, emo: "Disobbedienza", col: "#95a5a6" }
+        ]},
+
+        // 29. AMICI
+        { c: "Amici", i: "fa-heart", col: "#e84393", t: "Vedi il tuo ex che bacia un'altra persona.", o: [
+            { txt: "Scappi via per non farti vedere.", val: -10, emo: "Umiliazione", col: "#fdcb6e" },
+            { txt: "Li guardi con odio.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Pensi 'meglio così' e vai avanti.", val: 5, emo: "Sollievo", col: "#00b894" },
+            { txt: "Piangi nascosto.", val: -10, emo: "Tristezza", col: "#3498db" }
+        ]},
+        // 30. AMICI
+        { c: "Amici", i: "fa-user-slash", col: "#636e72", t: "Scopri che il tuo migliore amico ha sparlato di te.", o: [
+            { txt: "Lo cancelli dai social.", val: -10, emo: "Rottura", col: "#2d3436" },
+            { txt: "Lo affronti chiedendo spiegazioni.", val: 10, emo: "Curiosità", col: "#9b59b6" },
+            { txt: "Fai finta di niente.", val: -5, emo: "Rancore", col: "#d35400" },
+            { txt: "Sparli di lui per vendetta.", val: -15, emo: "Cattiveria", col: "#c0392b" }
+        ]},
+        // 31. AMICI
+        { c: "Amici", i: "fa-birthday-cake", col: "#fd79a8", t: "Ti organizzano una festa a sorpresa.", o: [
+            { txt: "Rimango pietrificato sulla soglia.", val: 5, emo: "Shock", col: "#9b59b6" },
+            { txt: "Abbraccio chi l'ha organizzata.", val: 15, emo: "Gioia", col: "#f1c40f" },
+            { txt: "Chiedo 'Ma cosa avete combinato?'.", val: 10, emo: "Sorpresa", col: "#e67e22" },
+            { txt: "Faccio finta di niente e vado via.", val: -10, emo: "Rifiuto", col: "#95a5a6" }
+        ]},
+        // 32. AMICI
+        { c: "Amici", i: "fa-moon", col: "#74b9ff", t: "Un amico ti chiama disperato alle 2 di notte per un litigio, ma tu hai sonno.", o: [
+            { txt: "Spengo il telefono e continuo a dormire.", val: -10, emo: "Egoismo", col: "#2d3436" },
+            { txt: "Rispondo stizzito dicendogli di dormire.", val: -5, emo: "Fastidio", col: "#d35400" },
+            { txt: "Mi alzo e lo ascolto anche se sono stanco.", val: 10, emo: "Amicizia", col: "#e84393" },
+            { txt: "Gli dico che ne parliamo domani.", val: 5, emo: "Ragionevolezza", col: "#00b894" }
+        ]},
+        // 33. VITA
+        { c: "Vita", i: "fa-wifi", col: "#a29bfe", t: "Perdi la connessione internet mentre stai vincendo una partita cruciale online.", o: [
+            { txt: "Spacco il mouse o la tastiera.", val: -15, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Respiro e cerco di riconnettermi subito.", val: 5, emo: "Pragmatismo", col: "#2c3e50" },
+            { txt: "Mi metto le mani nei capelli.", val: -10, emo: "Disperazione", col: "#3498db" },
+            { txt: "Spengo tutto e vado a dormire furioso.", val: -15, emo: "Frustrazione", col: "#e74c3c" }
+        ]},
+        // 34. VITA
+        { c: "Vita", i: "fa-shopping-bag", col: "#fd79a8", t: "Un amico compra lo stesso vestito che volevi tu.", o: [
+            { txt: "Decido di non metterlo più.", val: -5, emo: "Delusione", col: "#3498db" },
+            { txt: "Facciamo un gemellaggio e ne ridiamo.", val: 10, emo: "Gioia", col: "#f1c40f" },
+            { txt: "Gli dico che sta meglio a me.", val: -10, emo: "Competitività", col: "#d35400" },
+            { txt: "Faccio finta di nulla.", val: -5, emo: "Indifferenza", col: "#95a5a6" }
+        ]},
+        // 35. VITA
+        { c: "Vita", i: "fa-wallet", col: "#f39c12", t: "Trovi un portafoglio pieno di soldi per terra.", o: [
+            { txt: "Controllo se c'è un indirizzo per restituirlo.", val: 10, emo: "Onestà", col: "#2c3e50" },
+            { txt: "Lo prendo e me ne vado velocemente.", val: -15, emo: "Colpa", col: "#636e72" },
+            { txt: "Lo lascio lì, non sono fatti miei.", val: 0, emo: "Indifferenza", col: "#95a5a6" },
+            { txt: "Cerco il proprietario sui social.", val: 10, emo: "Proattività", col: "#e67e22" }
+        ]},
+        // 36. VITA
+        { c: "Vita", i: "fa-cloud-sun", col: "#3498db", t: "Bella giornata ma devi studiare chiuso in camera.", o: [
+            { txt: "Mi affaccio alla finestra sognando di uscire.", val: -5, emo: "Malinconia", col: "#3498db" },
+            { txt: "Finisco i compiti in velocità per godermi il resto.", val: 10, emo: "Motivazione", col: "#e67e22" },
+            { txt: "Decido di studiare fuori al parco.", val: 5, emo: "Adattamento", col: "#00b894" },
+            { txt: "Lascio perdere e vado al parco.", val: -5, emo: "Impulsività", col: "#f1c40f" }
+        ]},
+        // 37. VITA
+        { c: "Vita", i: "fa-phone-slash", col: "#636e72", t: "Il tuo ragazzo/a non risponde ai messaggi da ore.", o: [
+            { txt: "Ne mandi 50 di fila.", val: -10, emo: "Ansia", col: "#fdcb6e" },
+            { txt: "Aspetti con calma.", val: 10, emo: "Fiducia", col: "#00b894" },
+            { txt: "Pensi che ti stia tradendo.", val: -15, emo: "Gelosia", col: "#e74c3c" },
+            { txt: "Lo blocchi.", val: -10, emo: "Rabbia", col: "#c0392b" }
+        ]},
+        // 38. VITA (MODIFICATO: Perdita portafoglio)
+        { c: "Vita", i: "fa-car-crash", col: "#e74c3c", t: "Perdi il portafoglio con tutti i tuoi documenti e la paghetta.", o: [
+            { txt: "Vado nel panico e piango.", val: -15, emo: "Terrore", col: "#27ae60" },
+            { txt: "Torno indietro sui miei passi a cercarlo.", val: 10, emo: "Azione", col: "#00b894" },
+            { txt: "Chiamo subito i miei genitori.", val: 5, emo: "Supporto", col: "#3498db" },
+            { txt: "Incolpo qualcuno di avermelo rubato.", val: -10, emo: "Paranoia", col: "#2d3436" }
+        ]},
+        // 39. SOCIAL
+        { c: "Social", i: "fa-instagram", col: "#e84393", t: "Un tuo post riceve solo like ma nessun commento.", o: [
+            { txt: "Controllo ogni minuto se è arrivato qualcosa.", val: -10, emo: "Ansia", col: "#fdcb6e" },
+            { txt: "Mi dico che non è importante.", val: 10, emo: "Indifferenza", col: "#95a5a6" },
+            { txt: "Commento io stesso per dare il la.", val: -5, emo: "Bisogno di attenzione", col: "#e74c3c" },
+            { txt: "Cancello la foto dopo un'ora.", val: -10, emo: "Insicurezza", col: "#9b59b6" }
+        ]},
+        // 40. SOCIAL
+        { c: "Social", i: "fa-user-secret", col: "#2d3436", t: "Ricevi messaggi offensivi da un profilo anonimo.", o: [
+            { txt: "Rispondo a tono con insulti.", val: -10, emo: "Rabbia", col: "#e74c3c" },
+            { txt: "Ignoro e blocco l'utente.", val: 15, emo: "Autocontrollo", col: "#2c3e50" },
+            { txt: "Mi chiedo chi possa essere stato.", val: -5, emo: "Sospetto", col: "#f39c12" },
+            { txt: "Faccio uno screenshot e lo pubblico.", val: -5, emo: "Vendetta", col: "#d35400" }
+        ]}
+    ];
+
+    // --- LOGICA DI GIOCO ---
+    let energy = 50;
+    let round = 0;
+    let activeDB = []; 
+    let emotionStats = {}; 
+
+    function startGame() {
+        energy = 50;
+        round = 0;
+        emotionStats = {}; 
+        activeDB = shuffle(DB); 
+        switchScreen('scr-game');
+        loadScenario();
+    }
+
+    function loadScenario() {
+        updateUI();
+        if(round >= activeDB.length) {
+            endGame();
+            return;
+        }
+
+        const s = activeDB[round];
+        
+        document.getElementById('r-num').innerText = round + 1;
+        document.getElementById('s-cat').innerText = s.c.toUpperCase();
+        document.getElementById('s-txt').innerText = s.t;
+        
+        const visual = document.getElementById('s-icon');
+        visual.innerHTML = `<i class="fas ${s.i}"></i>`;
+        visual.style.background = s.col;
+
+        const opts = shuffle(s.o); 
+        const box = document.getElementById('opts-box');
+        box.innerHTML = '';
+
+        opts.forEach(o => {
+            const div = document.createElement('div');
+            div.className = 'opt-btn';
+            div.onclick = () => selectOption(o);
+            div.innerHTML = `
+                <div class="opt-icon"><i class="fas fa-hand-pointer"></i></div>
+                <div>
+                    <div class="opt-text">${o.txt}</div>
+                </div>
+            `;
+            box.appendChild(div);
+        });
+    }
+
+    function selectOption(o) {
+        energy += o.val;
+        if(energy > 100) energy = 100;
+        if(energy < 0) energy = 0;
+        
+        if(!emotionStats[o.emo]) emotionStats[o.emo] = 0;
+        emotionStats[o.emo]++;
+        if(!emotionStats[o.emo + '_col']) emotionStats[o.emo + '_col'] = o.col;
+
+        updateUI();
+
+        document.getElementById('fb-emo').innerText = o.emo.toUpperCase();
+        document.getElementById('fb-emo').style.background = o.col;
+        document.getElementById('fb-desc').innerText = (o.val > 0 ? "Scelta consapevole!" : "Riflettici sopra.");
+        
+        let valSign = o.val > 0 ? "+" : "";
+        document.getElementById('fb-val').innerText = valSign + o.val + "%";
+        document.getElementById('fb-val').style.color = o.val >= 0 ? "#00b894" : "#d63031";
+
+        document.getElementById('overlay').classList.add('active');
+    }
+
+    function nextRound() {
+        document.getElementById('overlay').classList.remove('active');
+        round++;
+        loadScenario();
+    }
+
+    function endGame() {
+        switchScreen('scr-activity');
+        generateReport();
+    }
+
+    function generateReport() {
+        let dominantEmo = "Nessuna";
+        let maxCount = 0;
+        let domCol = "#333";
+
+        for (let emo in emotionStats) {
+            if(emo.includes('_col')) continue;
+            if (emotionStats[emo] > maxCount) {
+                maxCount = emotionStats[emo];
+                dominantEmo = emo;
+                domCol = emotionStats[emo + '_col'] || "#333";
+            }
+        }
+
+        const center = document.getElementById('wheel-center');
+        center.innerHTML = `
+            <i class="fas fa-circle center-icon" style="color: ${domCol}"></i>
+            <span class="center-text">${dominantEmo}</span>
+        `;
+        center.style.borderColor = domCol;
+
+        let advice = "";
+        if (energy > 70) {
+            advice = `<strong>Profilo Resiliente!</strong><br> Ottimo equilibrio. Gestisci le situazioni con intelligenza emotiva.`;
+        } else if (energy > 40) {
+            advice = `<strong>Equilibrio Instabile.</strong><br> Ci sono stati momenti di difficoltà. Rivedi le situazioni dove l'energia è scesa.`;
+        } else {
+            advice = `<strong>Rischio Burnout.</strong><br> Le tue reazioni hanno consumato molte risorse. Impara a fare un passo indietro.`;
+        }
+
+        if(dominantEmo === "Rabbia") advice += "<br><em>Consiglio: Quando senti il sangue bollire, conta fino a 5.</em>";
+        if(dominantEmo === "Paura") advice += "<br><em>Consiglio: Analizza se il pericolo è reale o immaginario.</em>";
+        if(dominantEmo === "Tristezza") advice += "<br><em>Consiglio: Condividi ciò che senti con qualcuno di fidato.</em>";
+
+        document.getElementById('report-text').innerHTML = `
+            Emozione dominante: <strong style="color:${domCol}">${dominantEmo}</strong>.<br><br>
+            ${advice}
+        `;
+    }
+
+    function generateInspiration() {
+        const randomIndex = Math.floor(Math.random() * DB.length);
+        const scenario = DB[randomIndex];
+        
+        const card = document.getElementById('inspiration-card');
+        card.style.display = 'block';
+        card.innerHTML = `
+            <strong>Ti ricorda qualcosa?</strong><br>
+            "${scenario.t}"
+        `;
+        
+        document.getElementById('f-sit').placeholder = `Es. Simile a: "${scenario.t.substring(0, 30)}..."`;
+    }
+
+    function saveActivity() {
+        const sit = document.getElementById('f-sit').value;
+        const emo = document.getElementById('f-emo').value;
+        const rea = document.getElementById('f-rea').value;
+
+        if(sit && rea) {
+            document.getElementById('saved-msg').style.display = 'block';
+            console.log("SALVATO:", sit, emo, rea);
+        } else {
+            alert("Compila tutti i campi!");
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('p-bar').style.width = energy + '%';
+        document.getElementById('p-val').innerText = energy + '%';
+    }
+
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+</script>
+
+</body>
+</html>
