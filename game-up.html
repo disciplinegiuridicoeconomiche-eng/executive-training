@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coping Challenge · Executive Lab</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --dark: #2d3436;
+            --success: #00b894;
+            --danger: #d63031;
+            --warning: #fdcb6e;
+            --problem: #00b894;
+            --emotion: #6c5ce7;
+            --avoidance: #e74c3c;
+            --social: #e67e22;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0; height: 100vh;
+            background: #f0f2f5;
+            display: flex; justify-content: center; align-items: center;
+            color: #333; overflow: hidden;
+        }
+        #app {
+            width: 100%; max-width: 1100px; height: 100vh;
+            background: #fff; display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.12);
+        }
+        header {
+            padding: 12px 28px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            background: #fff; z-index: 10; flex-shrink: 0;
+        }
+        .logo { font-size: 1.1em; font-weight: 800; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+        .logo i { color: var(--primary); }
+        .stats-bar { display: flex; align-items: center; gap: 16px; }
+        .round-badge { background: #f0f0f0; border-radius: 20px; padding: 3px 10px; font-size: 0.82em; font-weight: 700; color: #555; }
+        .progress-wrap { display: flex; align-items: center; gap: 8px; }
+        .progress-container { width: 110px; height: 7px; background: #eee; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 50%; transition: width 0.5s ease; background: linear-gradient(90deg, var(--danger), var(--warning), var(--success)); }
+        .energy-label { font-size: 0.82em; font-weight: 700; color: #555; min-width: 38px; }
+
+        main { flex: 1; position: relative; overflow: hidden; }
+        .screen {
+            position: absolute; inset: 0;
+            display: none; padding: 24px;
+            flex-direction: column;
+            animation: fadeIn 0.35s ease;
+        }
+        .screen.active { display: flex; }
+
+        /* START */
+        #scr-start { justify-content: center; align-items: center; text-align: center; gap: 4px; }
+        .coping-wheel-container { position: relative; width: 190px; height: 190px; margin-bottom: 18px; flex-shrink: 0; }
+        .coping-wheel {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(var(--problem) 0deg 90deg, var(--social) 90deg 180deg, var(--emotion) 180deg 270deg, var(--avoidance) 270deg 360deg);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            animation: slowSpin 20s linear infinite;
+        }
+        .coping-wheel-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 68px; height: 68px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.7em;
+        }
+        .start-title { font-size: 2.1em; margin: 0 0 4px; color: var(--dark); font-weight: 800; }
+        .start-sub { color: var(--primary); font-weight: 700; font-size: 0.92em; margin: 0 0 8px; }
+        .start-intro { max-width: 500px; color: #666; line-height: 1.6; margin: 0 0 12px; font-size: 0.93em; }
+        .legend-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.82em; color: #555; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .btn-start {
+            background: var(--primary); color: #fff; border: none;
+            padding: 13px 44px; font-size: 1.1em; border-radius: 40px;
+            cursor: pointer; box-shadow: 0 8px 22px rgba(108,92,231,0.3);
+            transition: transform 0.2s, box-shadow 0.2s; font-weight: 700;
+        }
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(108,92,231,0.35); }
+
+        /* GAME */
+        #scr-game { padding: 18px 22px; }
+        .game-layout { display: flex; gap: 16px; flex: 1; min-height: 0; }
+        .col-scenario { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 10px; min-width: 0; }
+        .card-scenario {
+            background: #fff; border-radius: 16px; padding: 20px 18px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06); text-align: center;
+            border: 1px solid #f0f0f0; position: relative; flex-shrink: 0;
+        }
+        .cat-tag {
+            position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+            background: var(--dark); color: #fff; padding: 4px 14px;
+            border-radius: 12px; font-size: 0.74em; font-weight: 700; text-transform: uppercase; white-space: nowrap;
+        }
+        .scene-icon {
+            width: 74px; height: 74px; border-radius: 50%; margin: 12px auto 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 2em;
+            color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.12); flex-shrink: 0;
+        }
+        .scene-text { font-size: 1.05em; font-weight: 600; color: var(--dark); line-height: 1.45; }
+        .emo-trigger {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 8px 14px; border-radius: 10px; font-size: 0.88em; font-weight: 600; flex-shrink: 0;
+        }
+        .emo-trigger-label { font-size: 0.73em; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; margin-bottom: 4px; }
+
+        .col-options { flex: 1.4; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+        .col-options-label { font-size: 0.76em; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px; }
+        .opt-btn {
+            background: #fff; border: 1.5px solid #eee; border-radius: 10px;
+            padding: 10px 13px; cursor: pointer; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+            display: flex; align-items: center; gap: 11px; text-align: left; margin-bottom: 7px;
+        }
+        .opt-btn:last-child { margin-bottom: 0; }
+        .opt-btn:hover { border-color: var(--primary); transform: translateX(4px); box-shadow: 0 3px 10px rgba(0,0,0,0.06); }
+        .opt-icon { width: 34px; height: 34px; border-radius: 8px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #666; font-size: 1em; flex-shrink: 0; }
+        .opt-text { font-size: 0.93em; font-weight: 500; color: var(--dark); line-height: 1.35; }
+        .coping-tag { font-size: 0.7em; color: #bbb; margin-top: 2px; }
+
+        /* OVERLAY */
+        .overlay {
+            position: absolute; inset: 0;
+            background: rgba(255,255,255,0.97); z-index: 100;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            text-align: center; padding: 28px; gap: 4px;
+            animation: fadeIn 0.25s ease;
+        }
+        .overlay.active { display: flex; }
+        .fb-icon-wrap {
+            width: 110px; height: 110px; background: #f8f9fa; border: 2px dashed #ddd;
+            border-radius: 16px; display: flex; justify-content: center; align-items: center; margin-bottom: 6px;
+        }
+        .feedback-icon-large { font-size: 3.6em; }
+        .coping-badge {
+            display: inline-block; padding: 6px 20px; border-radius: 20px;
+            color: #fff; font-weight: 700; font-size: 0.95em; margin-top: 4px;
+            text-transform: uppercase; box-shadow: 0 4px 12px rgba(0,0,0,0.18); letter-spacing: 0.04em;
+        }
+        .fb-headline { font-size: 1.1em; font-weight: 700; color: var(--dark); margin: 6px 0 0; }
+        .fb-desc { font-size: 0.95em; max-width: 400px; margin: 6px 0 0; font-weight: 500; color: #555; font-style: italic; }
+        .fb-why {
+            max-width: 460px; margin: 8px auto 0;
+            background: #f8f9fa; border-radius: 10px; padding: 10px 15px;
+            font-size: 0.87em; color: #555; line-height: 1.6; text-align: left;
+            border-left: 4px solid #ccc;
+        }
+        .impact-row { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; justify-content: center; }
+        .impact-label { font-size: 0.8em; color: #aaa; }
+        .impact-val { font-size: 1.5em; font-weight: 800; }
+        .btn-next {
+            background: var(--primary); color: #fff; border: none;
+            padding: 10px 38px; font-size: 0.95em; border-radius: 30px;
+            cursor: pointer; margin-top: 10px; font-weight: 700;
+            transition: transform 0.15s; box-shadow: 0 6px 18px rgba(108,92,231,0.25);
+        }
+        .btn-next:hover { transform: translateY(-2px); }
+
+        /* ACTIVITY */
+        #scr-activity { padding: 0; }
+        .activity-layout { display: flex; height: 100%; width: 100%; }
+        .side-bridge {
+            flex: 1; background: #fff; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 20px 18px;
+            border-right: 1px solid #eee; overflow-y: auto; gap: 8px;
+        }
+        .profile-title { font-size: 1em; font-weight: 800; color: var(--dark); margin: 0; display: flex; align-items: center; gap: 6px; }
+        .dominant-badge {
+            padding: 6px 18px; border-radius: 20px; color: #fff; font-weight: 700;
+            font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .coping-bars { width: 100%; max-width: 270px; }
+        .coping-bar-row { margin-bottom: 8px; }
+        .coping-bar-label { font-size: 0.8em; font-weight: 600; color: var(--dark); margin-bottom: 3px; display: flex; justify-content: space-between; }
+        .coping-bar-track { height: 8px; background: #eee; border-radius: 5px; overflow: hidden; }
+        .coping-bar-fill { height: 100%; border-radius: 5px; transition: width 1s ease; }
+        .report-card {
+            background: #f8f9fa; border-radius: 12px; padding: 14px;
+            text-align: left; width: 100%; max-width: 270px;
+            border-left: 4px solid var(--primary);
+        }
+        .report-title { font-weight: 800; font-size: 0.9em; color: var(--dark); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .report-text { font-size: 0.83em; line-height: 1.6; color: #555; }
+
+        .side-form {
+            flex: 1.5; background: #fafafa; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 20px; overflow-y: auto;
+        }
+        .form-title { font-size: 0.95em; font-weight: 800; color: var(--dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .postit {
+            background: #fff740; padding: 20px; width: 100%; max-width: 410px;
+            box-shadow: 8px 8px 18px rgba(0,0,0,0.1); transform: rotate(-0.8deg); border-radius: 2px;
+        }
+        .postit h3 { margin: 0 0 12px; border-bottom: 2px solid rgba(0,0,0,0.1); padding-bottom: 7px; font-size: 0.95em; }
+        .form-group { margin-bottom: 9px; text-align: left; }
+        .form-group label { display: block; font-weight: 700; font-size: 0.8em; margin-bottom: 3px; color: #444; }
+        .form-input { width: 100%; padding: 7px 9px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 0.88em; background: rgba(255,255,255,0.7); }
+        textarea.form-input { resize: none; height: 50px; }
+        .btn-submit {
+            background: var(--dark); color: #fff; border: none;
+            padding: 9px; width: 100%; border-radius: 18px; cursor: pointer; font-size: 0.9em; margin-top: 5px; font-weight: 700;
+        }
+        .saved-msg { margin-top: 10px; color: var(--success); font-weight: 700; font-size: 0.88em; display: none; }
+
+        .scenario-progress { height: 3px; background: #eee; flex-shrink: 0; }
+        .scenario-progress-fill { height: 100%; background: var(--primary); transition: width 0.4s ease; width: 0%; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slowSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        @media (max-width: 680px) {
+            .game-layout { flex-direction: column; overflow-y: auto; }
+            .col-scenario, .col-options { flex: none; }
+            .activity-layout { flex-direction: column; }
+            .side-bridge { border-right: none; border-bottom: 1px solid #eee; flex: none; }
+            header { padding: 10px 14px; }
+            .progress-container { width: 80px; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <header>
+        <div class="logo"><i class="fas fa-shield-alt"></i> Executive Lab</div>
+        <div class="stats-bar">
+            <span class="round-badge">Scenario <span id="r-num">1</span>/40</span>
+            <div class="progress-wrap">
+                <div class="progress-container"><div class="progress-fill" id="p-bar"></div></div>
+                <span class="energy-label" id="p-val">50%</span>
+            </div>
+        </div>
+    </header>
+    <div class="scenario-progress"><div class="scenario-progress-fill" id="sp-fill"></div></div>
+
+    <main>
+
+        <div id="scr-start" class="screen active">
+            <div class="coping-wheel-container">
+                <div class="coping-wheel"></div>
+                <div class="coping-wheel-overlay">🛡️</div>
+            </div>
+            <div class="start-title">Coping Challenge</div>
+            <div class="start-sub">Executive Lab · Secondo capitolo</div>
+            <p class="start-intro">Hai già mappato le tue emozioni. Ora scopri come le gestisci.<br>40 scenari reali: scegli la tua strategia e scopri il tuo stile di coping.</p>
+            <div class="legend-row">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--problem)"></div>Problem-solving</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--social)"></div>Supporto sociale</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--emotion)"></div>Regolazione emotiva</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--avoidance)"></div>Evitamento</div>
+            </div>
+            <button class="btn-start" onclick="startGame()"><i class="fas fa-play"></i> Play Now</button>
+        </div>
+
+        <div id="scr-game" class="screen">
+            <div class="game-layout">
+                <div class="col-scenario">
+                    <div class="card-scenario">
+                        <div class="cat-tag" id="s-cat">Categoria</div>
+                        <div class="scene-icon" id="s-icon"><i class="fas fa-question"></i></div>
+                        <div class="scene-text" id="s-txt">Testo situazione</div>
+                    </div>
+                    <div>
+                        <div class="emo-trigger-label">Quello che provi</div>
+                        <div class="emo-trigger" id="emo-trigger"><i class="fas fa-circle" style="font-size:12px"></i> <span>—</span></div>
+                    </div>
+                </div>
+                <div class="col-options">
+                    <div class="col-options-label">Come reagisci?</div>
+                    <div id="opts-box"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="scr-activity" class="screen">
+            <div class="activity-layout">
+                <div class="side-bridge">
+                    <div class="profile-title"><i class="fas fa-user-shield" style="color:var(--primary)"></i> Il Tuo Stile di Coping</div>
+                    <div id="dominant-badge" class="dominant-badge">—</div>
+                    <div class="coping-bars" id="coping-bars"></div>
+                    <div class="report-card">
+                        <div class="report-title"><i class="fas fa-lightbulb"></i> Il tuo profilo</div>
+                        <div class="report-text" id="report-text">Analisi in corso...</div>
+                    </div>
+                </div>
+                <div class="side-form">
+                    <div class="form-title"><i class="fas fa-pencil-alt" style="color:var(--primary)"></i> Il tuo Piano di Coping</div>
+                    <div class="postit">
+                        <h3>Post-it Strategico</h3>
+                        <div class="form-group">
+                            <label>SITUAZIONE DIFFICILE</label>
+                            <input type="text" id="f-sit" class="form-input" placeholder="Es. Litigate continue con mio fratello">
+                        </div>
+                        <div class="form-group">
+                            <label>EMOZIONE CHE SENTO</label>
+                            <select id="f-emo" class="form-input">
+                                <option>Rabbia</option><option>Paura</option><option>Tristezza</option>
+                                <option>Ansia</option><option>Frustrazione</option><option>Vergogna</option>
+                                <option>Solitudine</option><option>Confusione</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>STRATEGIA CHE VOGLIO USARE</label>
+                            <select id="f-cop" class="form-input">
+                                <option>Problem-solving: affronto il problema concretamente</option>
+                                <option>Supporto sociale: ne parlo con qualcuno di fiducia</option>
+                                <option>Regolazione emotiva: gestisco prima l'emozione</option>
+                                <option>Micro-obiettivo: mi do un compito piccolo e fattibile</option>
+                                <option>Reset fisico: uso il corpo per scaricare la tensione</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>PRIMO PASSO CONCRETO</label>
+                            <textarea id="f-step" class="form-input" placeholder="Es. Stasera chiedo a mia madre 10 minuti per parlare"></textarea>
+                        </div>
+                        <button class="btn-submit" onclick="saveActivity()">Salva il mio Piano</button>
+                    </div>
+                    <div class="saved-msg" id="saved-msg"><i class="fas fa-check-circle"></i> Piano salvato! Ora hai uno strumento concreto.</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="overlay" id="overlay">
+        <div class="fb-icon-wrap"><i id="fb-icon-large" class="fas fa-star feedback-icon-large"></i></div>
+        <div id="fb-coping" class="coping-badge">Stile</div>
+        <div class="fb-headline" id="fb-headline">Hai scelto:</div>
+        <div class="fb-desc" id="fb-desc"></div>
+        <div class="fb-why" id="fb-why"></div>
+        <div class="impact-row">
+            <span class="impact-label">Impatto sull'Equilibrio:</span>
+            <span class="impact-val" id="fb-val">+10%</span>
+        </div>
+        <button class="btn-next" onclick="nextRound()">Continua <i class="fas fa-arrow-right"></i></button>
+    </div>
+
+</div>
+<script>
+const DB = [
+{c:"Scuola",i:"fa-graduation-cap",col:"#3498db",t:"Il prof ti restituisce un compito andato male davanti a tutti.",emo:{label:"Vergogna",col:"#9b59b6",icon:"fa-theater-masks"},o:[
+{txt:"Chiedi spiegazioni per capire gli errori.",val:15,coping:"Problem-solving",icon:"fa-search",desc:"Ottima scelta!",why:"Affrontare l'errore con curiosità trasforma un momento difficile in crescita — è il cuore del problem-solving."},
+{txt:"Ne parli con un amico per sfogarti.",val:10,coping:"Supporto sociale",icon:"fa-comments",desc:"Buona scelta.",why:"Condividere l'emozione abbassa l'intensità della vergogna e ti aiuta a non restare solo con quella sensazione."},
+{txt:"Respiri lentamente e aspetti che passi l'imbarazzo.",val:5,coping:"Regolazione emotiva",icon:"fa-spa",desc:"Discreto.",why:"Gestire prima l'emozione è utile, ma da solo non risolve il problema. Usala come primo passo, poi agisci."},
+{txt:"Fai finta che non ti importi e cambi discorso.",val:-10,coping:"Evitamento",icon:"fa-eye-slash",desc:"Attenzione.",why:"Fingere indifferenza è evitamento: nel lungo termine non impari dagli errori e la vergogna resta sotto."}
+]},
+{c:"Scuola",i:"fa-users",col:"#8e44ad",t:"Nel lavoro di gruppo nessuno fa la sua parte. La scadenza è domani.",emo:{label:"Frustrazione",col:"#d35400",icon:"fa-angry"},o:[
+{txt:"Proponi una divisione chiara dei compiti adesso.",val:15,coping:"Problem-solving",icon:"fa-tasks",desc:"Eccellente!",why:"Strutturare il problema con una divisione concreta è la strategia più efficace: agire sul problema riduce la frustrazione."},
+{txt:"Parli con il prof spiegando la situazione.",val:10,coping:"Supporto sociale",icon:"fa-chalkboard-teacher",desc:"Buona mossa.",why:"Cercare supporto da un adulto è appropriato quando il problema supera le tue forze. Non è debolezza, è intelligenza."},
+{txt:"Fai tutto tu per non rischiare un brutto voto.",val:-5,coping:"Evitamento",icon:"fa-user-tie",desc:"Funziona a breve, ma…",why:"Fare tutto da solo risolve la consegna ma evita il conflitto reale. Il gruppo non impara nulla e la prossima volta ricapita."},
+{txt:"Ti arrabbi e mandi messaggi duri nel gruppo.",val:-15,coping:"Evitamento",icon:"fa-bomb",desc:"Stato critico.",why:"Sfogare la rabbia non risolve il problema e brucia energia preziosa oltre a danneggiare le relazioni."}
+]},
+{c:"Scuola",i:"fa-laptop",col:"#7f8c8d",t:"Il PC si spegne mentre stavi salvando il progetto. Hai perso tutto.",emo:{label:"Panico",col:"#27ae60",icon:"fa-ghost"},o:[
+{txt:"Respiri, cerchi un backup o ricostruisci per punti.",val:15,coping:"Problem-solving",icon:"fa-save",desc:"Eccellente autocontrollo!",why:"Fermarsi, respirare e cercare soluzioni concrete è la risposta più efficace: il panico consuma energia senza risolvere."},
+{txt:"Chiedi aiuto a qualcuno più esperto di te.",val:10,coping:"Supporto sociale",icon:"fa-hands-helping",desc:"Ottima scelta.",why:"Riconoscere i propri limiti tecnici e chiedere aiuto è intelligente: il supporto include anche la competenza altrui."},
+{txt:"Dai un pugno al tavolo e urli.",val:-15,coping:"Evitamento",icon:"fa-hand-rock",desc:"Stato critico.",why:"La reazione fisica non recupera il file e aggiunge stress. Comprensibile ma non funzionale."},
+{txt:"Ti blocchi e non riesci a fare niente per un'ora.",val:-10,coping:"Evitamento",icon:"fa-pause-circle",desc:"Blocco paralizzante.",why:"Il blocco prolungato è evitamento involontario: usa una strategia attiva per uscirne."}
+]},
+{c:"Scuola",i:"fa-chalkboard-teacher",col:"#2c3e50",t:"Devi fare una presentazione davanti alla classe. Sei terrorizzato/a.",emo:{label:"Ansia",col:"#3498db",icon:"fa-heartbeat"},o:[
+{txt:"Ti prepari bene e ti eserciti ad alta voce.",val:15,coping:"Problem-solving",icon:"fa-microphone",desc:"Strategia vincente!",why:"La preparazione concreta è il rimedio più efficace contro l'ansia da prestazione. Il cervello impara che 'ce la fai'."},
+{txt:"Fai respirazione profonda prima di iniziare.",val:10,coping:"Regolazione emotiva",icon:"fa-spa",desc:"Ottima tecnica.",why:"La respirazione diaframmatica abbassa il cortisolo in pochi secondi — tecnica scientificamente validata."},
+{txt:"Chiedi a un amico di presentare insieme a te.",val:5,coping:"Supporto sociale",icon:"fa-user-friends",desc:"Buona idea.",why:"Avere supporto riduce il senso di esposizione, ma attenzione che non diventi dipendenza per evitare di affrontare da solo."},
+{txt:"Fingi di stare male per non presentare.",val:-15,coping:"Evitamento",icon:"fa-thermometer",desc:"Evitamento puro.",why:"Evitare rinforza l'ansia: il cervello impara che quella situazione è pericolosa. L'ansia cresce invece di diminuire."}
+]},
+{c:"Scuola",i:"fa-pencil-alt",col:"#d35400",t:"L'insegnante ti accusa ingiustamente davanti a tutti.",emo:{label:"Rabbia",col:"#e74c3c",icon:"fa-fire"},o:[
+{txt:"Aspetti che finisca, poi chiedi un momento per spiegare.",val:15,coping:"Regolazione emotiva",icon:"fa-hand-paper",desc:"Perfetto equilibrio!",why:"Aspettare che l'emozione si abbassi prima di parlare è intelligenza emotiva: ti permette di difenderti senza peggiorare."},
+{txt:"Spieghi i fatti con calma e assertività.",val:10,coping:"Problem-solving",icon:"fa-comments",desc:"Ottima risposta.",why:"Difendersi con argomenti calmi è assertività. Risolve il problema senza alimentare il conflitto."},
+{txt:"Urli la tua innocenza davanti a tutti.",val:-15,coping:"Evitamento",icon:"fa-bomb",desc:"Stato critico.",why:"La reazione esplosiva ti mette dalla parte del torto anche se hai ragione. Quando urliamo, l'altro smette di ascoltare."},
+{txt:"Taci e ti senti vittima per tutto il giorno.",val:-10,coping:"Evitamento",icon:"fa-cloud-rain",desc:"Evitamento passivo.",why:"Tacere per paura e rimuginare non risolve l'ingiustizia e alimenta pensieri negativi su di te."}
+]},
+{c:"Scuola",i:"fa-book",col:"#2980b9",t:"Hai studiato tutta la notte ma l'argomento è cambiato all'ultimo.",emo:{label:"Sconforto",col:"#3498db",icon:"fa-cloud-rain"},o:[
+{txt:"Provi a usare quello che sai per adattarti.",val:10,coping:"Problem-solving",icon:"fa-lightbulb",desc:"Flessibilità mentale!",why:"Adattare le proprie conoscenze a un contesto nuovo è resilienza cognitiva. Dimostra capacità di problem-solving sotto pressione."},
+{txt:"Vai nel panico totale e non rispondi a nulla.",val:-15,coping:"Evitamento",icon:"fa-ghost",desc:"Stato critico.",why:"Il panico blocca le risorse cognitive disponibili. Anche con argomento cambiato, qualcosa del tuo studio può tornare utile."},
+{txt:"Ti lamenti con i compagni ma poi fai del tuo meglio.",val:5,coping:"Supporto sociale",icon:"fa-comment-dots",desc:"Discreto.",why:"Sfogarsi brevemente allenta la pressione, ma l'azione concreta dopo è ciò che fa la differenza."},
+{txt:"Ti rassegni e consegni in bianco.",val:-10,coping:"Evitamento",icon:"fa-minus-circle",desc:"Resa prematura.",why:"Rassegnarsi senza provare è evitamento che taglia le gambe prima ancora di iniziare."}
+]},
+{c:"Scuola",i:"fa-book-reader",col:"#3498db",t:"Il compagno di banco copia sistematicamente dal tuo compito.",emo:{label:"Fastidio",col:"#d35400",icon:"fa-hand-paper"},o:[
+{txt:"Gli dici in privato che non ti fa piacere.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Assertività!",why:"Parlare direttamente e in privato è il modo più rispettoso ed efficace per risolvere il problema senza conflitti pubblici."},
+{txt:"Copri il foglio senza dire niente.",val:5,coping:"Regolazione emotiva",icon:"fa-hand-paper",desc:"Soluzione parziale.",why:"Proteggere il tuo lavoro è corretto, ma non affronta il problema relazionale. Se non parli, continuerà ad accadere."},
+{txt:"Lo lasci fare per non creare tensioni.",val:-5,coping:"Evitamento",icon:"fa-meh",desc:"Evitamento passivo.",why:"Ignorare il comportamento per non fare conflitti crea risentimento nel lungo termine e non aiuta nessuno."},
+{txt:"Lo segnali ad alta voce davanti a tutti.",val:-10,coping:"Evitamento",icon:"fa-bullhorn",desc:"Escalation pubblica.",why:"Svergognare in pubblico crea un conflitto più grande del problema originale."}
+]},
+{c:"Scuola",i:"fa-bus",col:"#e67e22",t:"Il prof ti interroga di sorpresa mentre stavi chiacchierando.",emo:{label:"Imbarazzo",col:"#fdcb6e",icon:"fa-theater-masks"},o:[
+{txt:"Rispondi con onestà dicendo che non eri attento.",val:10,coping:"Problem-solving",icon:"fa-comments",desc:"Risposta matura.",why:"L'onestà diretta disinnesca rapidamente la situazione e guadagna rispetto. Molto meglio che mentire o bloccarsi."},
+{txt:"Arrossisci ma tenti comunque di rispondere.",val:10,coping:"Regolazione emotiva",icon:"fa-fist-raised",desc:"Coraggio!",why:"Affrontare l'imbarazzo e provare comunque a rispondere è coraggio quotidiano che si allena nel tempo."},
+{txt:"Incolpi il compagno vicino.",val:-10,coping:"Evitamento",icon:"fa-user-slash",desc:"Spostare la colpa.",why:"Scaricare la responsabilità sugli altri è evitamento che danneggia la fiducia."},
+{txt:"Rimani in silenzio sperando che il prof passi oltre.",val:-5,coping:"Evitamento",icon:"fa-meh",desc:"Blocco passivo.",why:"Il silenzio prolungato peggiora l'imbarazzo e perde l'occasione di gestire la situazione in modo attivo."}
+]},
+{c:"Scuola",i:"fa-door-open",col:"#636e72",t:"Viene annunciata una verifica a sorpresa per domani.",emo:{label:"Ansia",col:"#3498db",icon:"fa-heartbeat"},o:[
+{txt:"Studi subito con metodo quello che riesci.",val:15,coping:"Problem-solving",icon:"fa-book-open",desc:"Azione immediata!",why:"Rispondere all'ansia con azione concreta e organizzata è la strategia più produttiva. Anche poco studio fatto bene aiuta."},
+{txt:"Respiri e fai del tuo meglio con quanto sai.",val:10,coping:"Regolazione emotiva",icon:"fa-spa",desc:"Buona accettazione.",why:"Accettare i limiti della situazione e agire con ciò che hai è intelligenza emotiva. Lamentarsi non cambierà la data."},
+{txt:"Ti lamenti con tutta la classe.",val:-5,coping:"Evitamento",icon:"fa-angry",desc:"Sfogo collettivo.",why:"Lamentarsi è comprensibile ma non cambia la situazione e consuma il tempo che potresti usare per studiare."},
+{txt:"Ti rassegni e non studi per niente.",val:-10,coping:"Evitamento",icon:"fa-bed",desc:"Resa totale.",why:"Rinunciare prima ancora di provare è l'evitamento nella sua forma più diretta: nessuna possibilità di miglioramento."}
+]},
+{c:"Scuola",i:"fa-star",col:"#f39c12",t:"Vieni scelto/a per rappresentare la classe in un concorso importante.",emo:{label:"Insicurezza",col:"#9b59b6",icon:"fa-question"},o:[
+{txt:"Accetti e ti prepari con cura.",val:15,coping:"Problem-solving",icon:"fa-fist-raised",desc:"Coraggio e metodo!",why:"Accettare una sfida e prepararsi concretamente costruisce autoefficacia. Ogni volta che ci provi, la fiducia in te cresce."},
+{txt:"Chiedi consiglio a chi l'ha già fatto.",val:10,coping:"Supporto sociale",icon:"fa-hands-helping",desc:"Intelligente.",why:"Imparare da chi ha già affrontato una situazione simile è supporto sociale applicato alla crescita personale."},
+{txt:"Accetti ma dentro ti dici che fallirai.",val:-5,coping:"Evitamento",icon:"fa-sad-tear",desc:"Sabotaggio interno.",why:"Accettare ma pre-sentirti fallito è evitamento cognitivo: il dialogo interno negativo diventa profezia che si autoavvera."},
+{txt:"Rifiuti dicendo che non sei adatto/a.",val:-10,coping:"Evitamento",icon:"fa-ban",desc:"Evitamento della sfida.",why:"Rifiutare per paura del giudizio restringe lo spazio di vita. Le opportunità non sfruttate per insicurezza si moltiplicano."}
+]},
+{c:"Scuola",i:"fa-exclamation-circle",col:"#e74c3c",t:"Scopri che qualcuno ha condiviso le tue note private con tutta la classe.",emo:{label:"Tradimento",col:"#c0392b",icon:"fa-heart-broken"},o:[
+{txt:"Parli direttamente con la persona responsabile.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Coraggio relazionale!",why:"Affrontare direttamente chi ha violato la tua fiducia è l'unico modo per avere chiarezza e proteggerti in futuro."},
+{txt:"Ne parli con un adulto di fiducia.",val:10,coping:"Supporto sociale",icon:"fa-user-shield",desc:"Cercare supporto è giusto.",why:"Quando si è traditi, avere un adulto di riferimento aiuta a gestire l'intensità emotiva e a valutare le opzioni."},
+{txt:"Pubblichi una risposta pubblica per difenderti.",val:-10,coping:"Evitamento",icon:"fa-bullhorn",desc:"Escalation rischiosa.",why:"La reazione pubblica trasforma un conflitto personale in uno spettacolo che spesso peggiora la situazione."},
+{txt:"Non dici niente ed eviti quella persona per sempre.",val:-5,coping:"Evitamento",icon:"fa-eye-slash",desc:"Chiusura senza elaborazione.",why:"Evitare senza affrontare non elabora il tradimento. Lascia una ferita aperta che influenza le relazioni future."}
+]},
+{c:"Scuola",i:"fa-medal",col:"#00b894",t:"Prendi il voto più alto della classe a una verifica difficilissima.",emo:{label:"Gioia",col:"#f1c40f",icon:"fa-smile-beam"},o:[
+{txt:"Condividi la notizia con chi ami.",val:15,coping:"Supporto sociale",icon:"fa-heart",desc:"Condividere amplifica la gioia.",why:"Condividere i successi con le persone care rafforza i legami e consolida il senso di autoefficacia."},
+{txt:"Analizzi cosa ha funzionato per replicarlo.",val:10,coping:"Problem-solving",icon:"fa-search",desc:"Approccio da campione.",why:"Riflettere su cosa ha portato al successo è problem-solving al contrario: si impara tanto dal successo quanto dall'errore."},
+{txt:"Minimizzi dicendo che è stato solo fortuna.",val:-5,coping:"Evitamento",icon:"fa-meh",desc:"Auto-svalutazione.",why:"Attribuire il successo alla fortuna è evitamento dell'autostima. Impedisce di costruire fiducia in se stessi duratura."},
+{txt:"Ti vanti in modo esagerato con tutti.",val:-5,coping:"Evitamento",icon:"fa-trophy",desc:"Difesa esternalizzata.",why:"La vanteria eccessiva spesso nasconde insicurezza: si cerca validazione esterna invece di godere del risultato in modo autentico."}
+]},
+{c:"Relazioni",i:"fa-user-friends",col:"#e74c3c",t:"Il tuo migliore amico smette di risponderti senza spiegazioni.",emo:{label:"Tristezza",col:"#3498db",icon:"fa-cloud-rain"},o:[
+{txt:"Gli scrivi un messaggio sincero chiedendo cosa è successo.",val:15,coping:"Problem-solving",icon:"fa-envelope",desc:"Coraggioso/a!",why:"Affrontare direttamente il problema con apertura è il modo più efficace per non perdere un'amicizia importante."},
+{txt:"Ne parli con un altro amico per avere prospettiva.",val:10,coping:"Supporto sociale",icon:"fa-comments",desc:"Buona scelta.",why:"Il punto di vista esterno aiuta a non catastrofizzare e può rivelare elementi che non vedi dall'interno della situazione."},
+{txt:"Aspetti qualche giorno pensando che abbia bisogno di spazio.",val:5,coping:"Regolazione emotiva",icon:"fa-clock",desc:"Dipende.",why:"Aspettare può essere saggio ma diventa evitamento se usi 'aspettare' per evitare una conversazione difficile."},
+{txt:"Lo/la togli da tutti i tuoi social per rabbia.",val:-15,coping:"Evitamento",icon:"fa-user-slash",desc:"Reazione impulsiva.",why:"Tagliare il contatto per rabbia trasforma un possibile malinteso in una rottura definitiva."}
+]},
+{c:"Relazioni",i:"fa-heart-broken",col:"#d63031",t:"Vieni escluso/a da un gruppo di amici senza spiegazioni.",emo:{label:"Solitudine",col:"#3498db",icon:"fa-sad-tear"},o:[
+{txt:"Parli direttamente con chi ti ha escluso/a.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Molto coraggioso/a!",why:"Chiedere spiegazioni è difficile ma necessario. Senza parlare si alimentano ipotesi negative spesso lontane dalla realtà."},
+{txt:"Passi la serata con altri amici o in famiglia.",val:10,coping:"Supporto sociale",icon:"fa-home",desc:"Scelta sana.",why:"Cercare connessione alternativa invece di isolarsi protegge il benessere emotivo."},
+{txt:"Resti a casa a guardare serie TV tutto il giorno.",val:-5,coping:"Evitamento",icon:"fa-tv",desc:"Riposo o fuga?",why:"Un momento di pausa va bene ma se diventa isolamento sistematico amplifica la solitudine."},
+{txt:"Smetti di frequentarli tutti senza spiegare.",val:-10,coping:"Evitamento",icon:"fa-eye-slash",desc:"Chiusura silenziosa.",why:"Ritirarsi senza confrontarsi lascia irrisolta la situazione e perde l'opportunità di capire cosa è successo davvero."}
+]},
+{c:"Relazioni",i:"fa-comments",col:"#16a085",t:"Un compagno/a ti critica duramente davanti al gruppo.",emo:{label:"Umiliazione",col:"#9b59b6",icon:"fa-theater-masks"},o:[
+{txt:"Rispondi con calma dicendo come ti ha fatto sentire.",val:15,coping:"Regolazione emotiva",icon:"fa-hand-peace",desc:"Assertività pura!",why:"Esprimere come ci si è sentiti senza attaccare è comunicazione assertiva — la forma più matura di regolazione emotiva in pubblico."},
+{txt:"Aspetti che si calmi e gli/le parli in privato.",val:10,coping:"Problem-solving",icon:"fa-user-clock",desc:"Strategia intelligente.",why:"Scegliere il momento e il luogo giusto per affrontare un conflitto è maturità: in privato le persone ascoltano meglio."},
+{txt:"Attacchi con una critica ancora più dura.",val:-15,coping:"Evitamento",icon:"fa-fire",desc:"Escalation.",why:"Il contrattacco sposta l'attenzione dal tuo dolore al conflitto. L'umiliazione originale non viene affrontata."},
+{txt:"Fingi di non aver sentito.",val:-5,coping:"Evitamento",icon:"fa-meh",desc:"Evitamento sottile.",why:"Ignorare la critica pubblica la lascia senza risposta e tu resti con l'umiliazione irrisolta."}
+]},
+{c:"Relazioni",i:"fa-user-secret",col:"#2c3e50",t:"Scopri che un amico ha detto cose false su di te agli altri.",emo:{label:"Tradimento",col:"#e74c3c",icon:"fa-heart-broken"},o:[
+{txt:"Gli parli in privato chiedendo spiegazioni dirette.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Diretto e maturo.",why:"Confrontarsi direttamente dà all'amico la possibilità di spiegare o scusarsi. Evita che la storia peggiori con i passaggi multipli."},
+{txt:"Ne parli con qualcuno di fiducia per avere sostegno.",val:10,coping:"Supporto sociale",icon:"fa-hands-helping",desc:"Buon supporto.",why:"Elaborare un tradimento con qualcuno di fiducia abbassa l'intensità emotiva e aiuta a decidere come agire."},
+{txt:"Cominci a spargere voci su di lui/lei per rivalsa.",val:-15,coping:"Evitamento",icon:"fa-exclamation",desc:"Spirale tossica.",why:"La rivalsa con voci peggiora il conflitto a ogni passaggio. Non risolve niente e alla fine non ricordi come è iniziato."},
+{txt:"Smetti di parlargli/le senza mai dirgli perché.",val:-5,coping:"Evitamento",icon:"fa-ban",desc:"Silenzio punitivo.",why:"Il silenzio punitivo non elabora il tradimento e lascia l'amico senza la possibilità di capire o rimediare."}
+]},
+{c:"Relazioni",i:"fa-people-arrows",col:"#8e44ad",t:"Due tuoi amici litigano e ti chiedono di schierarti.",emo:{label:"Disagio",col:"#636e72",icon:"fa-balance-scale"},o:[
+{txt:"Spieghi che non puoi e non vuoi schierarti.",val:15,coping:"Problem-solving",icon:"fa-hand-paper",desc:"Confine sano!",why:"Stabilire un confine chiaro in un conflitto altrui è competenza relazionale fondamentale. Protegge te e lascia agli altri la responsabilità."},
+{txt:"Suggerisci loro di parlare direttamente tra di loro.",val:10,coping:"Problem-solving",icon:"fa-comments",desc:"Mediazione intelligente.",why:"Incoraggiare il dialogo diretto è più utile che fare da intermediario. Non prendi su di te il peso del conflitto altrui."},
+{txt:"Ti schieri con chi ti piace di più per non perdere l'amicizia.",val:-10,coping:"Evitamento",icon:"fa-user-friends",desc:"Scelta guidata dalla paura.",why:"Schierarsi per paura di perdere qualcuno è evitamento del disagio. Rischi di perdere entrambi e di tradire i tuoi valori."},
+{txt:"Eviti entrambi finché non si risolvono da soli.",val:-5,coping:"Evitamento",icon:"fa-eye-slash",desc:"Fuga relazionale.",why:"Sparire durante un conflitto altrui danneggia le amicizie nel lungo periodo."}
+]},
+{c:"Relazioni",i:"fa-heart",col:"#e74c3c",t:"Qualcuno che ti piace non ricambia i tuoi sentimenti.",emo:{label:"Delusione",col:"#3498db",icon:"fa-sad-tear"},o:[
+{txt:"Elabori la delusione e rispetti la sua scelta.",val:15,coping:"Regolazione emotiva",icon:"fa-leaf",desc:"Maturità emotiva!",why:"Accettare i sentimenti altrui senza personalizzarli come rifiuto è una competenza emotiva avanzata."},
+{txt:"Ne parli con un amico fidato per sfogarti.",val:10,coping:"Supporto sociale",icon:"fa-comments",desc:"Sano sfogo.",why:"Condividere la delusione con chi ti vuole bene abbassa l'intensità e aiuta a ridimensionare il dolore."},
+{txt:"Smetti di frequentare i luoghi dove lo/la incontri.",val:-5,coping:"Evitamento",icon:"fa-map-marker-slash",desc:"Evitamento spaziale.",why:"Cambiare le tue abitudini per evitare qualcuno riduce la tua libertà e non elabora il sentimento."},
+{txt:"Scrivi messaggi insistenti sperando di fargli/le cambiare idea.",val:-15,coping:"Evitamento",icon:"fa-mobile",desc:"Rifiuto del confine.",why:"Non accettare la risposta altrui è evitamento della realtà. Genera disagio in entrambi e peggiora la situazione."}
+]},
+{c:"Relazioni",i:"fa-smile",col:"#f1c40f",t:"Un/una compagno/a timido/a viene isolato/a dal gruppo classe.",emo:{label:"Empatia",col:"#00b894",icon:"fa-heart"},o:[
+{txt:"Lo/la avvicini con naturalezza e lo/la includi.",val:15,coping:"Problem-solving",icon:"fa-user-plus",desc:"Azione empatica!",why:"Agire concretamente sull'esclusione altrui è la forma più alta di coping prosociale. Cambia la situazione invece di osservarla."},
+{txt:"Ne parli con il prof o un adulto.",val:10,coping:"Supporto sociale",icon:"fa-chalkboard-teacher",desc:"Cercare supporto adulto.",why:"Coinvolgere un adulto quando l'esclusione è sistematica è appropriato e coraggioso."},
+{txt:"Osservi senza fare niente, pensando non siano affari tuoi.",val:-10,coping:"Evitamento",icon:"fa-eye-slash",desc:"Bystander passivo.",why:"Non intervenire davanti all'esclusione è evitamento del disagio morale. La passività diventa parte del problema."},
+{txt:"Parli male del gruppo che lo/la esclude ma non agisci.",val:-5,coping:"Evitamento",icon:"fa-comment-slash",desc:"Critica senza azione.",why:"Giudicare senza agire è evitamento dell'impegno reale. Non cambia nulla per la persona esclusa."}
+]},
+{c:"Relazioni",i:"fa-users-cog",col:"#2980b9",t:"Nel tuo gruppo c'è sempre qualcuno che si lamenta di tutto.",emo:{label:"Stanchezza",col:"#636e72",icon:"fa-battery-half"},o:[
+{txt:"Gli/le dici gentilmente come ti fa sentire.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Feedback assertivo!",why:"Dire con gentilezza l'impatto che il comportamento ha su di te apre un dialogo reale e rispettoso."},
+{txt:"Metti un limite al tempo che passi con quella persona.",val:10,coping:"Regolazione emotiva",icon:"fa-clock",desc:"Confine protettivo.",why:"Gestire la propria esposizione a dinamiche negative è cura di sé, non mancanza di rispetto."},
+{txt:"Ti adegui e cominci a lamentarti anche tu.",val:-10,coping:"Evitamento",icon:"fa-frown",desc:"Contagio emotivo.",why:"Adeguarsi alle lamentele per evitare conflitti è evitamento che peggiora l'umore collettivo e il tuo."},
+{txt:"Eviti il gruppo per non sentirti a disagio.",val:-5,coping:"Evitamento",icon:"fa-door-open",desc:"Fuga relazionale.",why:"Evitare il gruppo risolve il sintomo ma non il problema relazionale e può isolarti da amici che ti fanno bene."}
+]},
+{c:"Famiglia",i:"fa-home",col:"#e67e22",t:"I tuoi genitori litigano spesso e l'atmosfera in casa è pesante.",emo:{label:"Ansia",col:"#3498db",icon:"fa-heartbeat"},o:[
+{txt:"Ne parli con un adulto di fiducia fuori dalla famiglia.",val:15,coping:"Supporto sociale",icon:"fa-hands-helping",desc:"Scelta molto matura.",why:"I conflitti genitoriali non sono responsabilità tua. Cercare supporto esterno ti protegge dall'assorbire un peso che non ti appartiene."},
+{txt:"Ti concedi attività che ti fanno stare bene.",val:10,coping:"Regolazione emotiva",icon:"fa-music",desc:"Ottima cura di sé.",why:"Mantenere le proprie abitudini positive quando il clima familiare è instabile è autoprotrezione necessaria, non egoismo."},
+{txt:"Ti chiudi in camera per non sentire.",val:-5,coping:"Evitamento",icon:"fa-door-closed",desc:"Comprensibile ma limitato.",why:"Isolarsi fisicamente aiuta nel breve ma se diventa l'unica strategia non elabori l'ansia e cresce la solitudine."},
+{txt:"Cerchi di fare da mediatore tra i tuoi genitori.",val:-10,coping:"Evitamento",icon:"fa-balance-scale",desc:"Ruolo sbagliato.",why:"I figli non devono arbitrare i conflitti dei genitori. Prendere questo ruolo aumenta il tuo stress senza risolvere nulla."}
+]},
+{c:"Famiglia",i:"fa-user-slash",col:"#636e72",t:"I tuoi ti proibiscono qualcosa che tutti i tuoi amici possono fare.",emo:{label:"Rabbia",col:"#e74c3c",icon:"fa-fire"},o:[
+{txt:"Aspetti un momento calmo e spieghi il tuo punto di vista.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Approccio maturo!",why:"Scegliere il momento giusto e usare argomenti invece di reazioni emotive è negoziazione efficace con i tuoi."},
+{txt:"Sfoghi la frustrazione con un amico fidato.",val:5,coping:"Supporto sociale",icon:"fa-user-friends",desc:"Va bene sfogarsi.",why:"Condividere la frustrazione abbassa l'intensità prima di affrontare la conversazione con i tuoi."},
+{txt:"Sbatti le porte e non parli per giorni.",val:-15,coping:"Evitamento",icon:"fa-door-open",desc:"Escalation inutile.",why:"Il silenzio punitivo non cambia la loro decisione e rende il clima familiare ancora più pesante."},
+{txt:"Vai di nascosto senza dirlo.",val:-10,coping:"Evitamento",icon:"fa-user-secret",desc:"Evitamento con rischio.",why:"Aggirare il divieto distrugge la fiducia. Le conseguenze future sono peggiori del divieto originale."}
+]},
+{c:"Famiglia",i:"fa-baby",col:"#9b59b6",t:"Un fratello/sorella minore ti rompe qualcosa di importante.",emo:{label:"Rabbia",col:"#e74c3c",icon:"fa-fire"},o:[
+{txt:"Respiri e spieghi perché era importante per te.",val:15,coping:"Regolazione emotiva",icon:"fa-spa",desc:"Gestione adulta.",why:"Aspettare che la rabbia si abbassi e poi spiegare insegna senza traumatizzare. È coping emotivo applicato alle relazioni familiari."},
+{txt:"Lo/la perdoni ma stabilisci una regola chiara per il futuro.",val:10,coping:"Problem-solving",icon:"fa-check-circle",desc:"Soluzione pratica.",why:"Perdonare e definire regole chiare è la risposta più funzionale: risolve il conflitto e previene il prossimo."},
+{txt:"Urli e lo/la fai sentire in colpa a lungo.",val:-15,coping:"Evitamento",icon:"fa-bomb",desc:"Reazione sproporzionata.",why:"Sfogare la rabbia su qualcuno più piccolo non è regolazione emotiva: è scarico. Lascia ferite relazionali durature."},
+{txt:"Ti arrabbi con i tuoi genitori perché non l'hanno controllato/a.",val:-5,coping:"Evitamento",icon:"fa-people-arrows",desc:"Spostamento della rabbia.",why:"Spostare la rabbia su chi non ha causato il problema è evitamento che non affronta la situazione reale."}
+]},
+{c:"Famiglia",i:"fa-graduation-cap",col:"#27ae60",t:"I tuoi genitori si aspettano risultati scolastici che senti troppo alti.",emo:{label:"Pressione",col:"#e74c3c",icon:"fa-weight-hanging"},o:[
+{txt:"Parli onestamente con loro delle tue difficoltà.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Dialogo aperto!",why:"Comunicare le proprie difficoltà è coraggio. I genitori spesso non sanno quanto pressione stai vivendo finché non glielo dici."},
+{txt:"Ne parli con il counselor scolastico.",val:10,coping:"Supporto sociale",icon:"fa-user-tie",desc:"Cercare supporto esterno.",why:"Il counselor può aiutarti a gestire la pressione e, se necessario, a comunicare con i tuoi genitori in modo mediato."},
+{txt:"Non dici niente e ti sforzi oltre i tuoi limiti.",val:-10,coping:"Evitamento",icon:"fa-running",desc:"Auto-sacrificio.",why:"Sopportare la pressione in silenzio porta all'esaurimento. Il silenzio non è gestione, è accumulo."},
+{txt:"Smetti di provarci pensando che tanto non basta mai.",val:-15,coping:"Evitamento",icon:"fa-minus-circle",desc:"Resa difensiva.",why:"La resa anticipatoria protegge dal dolore del fallimento ma evita anche ogni possibilità di successo."}
+]},
+{c:"Famiglia",i:"fa-car",col:"#2980b9",t:"I tuoi dimenticano di venire a prenderti e resti ad aspettare un'ora.",emo:{label:"Delusione",col:"#3498db",icon:"fa-cloud-rain"},o:[
+{txt:"Dici loro serenamente come ti ha fatto sentire.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Comunicazione sana.",why:"Esprimere la delusione senza colpa eccessiva o silenzio passivo è comunicazione familiare sana."},
+{txt:"Chiami un amico per passare il tempo e aspetti.",val:5,coping:"Supporto sociale",icon:"fa-phone",desc:"Gestione creativa.",why:"Trasformare un'attesa frustrante in un momento di connessione è una buona forma di regolazione emotiva."},
+{txt:"Non dici niente ma accumuli rancore.",val:-10,coping:"Evitamento",icon:"fa-eye-slash",desc:"Silenzio rancoroso.",why:"Il rancore silenzioso non cambia il comportamento altrui e ti logora dentro nel tempo."},
+{txt:"Urli appena salgono in macchina.",val:-10,coping:"Evitamento",icon:"fa-bomb",desc:"Sfogo immediato.",why:"Lo sfogo immediato scarica la tensione ma chiude la porta a una conversazione utile e costruttiva."}
+]},
+{c:"Famiglia",i:"fa-suitcase",col:"#d35400",t:"La tua famiglia si trasferisce in un'altra città. Devi lasciare tutto.",emo:{label:"Tristezza",col:"#3498db",icon:"fa-cloud-rain"},o:[
+{txt:"Pianifichi come mantenere i contatti con gli amici.",val:15,coping:"Problem-solving",icon:"fa-map-marked",desc:"Proattivo e organizzato.",why:"Pianificare concretamente il mantenimento delle relazioni trasforma un evento passivo in un'azione attiva."},
+{txt:"Parli dei tuoi sentimenti con qualcuno di fiducia.",val:10,coping:"Supporto sociale",icon:"fa-comments",desc:"Elaborare insieme.",why:"Condividere il dolore del distacco con qualcuno che ti capisce è uno dei modi più sani di elaborare una perdita."},
+{txt:"Rifiuti di conoscere chiunque nella nuova città.",val:-15,coping:"Evitamento",icon:"fa-ban",desc:"Chiusura totale.",why:"Rifiutare ogni nuova connessione per paura di perdere di nuovo è evitamento del dolore che blocca il recupero."},
+{txt:"Fai finta che non ti dispiaccia niente.",val:-5,coping:"Evitamento",icon:"fa-theater-masks",desc:"Negazione emotiva.",why:"Negare la tristezza non la elimina. Le emozioni non elaborate si accumulano e emergono in altri modi."}
+]},
+{c:"Sport",i:"fa-futbol",col:"#27ae60",t:"Sbagli il rigore decisivo. La squadra perde per colpa tua.",emo:{label:"Colpa",col:"#636e72",icon:"fa-sad-tear"},o:[
+{txt:"Ti scusi con la squadra e proponi di allenarti di più.",val:15,coping:"Problem-solving",icon:"fa-redo",desc:"Maturità sportiva!",why:"Assumersi la responsabilità senza autodistruggersi è la risposta più sana. Trasformi la sconfitta in motivazione."},
+{txt:"Accetti il conforto dei compagni senza isolarti.",val:10,coping:"Supporto sociale",icon:"fa-hands",desc:"Saper ricevere aiuto.",why:"Accettare il conforto invece di isolarsi nella colpa è intelligenza emotiva. Non dobbiamo elaborare il fallimento da soli."},
+{txt:"Ti dici che è solo una partita e lasci andare.",val:5,coping:"Regolazione emotiva",icon:"fa-leaf",desc:"Prospettiva sana.",why:"Ridimensionare aiuta a non catastrofizzare. Attenzione che 'lasciare andare' non diventi un modo per non imparare."},
+{txt:"Non torni agli allenamenti per la vergogna.",val:-15,coping:"Evitamento",icon:"fa-door-open",desc:"Evitamento totale.",why:"Abbandonare l'attività per evitare il rischio di sbagliare di nuovo è l'evitamento nel suo effetto peggiore: restringe la vita."}
+]},
+{c:"Sport",i:"fa-medal",col:"#f1c40f",t:"Vieni escluso/a dalla squadra titolare senza spiegazioni.",emo:{label:"Delusione",col:"#3498db",icon:"fa-cloud-rain"},o:[
+{txt:"Chiedi al coach un feedback su cosa migliorare.",val:15,coping:"Problem-solving",icon:"fa-search",desc:"Attitudine da campione!",why:"Trasformare la delusione in richiesta di feedback è il comportamento che distingue chi cresce da chi si ferma."},
+{txt:"Ti alleni ancora di più per dimostrare il tuo valore.",val:10,coping:"Problem-solving",icon:"fa-running",desc:"Risposta costruttiva.",why:"Usare la delusione come carburante per l'allenamento è orientamento all'azione concreto."},
+{txt:"Ne parli con un genitore per sfogarti.",val:5,coping:"Supporto sociale",icon:"fa-comments",desc:"Supporto utile.",why:"Sfogarsi aiuta a processare la delusione. Assicurati poi di passare all'azione per non restare nell'amarezza."},
+{txt:"Molli tutto lamentandoti di non essere capito/a.",val:-15,coping:"Evitamento",icon:"fa-door-open",desc:"Evitamento + vittimismo.",why:"Abbandonare e restare nella narrazione della vittima è la risposta meno funzionale. Non cambia la situazione."}
+]},
+{c:"Sport",i:"fa-dumbbell",col:"#2c3e50",t:"Ti infortuni a pochi giorni da una gara importante.",emo:{label:"Frustrazione",col:"#d35400",icon:"fa-angry"},o:[
+{txt:"Segui le indicazioni mediche e pianifichi il recupero.",val:15,coping:"Problem-solving",icon:"fa-notes-medical",desc:"Gestione ottimale.",why:"Accettare il processo di recupero e pianificarlo concretamente è la risposta più efficace. L'infortunio peggiora se forzato."},
+{txt:"Ne parli con allenatore e medico per avere supporto.",val:10,coping:"Supporto sociale",icon:"fa-user-md",desc:"Team di supporto.",why:"Avere un team che ti segue durante il recupero migliora sia la velocità di guarigione che il benessere emotivo."},
+{txt:"Partecipi lo stesso forzando l'infortunio.",val:-15,coping:"Evitamento",icon:"fa-running",desc:"Negazione del limite.",why:"Ignorare un infortunio è evitamento della realtà con conseguenze fisiche potenzialmente gravi."},
+{txt:"Abbandoni completamente lo sport.",val:-10,coping:"Evitamento",icon:"fa-ban",desc:"Generalizzazione negativa.",why:"Un infortunio non dice nulla sulle tue capacità future. Abbandonare tutto è una risposta sproporzionata all'evento."}
+]},
+{c:"Sport",i:"fa-people-arrows",col:"#e74c3c",t:"Il tuo allenatore ti critica duramente davanti a tutta la squadra.",emo:{label:"Umiliazione",col:"#9b59b6",icon:"fa-theater-masks"},o:[
+{txt:"Ascolti, poi chiedi un confronto privato.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Professionalità!",why:"Ascoltare la critica e poi chiedere un confronto privato è rispetto del contesto abbinato ad assertività personale."},
+{txt:"Parli con un compagno di squadra per sfogarti.",val:5,coping:"Supporto sociale",icon:"fa-user-friends",desc:"Sfogo sano.",why:"Condividere l'umiliazione con un compagno fidato riduce l'intensità e aiuta a mantenerla in prospettiva."},
+{txt:"Rispondi in modo aggressivo davanti a tutti.",val:-15,coping:"Evitamento",icon:"fa-bomb",desc:"Escalation pubblica.",why:"Rispondere con aggressività in pubblico genera conseguenze immediate e distrugge la relazione con il coach."},
+{txt:"Smetti di impegnarti per non esporti più.",val:-10,coping:"Evitamento",icon:"fa-minus-circle",desc:"Ritiro difensivo.",why:"Ridurre l'impegno per evitare critiche è evitamento che ti danneggia come atleta e come persona."}
+]},
+{c:"Sport",i:"fa-trophy",col:"#f1c40f",t:"Perdi in finale dopo mesi di allenamento intenso.",emo:{label:"Dispiacere",col:"#3498db",icon:"fa-sad-tear"},o:[
+{txt:"Fai i complimenti al vincitore e analizzi cosa hai imparato.",val:15,coping:"Regolazione emotiva",icon:"fa-handshake",desc:"Fair play e crescita!",why:"Riconoscere il valore dell'avversario e riflettere sull'esperienza trasforma una sconfitta in valore. È la mentalità da campione."},
+{txt:"Ti concedi un po' di tempo per stare con il dispiacere.",val:10,coping:"Regolazione emotiva",icon:"fa-clock",desc:"Elaborazione sana.",why:"Permettersi di sentire il dispiacere senza reagire impulsivamente è regolazione emotiva matura."},
+{txt:"Cerchi scuse esterne per spiegare la sconfitta.",val:-10,coping:"Evitamento",icon:"fa-exclamation",desc:"Esternalizzazione.",why:"Attribuire la sconfitta solo a fattori esterni impedisce l'apprendimento e non onora il lavoro fatto."},
+{txt:"Smetti di allenarti per settimane.",val:-5,coping:"Evitamento",icon:"fa-bed",desc:"Ritiro prolungato.",why:"Una pausa breve dopo una sconfitta è normale. Settimane di abbandono è evitamento che rallenta il recupero."}
+]},
+{c:"Sport",i:"fa-users",col:"#8e44ad",t:"Un compagno di squadra si prende tutto il merito di un successo collettivo.",emo:{label:"Risentimento",col:"#e74c3c",icon:"fa-angry"},o:[
+{txt:"Glielo dici in privato con calma.",val:15,coping:"Problem-solving",icon:"fa-comments",desc:"Diretto e rispettoso.",why:"Affrontare direttamente e in privato dà all'altro la possibilità di rimediare senza imbarazzo pubblico."},
+{txt:"Ne parli con l'allenatore per avere prospettiva.",val:10,coping:"Supporto sociale",icon:"fa-chalkboard-teacher",desc:"Supporto esterno.",why:"Una figura di riferimento può aiutarti a valutare se il tuo risentimento è proporzionato e come gestirlo."},
+{txt:"Parli male di lui/lei con tutta la squadra.",val:-15,coping:"Evitamento",icon:"fa-bullhorn",desc:"Conflitto aperto.",why:"Creare fazioni nella squadra distrugge il clima e alla fine danneggia le prestazioni collettive."},
+{txt:"Non dici niente ma cominci a fare meno del tuo meglio.",val:-10,coping:"Evitamento",icon:"fa-minus-circle",desc:"Sabotaggio passivo.",why:"Ridurre l'impegno per 'vendicarsi' in silenzio danneggia prima di tutto te stesso/a."}
+]},
+{c:"Benessere",i:"fa-brain",col:"#6c5ce7",t:"Ti senti spesso giù, senza voglia di fare niente, da alcune settimane.",emo:{label:"Apatia",col:"#636e72",icon:"fa-meh"},o:[
+{txt:"Ti dai un micro-obiettivo: una piccola cosa da fare oggi.",val:15,coping:"Problem-solving",icon:"fa-check-circle",desc:"Tecnica efficace!",why:"Il micro-obiettivo rompe il blocco dell'apatia. Un piccolo risultato concreto genera energia per il passo successivo."},
+{txt:"Ne parli con qualcuno di cui ti fidi.",val:10,coping:"Supporto sociale",icon:"fa-comments",desc:"Passo importante.",why:"Dire 'non sto bene' a qualcuno riduce l'isolamento che alimenta l'apatia. Può aprire la porta a un aiuto professionale."},
+{txt:"Esci a camminare o fai attività fisica.",val:10,coping:"Regolazione emotiva",icon:"fa-walking",desc:"Il corpo aiuta la mente.",why:"Il movimento aumenta dopamina e serotonina. È uno degli antidoti naturali più documentati all'apatia."},
+{txt:"Stai a letto tutto il giorno sui social.",val:-15,coping:"Evitamento",icon:"fa-bed",desc:"Spirale discendente.",why:"Isolarsi e consumare contenuti passivi amplifica l'apatia. Corpo fermo e stimolazione passiva rinforzano il circolo negativo."}
+]},
+{c:"Benessere",i:"fa-bed",col:"#2c3e50",t:"Non riesci a dormire perché ripensi continuamente a qualcosa.",emo:{label:"Ansia",col:"#3498db",icon:"fa-heartbeat"},o:[
+{txt:"Scrivi su un foglio tutto quello che hai in testa.",val:15,coping:"Regolazione emotiva",icon:"fa-pen",desc:"Tecnica validata!",why:"La scrittura esternalizza i pensieri: il cervello smette di 'girarli' perché sono già 'al sicuro' su carta."},
+{txt:"Fai respirazione lenta o ascolti musica rilassante.",val:10,coping:"Regolazione emotiva",icon:"fa-music",desc:"Il corpo aiuta la mente.",why:"Le tecniche di rilassamento corporeo attivano il sistema nervoso parasimpatico, riducendo l'arousal notturno."},
+{txt:"Guardi il telefono per distrarti.",val:-5,coping:"Evitamento",icon:"fa-mobile",desc:"Controproducente.",why:"La luce del telefono peggiora la qualità del sonno. La distrazione allontana dall'ansia ma non la risolve."},
+{txt:"Lasci i pensieri girare sperando di stancarti.",val:-10,coping:"Evitamento",icon:"fa-sync",desc:"Rimuginio passivo.",why:"Lasciare girare i pensieri senza interrompere il ciclo alimenta l'ansia. Il cervello li amplifica, non si stanca."}
+]},
+{c:"Benessere",i:"fa-bolt",col:"#f39c12",t:"Hai una giornata iper-stressante e arrivi a casa esausto/a.",emo:{label:"Esaurimento",col:"#e74c3c",icon:"fa-battery-empty"},o:[
+{txt:"Fai 20 minuti di attività che ti ricarica davvero.",val:15,coping:"Regolazione emotiva",icon:"fa-leaf",desc:"Reset efficace!",why:"Scegliere consapevolmente un'attività rigenerante (non il telefono) attiva il sistema del recupero. È riposo attivo."},
+{txt:"Fai una passeggiata di 15 minuti senza telefono.",val:10,coping:"Regolazione emotiva",icon:"fa-walking",desc:"Disconnessione sana.",why:"La passeggiata senza stimoli digitali permette alla mente di 'scaricarsi' naturalmente. Il movimento leggero riduce il cortisolo."},
+{txt:"Stai sul divano a scrollare social per ore.",val:-5,coping:"Evitamento",icon:"fa-mobile-alt",desc:"Riposo apparente.",why:"I social danno sensazione di pausa ma mantengono il cervello in allerta. Non è vero recupero."},
+{txt:"Sfoghi tutto sul primo familiare che ti capita.",val:-15,coping:"Evitamento",icon:"fa-fire",desc:"Sfogo disfunzionale.",why:"Scaricare lo stress sugli altri è evitamento della gestione emotiva. Danneggia le relazioni e aggiunge senso di colpa."}
+]},
+{c:"Digitale",i:"fa-mobile-alt",col:"#3498db",t:"Qualcuno posta una storia su di te senza permesso.",emo:{label:"Tradimento",col:"#e74c3c",icon:"fa-heart-broken"},o:[
+{txt:"Gli/le scrivi privatamente chiedendo di rimuoverla.",val:15,coping:"Problem-solving",icon:"fa-envelope",desc:"Risposta assertiva!",why:"Affrontare direttamente e privatamente è la via più efficace. Dà all'altro la possibilità di rimediare senza umiliazione."},
+{txt:"Chiedi a un amico di supportarti nella conversazione.",val:5,coping:"Supporto sociale",icon:"fa-user-friends",desc:"Il supporto aiuta.",why:"Avere supporto abbassa l'agitazione prima di affrontare la situazione. Ricorda di affrontarla tu direttamente."},
+{txt:"Pubblichi una risposta pungente nelle storie.",val:-15,coping:"Evitamento",icon:"fa-fire",desc:"Escalation digitale.",why:"La guerra sui social amplifica il problema. Il conflitto digitale pubblico è quasi impossibile da fermare una volta iniziato."},
+{txt:"Blocchi la persona e non ne parli con nessuno.",val:-5,coping:"Evitamento",icon:"fa-ban",desc:"Evitamento parziale.",why:"Bloccare risolve il sintomo ma non il problema relazionale. La rabbia e il tradimento restano irrisolti."}
+]},
+{c:"Digitale",i:"fa-comment-slash",col:"#636e72",t:"Ricevi commenti negativi su un tuo post su cui hai lavorato molto.",emo:{label:"Insicurezza",col:"#9b59b6",icon:"fa-theater-masks"},o:[
+{txt:"Valuti se il commento ha qualcosa di utile, poi lo ignori.",val:15,coping:"Regolazione emotiva",icon:"fa-filter",desc:"Filtro critico!",why:"Distinguere feedback costruttivo da critica gratuita è competenza fondamentale. Non tutto merita peso emotivo."},
+{txt:"Ne parli con un amico per avere prospettiva.",val:10,coping:"Supporto sociale",icon:"fa-comments",desc:"Buona scelta.",why:"Il supporto esterno aiuta a non ingigantire la critica. Un amico fidato può aiutarti a valutarla in modo equilibrato."},
+{txt:"Rispondi in modo aggressivo per difenderti.",val:-10,coping:"Evitamento",icon:"fa-fire",desc:"Alimenta il conflitto.",why:"Rispondere aggressivamente online attira altri commenti negativi. Le 'guerre nei commenti' non si vincono mai."},
+{txt:"Cancelli il post e ti prometti di non pubblicare mai più.",val:-10,coping:"Evitamento",icon:"fa-eye-slash",desc:"Ritiro eccessivo.",why:"Cancellare per evitare la critica rinforza l'insicurezza: il cervello impara che 'mostrarsi' è pericoloso."}
+]},
+{c:"Futuro",i:"fa-road",col:"#00b894",t:"Non sai cosa vuoi fare dopo la scuola. Tutti sembrano sicuri tranne te.",emo:{label:"Confusione",col:"#636e72",icon:"fa-question"},o:[
+{txt:"Cerchi info su percorsi diversi senza fretta di decidere.",val:15,coping:"Problem-solving",icon:"fa-search",desc:"Approccio sano!",why:"Esplorare senza pressione è il modo più efficace. La confusione sul futuro a 16-17 anni è normale, non un problema."},
+{txt:"Ne parli con un adulto con esperienze diverse (orientatore, prof).",val:10,coping:"Supporto sociale",icon:"fa-chalkboard-teacher",desc:"Ottima iniziativa.",why:"Raccogliere esperienze diverse amplia la mappa delle possibilità. L'orientatore scolastico esiste proprio per questo."},
+{txt:"Fingi di sapere già cosa vuoi per non sentirti diverso/a.",val:-10,coping:"Evitamento",icon:"fa-theater-masks",desc:"Pressione sociale falsa.",why:"Fingersi sicuri ti allontana dalle persone che potrebbero aiutarti e da te stesso/a."},
+{txt:"Ti dici che hai ancora tempo e rimandi tutto a dopo.",val:-5,coping:"Evitamento",icon:"fa-clock",desc:"Rinvio passivo.",why:"La confusione non si risolve aspettando. Si risolve esplorando."}
+]},
+{c:"Futuro",i:"fa-exclamation-triangle",col:"#e74c3c",t:"Hai sbagliato qualcosa di importante e non riesci a perdonarti.",emo:{label:"Colpa",col:"#636e72",icon:"fa-weight-hanging"},o:[
+{txt:"Riconosci l'errore, chiedi scusa se necessario, poi vai avanti.",val:15,coping:"Problem-solving",icon:"fa-redo",desc:"Autocompassione matura!",why:"Riconoscere, riparare e andare avanti è il ciclo sano della colpa. La colpa cronica senza azione è auto-punizione, non responsabilità."},
+{txt:"Ne parli con qualcuno di fiducia senza autogiudicarti.",val:10,coping:"Supporto sociale",icon:"fa-hands-helping",desc:"Condividere aiuta.",why:"Parlare dell'errore ad alta voce riduce la sua dimensione. Spesso scopriamo che gli altri ci giudicano meno di quanto facciamo noi."},
+{txt:"Continui a rimuginare sull'errore tutto il giorno.",val:-15,coping:"Evitamento",icon:"fa-sync",desc:"Rimuginio paralizzante.",why:"Rimuginare non è elaborare: è un loop cognitivo che amplifica la colpa senza portare a soluzione."},
+{txt:"Cerchi di distrarti con qualsiasi cosa per non pensarci.",val:-5,coping:"Evitamento",icon:"fa-random",desc:"Fuga temporanea.",why:"La distrazione funziona a breve ma il senso di colpa non elaborato torna. Le emozioni evitate si ripresentano più forti."}
+]},
+{c:"Futuro",i:"fa-star",col:"#f1c40f",t:"Hai un'opportunità importante (audizione, colloquio, gara) ma hai paura di fallire.",emo:{label:"Paura",col:"#27ae60",icon:"fa-ghost"},o:[
+{txt:"Ti prepari al meglio e vai, accettando che potresti sbagliare.",val:15,coping:"Problem-solving",icon:"fa-fist-raised",desc:"Coraggio realistico!",why:"Accettare la possibilità del fallimento mentre agisci è la definizione di coraggio. La paura è normale; lasciarla bloccarti è la vera perdita."},
+{txt:"Visualizzi mentalmente come andrà bene.",val:10,coping:"Regolazione emotiva",icon:"fa-eye",desc:"Tecnica delle élite.",why:"La visualizzazione positiva è usata da atleti e musicisti professionisti. Prepara il cervello a performare sotto stress."},
+{txt:"Chiedi supporto a chi ti conosce bene prima di entrare.",val:5,coping:"Supporto sociale",icon:"fa-user-friends",desc:"Supporto pre-performance.",why:"Un incoraggiamento da chi ti vuole bene abbassa il cortisolo. Usalo come preparazione, non come dipendenza."},
+{txt:"Rinunci dicendoti che 'non è per te'.",val:-15,coping:"Evitamento",icon:"fa-ban",desc:"Evitamento del rischio.",why:"Rinunciare per paura del fallimento è l'evitamento nel suo effetto più pesante: non sai mai cosa avresti potuto fare."}
+]}
+];
+
+const STYLES = {
+    "Problem-solving":    {col:"#00b894",icon:"fa-tools",       label:"Problem-solver",       desc:"Affronti i problemi con azioni concrete. Cerchi soluzioni invece di evitare. Una delle strategie più efficaci per il benessere a lungo termine."},
+    "Supporto sociale":   {col:"#e67e22",icon:"fa-hands-helping",label:"Connettore/Connettrice",desc:"Sai che non devi affrontare tutto da solo/a. La connessione sociale è uno dei più potenti protettori del benessere emotivo."},
+    "Regolazione emotiva":{col:"#6c5ce7",icon:"fa-spa",         label:"Regolatore/Regolatrice",desc:"Gestisci le emozioni prima di agire. Hai buona consapevolezza emotiva. Attenzione che la regolazione non diventi un modo per rimandare l'azione."},
+    "Evitamento":         {col:"#e74c3c",icon:"fa-eye-slash",   label:"Evitante",              desc:"Tendi ad allontanarti dalle situazioni difficili. A breve termine funziona, ma nel lungo periodo i problemi evitati crescono. Prova a identificare una piccola azione concreta la prossima volta."}
+};
+
+let energy=50, round=0, activeDB=[], copingStats={};
+
+function startGame(){energy=50;round=0;copingStats={};activeDB=shuffle([...DB]);switchScreen('scr-game');loadScenario();}
+
+function loadScenario(){
+    updateUI();
+    if(round>=activeDB.length){endGame();return;}
+    const s=activeDB[round];
+    document.getElementById('r-num').innerText=round+1;
+    document.getElementById('sp-fill').style.width=((round/activeDB.length)*100)+'%';
+    document.getElementById('s-cat').innerText=s.c.toUpperCase();
+    document.getElementById('s-txt').innerText=s.t;
+    const si=document.getElementById('s-icon');
+    si.innerHTML=`<i class="fas ${s.i}"></i>`;si.style.background=s.col;
+    const tr=document.getElementById('emo-trigger');
+    tr.style.background=s.emo.col+'22';
+    tr.innerHTML=`<i class="fas ${s.emo.icon}" style="color:${s.emo.col};font-size:12px"></i><span style="color:${s.emo.col}">${s.emo.label}</span>`;
+    const opts=shuffle([...s.o]);
+    const box=document.getElementById('opts-box');box.innerHTML='';
+    opts.forEach(o=>{
+        const d=document.createElement('div');d.className='opt-btn';d.onclick=()=>selectOption(o);
+        d.innerHTML=`<div class="opt-icon"><i class="fas ${o.icon}"></i></div><div><div class="opt-text">${o.txt}</div><div class="coping-tag">${o.coping}</div></div>`;
+        box.appendChild(d);
+    });
+}
+
+function selectOption(o){
+    energy=Math.min(100,Math.max(0,energy+o.val));
+    copingStats[o.coping]=(copingStats[o.coping]||0)+1;
+    updateUI();
+    const st=STYLES[o.coping]||STYLES["Problem-solving"];
+    const fi=document.getElementById('fb-icon-large');
+    fi.className=`fas ${o.icon} feedback-icon-large`;fi.style.color=st.col;
+    document.getElementById('fb-coping').innerText=o.coping.toUpperCase();
+    document.getElementById('fb-coping').style.background=st.col;
+    document.getElementById('fb-headline').innerText=o.desc;
+    document.getElementById('fb-desc').innerText=`"${o.txt}"`;
+    const why=document.getElementById('fb-why');
+    why.innerHTML=`<i class="fas fa-lightbulb" style="color:${st.col};font-size:12px"></i> <strong>Perché?</strong> ${o.why}`;
+    why.style.borderLeftColor=st.col;
+    const sign=o.val>0?'+':'';
+    const ve=document.getElementById('fb-val');
+    ve.innerText=sign+o.val+'%';ve.style.color=o.val>=0?'#00b894':'#d63031';
+    document.getElementById('overlay').classList.add('active');
+}
+
+function nextRound(){document.getElementById('overlay').classList.remove('active');round++;loadScenario();}
+
+function endGame(){document.getElementById('sp-fill').style.width='100%';switchScreen('scr-activity');generateReport();}
+
+function generateReport(){
+    let dominant="Problem-solving",maxC=0;
+    for(const k in copingStats){if(copingStats[k]>maxC){maxC=copingStats[k];dominant=k;}}
+    const st=STYLES[dominant];
+    document.getElementById('dominant-badge').innerText=st.label;
+    document.getElementById('dominant-badge').style.background=st.col;
+    const total=Object.values(copingStats).reduce((a,b)=>a+b,0)||1;
+    document.getElementById('coping-bars').innerHTML=Object.entries(STYLES).map(([k,v])=>{
+        const pct=Math.round(((copingStats[k]||0)/total)*100);
+        return `<div class="coping-bar-row"><div class="coping-bar-label"><span>${k}</span><span>${pct}%</span></div><div class="coping-bar-track"><div class="coping-bar-fill" style="width:${pct}%;background:${v.col}"></div></div></div>`;
+    }).join('');
+    const en=energy>70?"Hai mantenuto un ottimo equilibrio emotivo.":energy>40?"Alcune situazioni ti hanno messo sotto pressione.":"Hai consumato molte energie: è il momento di ricaricarsi.";
+    document.getElementById('report-text').innerHTML=`${st.desc}<br><br><em>${en}</em>`;
+}
+
+function saveActivity(){
+    const sit=document.getElementById('f-sit').value.trim();
+    const step=document.getElementById('f-step').value.trim();
+    if(sit&&step){document.getElementById('saved-msg').style.display='block';}
+    else alert("Compila almeno la situazione e il primo passo concreto!");
+}
+
+function updateUI(){
+    document.getElementById('p-bar').style.width=energy+'%';
+    document.getElementById('p-val').innerText=energy+'%';
+}
+
+function switchScreen(id){document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function shuffle(arr){let i=arr.length,j;while(i){j=Math.floor(Math.random()*i--);[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+</script>
+</body>
+</html>
