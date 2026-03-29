@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sfida di Coping · Executive Lab</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --primary: #6c5ce7;
+  --primary-light: #ede9fe;
+  --success: #10b981;
+  --error: #ef4444;
+  --physical: #0ea5e9;
+  --social: #10b981;
+  --cognitive: #8b5cf6;
+  --emergency: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #faf5ff 100%);
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+/* ── HEADER ── */
+.header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, #6c5ce7, #8b5cf6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white;
+}
+.game-title { font-size: 20px; font-weight: 800; color: #1e293b; }
+.game-subtitle { font-size: 12px; color: #94a3b8; }
+
+.header-stats { display: flex; align-items: center; gap: 10px; }
+.stat-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 30px; padding: 6px 14px;
+  font-size: 13px; font-weight: 600; color: #475569;
+}
+.stat-pill i { font-size: 13px; color: var(--primary); }
+.stat-val { color: var(--primary); font-weight: 800; }
+
+.btn-reset {
+  display: flex; align-items: center; gap: 6px;
+  background: white; border: 1.5px solid #e2e8f0;
+  border-radius: 30px; padding: 7px 16px;
+  font-size: 13px; font-weight: 600; color: #64748b;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-reset:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+/* ── MAIN ── */
+.main { max-width: 1140px; margin: 0 auto; padding: 24px 20px 60px; }
+
+/* ── INSTRUCTIONS ── */
+.instructions {
+  background: white; border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 14px 20px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.instructions i { font-size: 20px; color: var(--primary); flex-shrink: 0; }
+.instructions p { font-size: 14px; color: #475569; line-height: 1.5; }
+.instructions strong { color: #1e293b; }
+
+/* ── FEEDBACK BAR ── */
+.feedback-bar {
+  border-radius: 12px; padding: 12px 20px;
+  margin-bottom: 16px; text-align: center;
+  font-size: 15px; font-weight: 600;
+  display: none; animation: slideDown 0.2s ease;
+}
+.feedback-bar.success { background: #d1fae5; color: #065f46; display: block; }
+.feedback-bar.error   { background: #fee2e2; color: #991b1b; display: block; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── GAME GRID ── */
+.game-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.col-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.col-badge {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #1e293b; color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; flex-shrink: 0;
+}
+.col-title { font-size: 17px; font-weight: 800; color: #1e293b; }
+
+.cards-list { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── ITEM CARD ── */
+.item-card {
+  width: 100%;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s, background 0.15s;
+  display: flex; align-items: center; gap: 12px;
+  position: relative;
+  user-select: none;
+}
+.item-card:not(.matched):not(.disabled):hover {
+  border-color: #a78bfa;
+  box-shadow: 0 4px 14px rgba(108,92,231,0.12);
+  transform: translateX(3px);
+}
+.item-card.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(108,92,231,0.15);
+}
+.item-card.matched {
+  border-color: var(--success);
+  background: #f0fdf4;
+  cursor: default;
+  opacity: 0.85;
+  animation: matchPop 0.35s ease;
+}
+.item-card.wrong {
+  border-color: var(--error);
+  background: #fef2f2;
+  animation: shake 0.4s ease;
+}
+.item-card.disabled { cursor: default; }
+
+@keyframes matchPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%  { transform: translateX(-6px); }
+  40%  { transform: translateX(6px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px); }
+}
+
+.item-emoji { font-size: 26px; flex-shrink: 0; line-height: 1; }
+.item-text  { flex: 1; font-size: 13.5px; font-weight: 600; color: #334155; line-height: 1.4; }
+.item-card.matched .item-text { color: #065f46; }
+
+.item-check {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--success); color: white;
+  display: none; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+.item-card.matched .item-check { display: flex; }
+
+.item-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--primary); flex-shrink: 0;
+  display: none;
+}
+.item-card.selected .item-dot { display: block; }
+
+.cat-tag {
+  position: absolute; bottom: -1px; right: 10px;
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 8px 8px 0 0;
+  display: none;
+}
+.item-card.matched .cat-tag { display: block; }
+.cat-physical  { background: #dbeafe; color: #1d4ed8; }
+.cat-social    { background: #d1fae5; color: #065f46; }
+.cat-cognitive { background: #ede9fe; color: #4c1d95; }
+.cat-emergency { background: #fee2e2; color: #991b1b; }
+
+/* ── LEGEND ── */
+.legend {
+  display: flex; justify-content: center; gap: 10px;
+  flex-wrap: wrap; margin-top: 28px;
+}
+.legend-pill {
+  font-size: 12px; font-weight: 600; padding: 4px 14px;
+  border-radius: 20px;
+}
+
+/* ── WIN SCREEN ── */
+.win-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(15,10,30,0.7);
+  z-index: 200;
+  align-items: center; justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+.win-overlay.show { display: flex; }
+.win-card {
+  background: white; border-radius: 24px;
+  padding: 40px 48px; text-align: center;
+  max-width: 440px; width: 90%;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.win-trophy {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin: 0 auto 20px;
+  box-shadow: 0 8px 24px rgba(239,68,68,0.3);
+}
+.win-title { font-size: 28px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+.win-sub { font-size: 15px; color: #64748b; margin-bottom: 24px; line-height: 1.6; }
+.win-stats {
+  background: #f8fafc; border-radius: 14px; padding: 16px;
+  margin-bottom: 24px;
+}
+.win-stat-val { font-size: 36px; font-weight: 800; color: var(--primary); }
+.win-stat-label { font-size: 13px; color: #94a3b8; }
+.win-message { font-size: 14px; color: #64748b; font-style: italic; margin-top: 6px; }
+.btn-play-again {
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: white; border: none; border-radius: 30px;
+  padding: 13px 36px; font-size: 15px; font-weight: 700;
+  cursor: pointer; width: 100%;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 6px 20px rgba(108,92,231,0.3);
+}
+.btn-play-again:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(108,92,231,0.35); }
+
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+/* Progress bar */
+.progress-wrap { margin-bottom: 20px; }
+.progress-track {
+  height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--primary), #8b5cf6);
+  border-radius: 3px; transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: #94a3b8; margin-bottom: 5px;
+}
+
+@media (max-width: 700px) {
+  .game-grid { grid-template-columns: 1fr; }
+  .header { flex-wrap: wrap; gap: 10px; }
+  .header-stats { flex-wrap: wrap; gap: 6px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-icon">🧩</div>
+    <div>
+      <div class="game-title">Sfida di Coping</div>
+      <div class="game-subtitle">Executive Lab · Abbina situazioni e strategie</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill">
+      <i class="fas fa-check-circle"></i>
+      <span id="completed-count">0</span>/<span id="total-count">10</span>
+      <span class="stat-val" style="font-size:11px;margin-left:2px">completati</span>
+    </div>
+    <div class="stat-pill">
+      <i class="fas fa-crosshairs"></i>
+      Tentativi: <span class="stat-val" id="attempts-count">0</span>
+    </div>
+    <button class="btn-reset" onclick="resetGame()">
+      <i class="fas fa-redo"></i> Ricomincia
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- Instructions -->
+  <div class="instructions">
+    <i class="fas fa-info-circle"></i>
+    <p><strong>Come giocare:</strong> Clicca su una <strong>situazione emotiva</strong> a sinistra, poi sulla <strong>strategia di coping</strong> corretta a destra. Il colore del bordo ti aiuta a capire la categoria. Abbina tutte le 10 coppie per vincere!</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Progresso</span>
+      <span id="progress-text">0 di 10</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Feedback -->
+  <div class="feedback-bar" id="feedback-bar"></div>
+
+  <!-- Game Grid -->
+  <div class="game-grid">
+    <div>
+      <div class="col-header">
+        <div class="col-badge">A</div>
+        <div class="col-title">Situazioni Emotive</div>
+      </div>
+      <div class="cards-list" id="situations-col"></div>
+    </div>
+    <div>
+      <div class="col-header">
+        <div class="col-badge">B</div>
+        <div class="col-title">Strategie di Coping</div>
+      </div>
+      <div class="cards-list" id="strategies-col"></div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span class="legend-pill" style="background:#dbeafe;color:#1d4ed8">Fisica</span>
+    <span class="legend-pill" style="background:#d1fae5;color:#065f46">Sociale</span>
+    <span class="legend-pill" style="background:#ede9fe;color:#4c1d95">Cognitiva</span>
+    <span class="legend-pill" style="background:#fee2e2;color:#991b1b">Emergenza</span>
+  </div>
+
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="win-overlay" id="win-overlay">
+  <div class="win-card">
+    <div class="win-trophy">🏆</div>
+    <div class="win-title">Complimenti!</div>
+    <div class="win-sub">Hai abbinato tutte le situazioni emotive alle strategie di coping corrette. Ora sai come gestire ogni livello del termometro!</div>
+    <div class="win-stats">
+      <div class="win-stat-val" id="win-attempts">0</div>
+      <div class="win-stat-label">Tentativi totali</div>
+      <div class="win-message" id="win-message">Ottima prestazione!</div>
+    </div>
+    <button class="btn-play-again" onclick="resetGame()">
+      <i class="fas fa-redo"></i> &nbsp;Gioca di nuovo
+    </button>
+  </div>
+</div>
+
+<script>
+const PAIRS = [
+  {
+    id: 1,
+    situation: '🌋 STATO CRITICO: Esplosione di rabbia, sto per perdere il controllo',
+    strategy: '🛑 STOP & ESCI: Mi allontano subito, non parlo e aspetto di calmarmi',
+    category: 'emergency'
+  },
+  {
+    id: 2,
+    situation: '🔥 RABBIA ALTA: Muscoli tesi, voglio colpire qualcosa',
+    strategy: '🏀 RESET FISICO: Uso una pallina antistress o faccio movimento',
+    category: 'physical'
+  },
+  {
+    id: 3,
+    situation: '🕳️ DEPRESSIONE/VUOTO: Mi sento giù, senza energia né voglia',
+    strategy: '✅ MICRO-OBIETTIVO: Mi pongo un compito piccolo e raggiungibile',
+    category: 'cognitive'
+  },
+  {
+    id: 4,
+    situation: '☁️ TRISTEZZA: Sento un peso sul petto e voglio isolarmi',
+    strategy: '🤝 ANCORAGGIO: Cerco supporto parlando con una persona di fiducia',
+    category: 'social'
+  },
+  {
+    id: 5,
+    situation: '🧩 ANSIA DA COMPITO: Il progetto è troppo grande, non so da dove iniziare',
+    strategy: '📋 SCOMPOSIZIONE: Divido il grande problema in piccoli passi',
+    category: 'cognitive'
+  },
+  {
+    id: 6,
+    situation: '🌑 ISOLAMENTO: Sento che nessuno mi capisce, voglio sparire',
+    strategy: '📱 CONTATTO MINIMO: Mando un messaggio o un\'emoji a qualcuno',
+    category: 'social'
+  },
+  {
+    id: 7,
+    situation: '🌪️ PENSIERI NEGATIVI: Penso che tutto vada male e non cambierà mai',
+    strategy: '❓ DIFESA COGNITIVA: Metto in dubbio il pensiero negativo chiedendomi "È vero?"',
+    category: 'cognitive'
+  },
+  {
+    id: 8,
+    situation: '⚡ NOIA/NERVOSISMO: Non riesco a stare fermo, sono irrequieto',
+    strategy: '⏸️ CAMBIO FOCUS: Faccio una breve pausa e cambio attività',
+    category: 'physical'
+  },
+  {
+    id: 9,
+    situation: '🔄 RICALIBRAZIONE: Sono ancora un po\' agitato dopo un momento difficile',
+    strategy: '🧘 PAZIENZA: Continuo la tecnica di calma finché il corpo si regola',
+    category: 'physical'
+  },
+  {
+    id: 10,
+    situation: '🌞 BASE DI SICUREZZA: Mi sento calmo e sereno, tutto è ok',
+    strategy: '💚 MANTENIMENTO: Pratico la gratitudine e aiuto chi mi sta intorno',
+    category: 'social'
+  }
+];
+
+const CAT_LABELS = { physical:'Fisica', social:'Sociale', cognitive:'Cognitiva', emergency:'Emergenza' };
+const CAT_CLASS  = { physical:'cat-physical', social:'cat-social', cognitive:'cat-cognitive', emergency:'cat-emergency' };
+
+let shuffledSit = [], shuffledStr = [];
+let selectedSit = null, selectedStr = null;
+let matched = [], attempts = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function resetGame() {
+  shuffledSit = shuffle(PAIRS);
+  shuffledStr = shuffle(PAIRS);
+  selectedSit = null; selectedStr = null;
+  matched = []; attempts = 0;
+  document.getElementById('win-overlay').classList.remove('show');
+  hideFeedback();
+  renderCols();
+  updateStats();
+}
+
+function renderCols() {
+  const sitCol = document.getElementById('situations-col');
+  const strCol = document.getElementById('strategies-col');
+  sitCol.innerHTML = '';
+  strCol.innerHTML = '';
+
+  shuffledSit.forEach(p => {
+    const el = document.createElement('button');
+    el.className = 'item-card' + (matched.includes(p.id) ? ' matched disabled' : '');
+    el.id = 'sit-' + p.id;
+    el.onclick = () => clickSituation(p.id);
+    el.innerHTML = `
+      <div class="item-text">${p.situation}</div>
+      <div class="item-check"><i class="fas fa-check"></i></div>
+      <div class="item-dot"></div>
+      <div class="cat-tag ${CAT_CLASS[p.category]}">${CAT_LABELS[p.category]}</div>`;
+    sitCol.appendChild(el);
+  });
+
+  shuffledStr.forEach(p => {
+    const el = document.createElement('button');
+    el.className = 'item-card' + (matched.includes(p.id) ? ' matched disabled' : '');
+    el.id = 'str-' + p.id;
+    el.onclick = () => clickStrategy(p.id);
+    el.innerHTML = `
+      <div class="item-text">${p.strategy}</div>
+      <div class="item-check"><i class="fas fa-check"></i></div>
+      <div class="item-dot"></div>
+      <div class="cat-tag ${CAT_CLASS[p.category]}">${CAT_LABELS[p.category]}</div>`;
+    strCol.appendChild(el);
+  });
+}
+
+function clickSituation(id) {
+  if (matched.includes(id)) return;
+  // deselect if same
+  if (selectedSit === id) {
+    selectedSit = null;
+    document.getElementById('sit-' + id).classList.remove('selected');
+    return;
+  }
+  // deselect previous
+  if (selectedSit !== null) {
+    const prev = document.getElementById('sit-' + selectedSit);
+    if (prev) prev.classList.remove('selected');
+  }
+  selectedSit = id;
+  document.getElementById('sit-' + id).classList.add('selected');
+  if (selectedStr !== null) checkMatch();
+}
+
+function clickStrategy(id) {
+  if (matched.includes(id)) return;
+  if (selectedStr === id) {
+    selectedStr = null;
+    document.getElementById('str-' + id).classList.remove('selected');
+    return;
+  }
+  if (selectedStr !== null) {
+    const prev = document.getElementById('str-' + selectedStr);
+    if (prev) prev.classList.remove('selected');
+  }
+  selectedStr = id;
+  document.getElementById('str-' + id).classList.add('selected');
+  if (selectedSit !== null) checkMatch();
+}
+
+function checkMatch() {
+  attempts++;
+  const sitEl = document.getElementById('sit-' + selectedSit);
+  const strEl = document.getElementById('str-' + selectedStr);
+
+  if (selectedSit === selectedStr) {
+    // ✅ MATCH
+    matched.push(selectedSit);
+    sitEl.classList.remove('selected'); sitEl.classList.add('matched', 'disabled');
+    strEl.classList.remove('selected'); strEl.classList.add('matched', 'disabled');
+    const pair = PAIRS.find(p => p.id === selectedSit);
+    showFeedback('success', `✅ Ottimo abbinamento! <strong>${CAT_LABELS[pair.category]}</strong> — strategia corretta.`);
+    selectedSit = null; selectedStr = null;
+    updateStats();
+    if (matched.length === PAIRS.length) setTimeout(showWin, 600);
+  } else {
+    // ❌ NO MATCH
+    sitEl.classList.add('wrong'); strEl.classList.add('wrong');
+    showFeedback('error', '❌ Non è la coppia giusta. Rifletti sulla situazione emotiva e prova di nuovo.');
+    setTimeout(() => {
+      sitEl.classList.remove('selected', 'wrong');
+      strEl.classList.remove('selected', 'wrong');
+      selectedSit = null; selectedStr = null;
+      updateStats();
+    }, 900);
+  }
+}
+
+function updateStats() {
+  document.getElementById('completed-count').textContent = matched.length;
+  document.getElementById('attempts-count').textContent = attempts;
+  const pct = (matched.length / PAIRS.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = matched.length + ' di ' + PAIRS.length;
+}
+
+function showFeedback(type, msg) {
+  const bar = document.getElementById('feedback-bar');
+  bar.className = 'feedback-bar ' + type;
+  bar.innerHTML = msg;
+  clearTimeout(bar._timer);
+  bar._timer = setTimeout(hideFeedback, 2200);
+}
+
+function hideFeedback() {
+  const bar = document.getElementById('feedback-bar');
+  bar.className = 'feedback-bar';
+}
+
+function showWin() {
+  document.getElementById('win-attempts').textContent = attempts;
+  const msgs = {
+    perfect: 'Perfetto! Hai abbinato tutto senza errori. Straordinario!',
+    good: 'Molto bene! Hai dimostrato ottima comprensione delle strategie.',
+    ok: 'Buon lavoro! Con la pratica diventerà ancora più naturale.'
+  };
+  const errors = attempts - PAIRS.length;
+  const msg = errors === 0 ? msgs.perfect : errors <= 3 ? msgs.good : msgs.ok;
+  document.getElementById('win-message').textContent = msg;
+  document.getElementById('win-overlay').classList.add('show');
+}
+
+// Init
+resetGame();
+</script>
+</body>
+</html>
