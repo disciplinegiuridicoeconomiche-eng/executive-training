@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dall'Emozione alla Capacità · Executive Lab</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --primary: #0ea5e9;
+  --primary-dark: #0369a1;
+  --primary-light: #e0f2fe;
+  --success: #10b981;
+  --error: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #f0fdf4 100%);
+  min-height: 100vh; color: #1e293b;
+}
+.header {
+  background: white; border-bottom: 1px solid #e2e8f0;
+  padding: 14px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, #0ea5e9, #6c5ce7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white;
+}
+.game-title { font-size: 20px; font-weight: 800; color: #1e293b; }
+.game-subtitle { font-size: 12px; color: #94a3b8; }
+.header-stats { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.stat-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 30px; padding: 6px 14px;
+  font-size: 13px; font-weight: 600; color: #475569;
+}
+.stat-pill i { font-size: 13px; color: var(--primary); }
+.stat-val { color: var(--primary); font-weight: 800; }
+.btn-reset {
+  display: flex; align-items: center; gap: 6px;
+  background: white; border: 1.5px solid #e2e8f0;
+  border-radius: 30px; padding: 7px 16px;
+  font-size: 13px; font-weight: 600; color: #64748b;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-reset:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+.main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+.instructions {
+  background: white; border-radius: 14px; border: 1px solid #e2e8f0;
+  padding: 14px 20px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.instructions i { font-size: 20px; color: var(--primary); flex-shrink: 0; }
+.instructions p { font-size: 14px; color: #475569; line-height: 1.5; }
+
+.progress-wrap { margin-bottom: 20px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 5px; }
+.progress-track { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #0ea5e9, #6c5ce7); border-radius: 3px; transition: width 0.4s ease; width: 0%; }
+
+.feedback-bar {
+  border-radius: 12px; padding: 12px 20px; margin-bottom: 16px;
+  text-align: center; font-size: 15px; font-weight: 600; display: none;
+  animation: slideDown 0.2s ease;
+}
+.feedback-bar.success { background: #d1fae5; color: #065f46; display: block; }
+.feedback-bar.error   { background: #fee2e2; color: #991b1b; display: block; }
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+.game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+.col-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.col-badge {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #1e293b; color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; flex-shrink: 0;
+}
+.col-title { font-size: 17px; font-weight: 800; color: #1e293b; }
+.cards-list { display: flex; flex-direction: column; gap: 10px; }
+
+.item-card {
+  width: 100%; background: white;
+  border: 2px solid #e2e8f0; border-radius: 14px;
+  padding: 16px 18px; cursor: pointer; text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s, background 0.15s;
+  display: flex; align-items: center; gap: 12px;
+  position: relative; user-select: none;
+}
+.item-card:not(.matched):not(.disabled):hover {
+  border-color: #7dd3fc; box-shadow: 0 4px 14px rgba(14,165,233,0.12);
+  transform: translateX(3px);
+}
+.item-card.selected {
+  border-color: var(--primary); background: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+}
+.item-card.matched {
+  border-color: var(--success); background: #f0fdf4;
+  cursor: default; opacity: 0.85;
+  animation: matchPop 0.35s ease;
+}
+.item-card.wrong {
+  border-color: var(--error); background: #fef2f2;
+  animation: shake 0.4s ease;
+}
+.item-card.disabled { cursor: default; }
+@keyframes matchPop { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 100%{transform:scale(1)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+.item-icon { font-size: 24px; flex-shrink: 0; line-height: 1; }
+.item-text { flex: 1; font-size: 13.5px; font-weight: 600; color: #334155; line-height: 1.4; }
+.item-card.matched .item-text { color: #065f46; }
+
+.item-check {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--success); color: white;
+  display: none; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+.item-card.matched .item-check { display: flex; }
+.item-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--primary); flex-shrink: 0; display: none;
+}
+.item-card.selected .item-dot { display: block; }
+
+/* capacity badge shown after match on strategy side */
+.cap-badge {
+  position: absolute; top: -1px; right: 12px;
+  font-size: 10px; font-weight: 700; padding: 2px 9px;
+  border-radius: 8px 8px 0 0;
+  background: #dbeafe; color: #1d4ed8;
+  display: none;
+}
+.item-card.matched .cap-badge { display: block; }
+
+/* WIN */
+.win-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(15,10,30,0.7); z-index: 200;
+  align-items: center; justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+.win-overlay.show { display: flex; }
+.win-card {
+  background: white; border-radius: 24px;
+  padding: 40px 48px; text-align: center;
+  max-width: 440px; width: 90%;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+.win-trophy {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin: 0 auto 20px;
+  box-shadow: 0 8px 24px rgba(239,68,68,0.3);
+}
+.win-title { font-size: 28px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+.win-sub { font-size: 15px; color: #64748b; margin-bottom: 24px; line-height: 1.6; }
+.win-stats { background: #f8fafc; border-radius: 14px; padding: 16px; margin-bottom: 24px; }
+.win-stat-val { font-size: 36px; font-weight: 800; color: var(--primary); }
+.win-stat-label { font-size: 13px; color: #94a3b8; }
+.win-message { font-size: 14px; color: #64748b; font-style: italic; margin-top: 6px; }
+.btn-play-again {
+  background: linear-gradient(135deg, #0ea5e9, #6c5ce7);
+  color: white; border: none; border-radius: 30px;
+  padding: 13px 36px; font-size: 15px; font-weight: 700;
+  cursor: pointer; width: 100%;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 6px 20px rgba(14,165,233,0.3);
+}
+.btn-play-again:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(14,165,233,0.35); }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+@media (max-width: 680px) {
+  .game-grid { grid-template-columns: 1fr; }
+  .header { flex-wrap: wrap; gap: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-icon">🧠</div>
+    <div>
+      <div class="game-title">Dall'Emozione alla Capacità</div>
+      <div class="game-subtitle">Executive Lab · Collega la sfida mentale alla capacità corretta</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill">
+      <i class="fas fa-check-circle"></i>
+      <span id="completed-count">0</span>/<span>10</span>
+      <span class="stat-val" style="font-size:11px;margin-left:2px">completati</span>
+    </div>
+    <div class="stat-pill">
+      <i class="fas fa-crosshairs"></i>
+      Tentativi: <span class="stat-val" id="attempts-count">0</span>
+    </div>
+    <button class="btn-reset" onclick="resetGame()">
+      <i class="fas fa-redo"></i> Ricomincia
+    </button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="instructions">
+    <i class="fas fa-info-circle"></i>
+    <p><strong>Come giocare:</strong> Clicca su una <strong>sfida mentale</strong> a sinistra, poi sulla <strong>capacità emotiva</strong> corretta a destra. Abbina tutte e 10 le coppie per vincere!</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Progresso</span><span id="progress-text">0 di 10</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="feedback-bar" id="feedback-bar"></div>
+
+  <div class="game-grid">
+    <div>
+      <div class="col-header">
+        <div class="col-badge">A</div>
+        <div class="col-title">Sfida Mentale</div>
+      </div>
+      <div class="cards-list" id="situations-col"></div>
+    </div>
+    <div>
+      <div class="col-header">
+        <div class="col-badge">B</div>
+        <div class="col-title">Capacità Emotiva</div>
+      </div>
+      <div class="cards-list" id="strategies-col"></div>
+    </div>
+  </div>
+</div>
+
+<div class="win-overlay" id="win-overlay">
+  <div class="win-card">
+    <div class="win-trophy">🏆</div>
+    <div class="win-title">Eccellente!</div>
+    <div class="win-sub">Hai collegato tutte le sfide mentali alle capacità emotive giuste. Queste sono le tue competenze per la vita!</div>
+    <div class="win-stats">
+      <div class="win-stat-val" id="win-attempts">0</div>
+      <div class="win-stat-label">Tentativi totali</div>
+      <div class="win-message" id="win-message"></div>
+    </div>
+    <button class="btn-play-again" onclick="resetGame()">
+      <i class="fas fa-redo"></i> &nbsp;Gioca di nuovo
+    </button>
+  </div>
+</div>
+
+<script>
+const PAIRS = [
+  { id:1,  situation:'Capire quale emozione sta prendendo piede dentro di me',          situationIcon:'🔍', strategy:'Autoconsapevolezza',      strategyIcon:'🪞' },
+  { id:2,  situation:'Riuscire a calmarsi prima di una sfida importante',               situationIcon:'🧘', strategy:'Autocontrollo',           strategyIcon:'⚖️' },
+  { id:3,  situation:'Trovare la voglia di riprovare dopo un fallimento',               situationIcon:'💪', strategy:'Motivazione',             strategyIcon:'🔥' },
+  { id:4,  situation:'Sentire ciò che prova una persona in difficoltà',                 situationIcon:'❤️', strategy:'Empatia',                 strategyIcon:'🤝' },
+  { id:5,  situation:'Gestire un momento di forte pressione o ansia',                   situationIcon:'🌀', strategy:'Gestione dello Stress',   strategyIcon:'🛡️' },
+  { id:6,  situation:'Saper leggere il linguaggio del corpo degli altri',               situationIcon:'👀', strategy:'Percezione Sociale',      strategyIcon:'🎭' },
+  { id:7,  situation:'Sentirsi all\'altezza di una sfida difficile',                    situationIcon:'🏔️', strategy:'Autostima',               strategyIcon:'⭐' },
+  { id:8,  situation:'Agire senza farsi condizionare dagli altri',                      situationIcon:'🦅', strategy:'Indipendenza',            strategyIcon:'🗝️' },
+  { id:9,  situation:'Influenzare positivamente il clima del gruppo',                   situationIcon:'🌟', strategy:'Leadership',              strategyIcon:'👑' },
+  { id:10, situation:'Saper cambiare piano in corsa quando le cose cambiano',           situationIcon:'🔄', strategy:'Flessibilità',            strategyIcon:'🌊' },
+];
+
+let shuffledSit=[], shuffledStr=[], selectedSit=null, selectedStr=null, matched=[], attempts=0;
+
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function resetGame(){
+  shuffledSit=shuffle(PAIRS); shuffledStr=shuffle(PAIRS);
+  selectedSit=null; selectedStr=null; matched=[]; attempts=0;
+  document.getElementById('win-overlay').classList.remove('show');
+  hideFeedback(); renderCols(); updateStats();
+}
+
+function renderCols(){
+  const sc=document.getElementById('situations-col');
+  const pc=document.getElementById('strategies-col');
+  sc.innerHTML=''; pc.innerHTML='';
+
+  shuffledSit.forEach(p=>{
+    const el=document.createElement('button');
+    el.className='item-card'+(matched.includes(p.id)?' matched disabled':'');
+    el.id='sit-'+p.id; el.onclick=()=>clickSit(p.id);
+    el.innerHTML=`<div class="item-icon">${p.situationIcon}</div>
+      <div class="item-text">${p.situation}</div>
+      <div class="item-check"><i class="fas fa-check"></i></div>
+      <div class="item-dot"></div>`;
+    sc.appendChild(el);
+  });
+
+  shuffledStr.forEach(p=>{
+    const el=document.createElement('button');
+    el.className='item-card'+(matched.includes(p.id)?' matched disabled':'');
+    el.id='str-'+p.id; el.onclick=()=>clickStr(p.id);
+    el.innerHTML=`<div class="item-icon">${p.strategyIcon}</div>
+      <div class="item-text">${p.strategy}</div>
+      <div class="item-check"><i class="fas fa-check"></i></div>
+      <div class="item-dot"></div>
+      <div class="cap-badge">Corretto!</div>`;
+    pc.appendChild(el);
+  });
+}
+
+function clickSit(id){
+  if(matched.includes(id)) return;
+  if(selectedSit===id){ selectedSit=null; document.getElementById('sit-'+id).classList.remove('selected'); return; }
+  if(selectedSit!==null){ const p=document.getElementById('sit-'+selectedSit); if(p) p.classList.remove('selected'); }
+  selectedSit=id; document.getElementById('sit-'+id).classList.add('selected');
+  if(selectedStr!==null) checkMatch();
+}
+
+function clickStr(id){
+  if(matched.includes(id)) return;
+  if(selectedStr===id){ selectedStr=null; document.getElementById('str-'+id).classList.remove('selected'); return; }
+  if(selectedStr!==null){ const p=document.getElementById('str-'+selectedStr); if(p) p.classList.remove('selected'); }
+  selectedStr=id; document.getElementById('str-'+id).classList.add('selected');
+  if(selectedSit!==null) checkMatch();
+}
+
+function checkMatch(){
+  attempts++;
+  const se=document.getElementById('sit-'+selectedSit);
+  const pe=document.getElementById('str-'+selectedStr);
+  if(selectedSit===selectedStr){
+    matched.push(selectedSit);
+    se.classList.remove('selected'); se.classList.add('matched','disabled');
+    pe.classList.remove('selected'); pe.classList.add('matched','disabled');
+    const pair=PAIRS.find(p=>p.id===selectedSit);
+    showFeedback('success',`✅ Esatto! <strong>${pair.situation.split(' ').slice(0,4).join(' ')}...</strong> → <strong>${pair.strategy}</strong>`);
+    selectedSit=null; selectedStr=null;
+    updateStats();
+    if(matched.length===PAIRS.length) setTimeout(showWin,600);
+  } else {
+    se.classList.add('wrong'); pe.classList.add('wrong');
+    showFeedback('error','❌ Non è la coppia giusta. Rifletti sulla sfida emotiva e riprova.');
+    setTimeout(()=>{
+      se.classList.remove('selected','wrong');
+      pe.classList.remove('selected','wrong');
+      selectedSit=null; selectedStr=null; updateStats();
+    },900);
+  }
+}
+
+function updateStats(){
+  document.getElementById('completed-count').textContent=matched.length;
+  document.getElementById('attempts-count').textContent=attempts;
+  document.getElementById('progress-fill').style.width=(matched.length/PAIRS.length*100)+'%';
+  document.getElementById('progress-text').textContent=matched.length+' di '+PAIRS.length;
+}
+
+function showFeedback(type,msg){
+  const bar=document.getElementById('feedback-bar');
+  bar.className='feedback-bar '+type; bar.innerHTML=msg;
+  clearTimeout(bar._t); bar._t=setTimeout(hideFeedback,2400);
+}
+function hideFeedback(){ document.getElementById('feedback-bar').className='feedback-bar'; }
+
+function showWin(){
+  document.getElementById('win-attempts').textContent=attempts;
+  const err=attempts-PAIRS.length;
+  document.getElementById('win-message').textContent=
+    err===0?'Perfetto! Nessun errore — padronanza totale!':
+    err<=3?'Ottimo! Hai dimostrato grande intelligenza emotiva.':
+    'Buon lavoro! Ripeti il gioco per consolidare le coppie.';
+  document.getElementById('win-overlay').classList.add('show');
+}
+
+resetGame();
+</script>
+</body>
+</html>
