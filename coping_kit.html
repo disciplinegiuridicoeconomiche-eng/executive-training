@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Mio Kit di Calma · Executive Lab</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --calmo: #3b82f6;
+  --ok: #06b6d4;
+  --agitato: #84cc16;
+  --nervoso: #eab308;
+  --molto-agitato: #f97316;
+  --arrabbiato: #ef4444;
+  --esplosione: #b91c1c;
+  --dark: #1e293b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #334155;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* HEADER */
+.hero {
+  background: linear-gradient(135deg, #1e3a5f 0%, #0ea5e9 100%);
+  padding: 32px 24px 28px;
+  text-align: center;
+  position: relative;
+}
+.hero h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.hero h1 span { color: #fde047; }
+.hero p {
+  font-size: 15px;
+  color: rgba(255,255,255,0.85);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* MAIN */
+.main { max-width: 900px; margin: 0 auto; padding: 24px 16px 40px; }
+
+/* SEZIONI */
+.section {
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* TERMOMETRO */
+.thermo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.thermo-level {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.thermo-level:hover { transform: translateX(4px); }
+.thermo-level.active {
+  border-width: 3px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.level-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.level-content { flex: 1; }
+.level-name {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+.level-desc {
+  font-size: 13px;
+  opacity: 0.85;
+}
+.level-emoji {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+/* Colori livelli */
+.l1 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.l1.active { border-color: #3b82f6; background: #eff6ff; }
+.l1 .level-name, .l1 .level-desc { color: #1e40af; }
+
+.l2 { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+.l2.active { border-color: #06b6d4; background: #ecfeff; }
+.l2 .level-name, .l2 .level-desc { color: #0e7490; }
+
+.l3 { background: linear-gradient(135deg, #84cc16, #65a30d); }
+.l3.active { border-color: #84cc16; background: #f7fee7; }
+.l3 .level-name, .l3 .level-desc { color: #3f6212; }
+
+.l4 { background: linear-gradient(135deg, #eab308, #ca8a04); }
+.l4.active { border-color: #eab308; background: #fefce8; }
+.l4 .level-name, .l4 .level-desc { color: #854d0e; }
+
+.l5 { background: linear-gradient(135deg, #f97316, #ea580c); }
+.l5.active { border-color: #f97316; background: #fff7ed; }
+.l5 .level-name, .l5 .level-desc { color: #9a3412; }
+
+.l6 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.l6.active { border-color: #ef4444; background: #fef2f2; }
+.l6 .level-name, .l6 .level-desc { color: #991b1b; }
+
+.l7 { background: linear-gradient(135deg, #b91c1c, #7f1d1d); }
+.l7.active { border-color: #b91c1c; background: #fef2f2; }
+.l7 .level-name, .l7 .level-desc { color: #7f1d1d; }
+
+/* STRATEGIE PER LIVELLO */
+.strategies-box {
+  display: none;
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  animation: fadeIn 0.3s ease;
+}
+.strategies-box.show { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.strategies-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.strategy-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.strategy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.strategy-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.strategy-emoji {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+.strategy-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.strategy-detail {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+}
+.strategy-detail.show { display: block; }
+
+.how-to {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+.how-to strong {
+  color: #334155;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tip {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  border-left: 3px solid #cbd5e1;
+}
+
+/* Colori strategie per zona */
+.zona-verde .strategies-box { background: #f0fdf4; border: 2px solid #bbf7d0; }
+.zona-verde .strategies-title { color: #166534; }
+.zona-verde .strategy-card:hover { border-color: #86efac; }
+.zona-verde .tip { border-left-color: #86efac; background: #f0fdf4; }
+
+.zona-gialla .strategies-box { background: #fefce8; border: 2px solid #fde047; }
+.zona-gialla .strategies-title { color: #854d0e; }
+.zona-gialla .strategy-card:hover { border-color: #facc15; }
+.zona-gialla .tip { border-left-color: #facc15; background: #fefce8; }
+
+.zona-arancione .strategies-box { background: #fff7ed; border: 2px solid #fdba74; }
+.zona-arancione .strategies-title { color: #9a3412; }
+.zona-arancione .strategy-card:hover { border-color: #fb923c; }
+.zona-arancione .tip { border-left-color: #fb923c; background: #fff7ed; }
+
+.zona-rossa .strategies-box { background: #fef2f2; border: 2px solid #fecaca; }
+.zona-rossa .strategies-title { color: #991b1b; }
+.zona-rossa .strategy-card:hover { border-color: #f87171; }
+.zona-rossa .tip { border-left-color: #f87171; background: #fef2f2; }
+
+/* EMERGENZA */
+.emergency-box {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 2px solid #fecaca;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+}
+.emergency-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #991b1b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.emergency-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.emergency-step {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  border: 2px solid #fecaca;
+}
+.step-number {
+  width: 32px;
+  height: 32px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  margin: 0 auto 8px;
+}
+.step-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #991b1b;
+  margin-bottom: 4px;
+}
+.step-desc {
+  font-size: 12px;
+  color: #7f1d1d;
+}
+
+/* RIEPILOGO */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+.summary-card {
+  border-radius: 14px;
+  padding: 16px;
+  border: 2px solid;
+}
+.summary-card h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.summary-card ul {
+  font-size: 13px;
+  line-height: 1.8;
+  list-style: none;
+}
+.summary-card li {
+  padding-left: 16px;
+  position: relative;
+}
+.summary-card li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+
+.summary-verde { background: #f0fdf4; border-color: #bbf7d0; }
+.summary-verde h4 { color: #166534; }
+.summary-verde li { color: #166534; }
+.summary-verde li::before { color: #22c55e; }
+
+.summary-gialla { background: #fefce8; border-color: #fde047; }
+.summary-gialla h4 { color: #854d0e; }
+.summary-gialla li { color: #854d0e; }
+.summary-gialla li::before { color: #eab308; }
+
+.summary-rossa { background: #fef2f2; border-color: #fecaca; }
+.summary-rossa h4 { color: #991b1b; }
+.summary-rossa li { color: #991b1b; }
+.summary-rossa li::before { color: #ef4444; }
+
+/* ISTRUZIONI */
+.instructions {
+  background: #eff6ff;
+  border: 2px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.instructions i {
+  color: #3b82f6;
+  font-size: 20px;
+  margin-top: 2px;
+}
+.instructions p {
+  font-size: 14px;
+  color: #1e40af;
+  margin: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hero">
+  <h1>Il Mio <span>Kit di Calma</span></h1>
+  <p>Scopri come ti senti e scegli le strategie giuste per stare meglio</p>
+</div>
+
+<div class="main">
+
+  <!-- ISTRUZIONI -->
+  <div class="instructions">
+    <i class="fas fa-hand-pointer"></i>
+    <p><strong>Come usarlo:</strong> Clicca sul livello che rappresenta come ti senti in questo momento. Ti mostrerò le strategie più adatte per te!</p>
+  </div>
+
+  <!-- TERMOMETRO -->
+  <div class="section">
+    <div class="section-title">
+      <i class="fas fa-thermometer-half" style="color:#ef4444"></i>
+      Come ti senti ora?
+    </div>
+    
+    <div class="thermo-container">
+      <!-- Livello 1 - Calmo -->
+      <div class="thermo-level l1" onclick="selectLevel(1)">
+        <div class="level-number" style="background:var(--calmo)">1</div>
+        <div class="level-content">
+          <div class="level-name">Calmo/a</div>
+          <div class="level-desc">Rilassato, sereno, tutto bene</div>
+        </div>
+        <div class="level-emoji">😌</div>
+      </div>
+      
+      <!-- Livello 2 - Ok -->
+      <div class="thermo-level l2" onclick="selectLevel(2)">
+        <div class="level-number" style="background:var(--ok)">2</div>
+        <div class="level-content">
+          <div class="level-name">Ok</div>
+          <div class="level-desc">Normale, tranquillo, tutto sotto controllo</div>
+        </div>
+        <div class="level-emoji">🙂</div>
+      </div>
+      
+      <!-- Livello 3 - Leggermente agitato -->
+      <div class="thermo-level l3" onclick="selectLevel(3)">
+        <div class="level-number" style="background:var(--agitato)">3</div>
+        <div class="level-content">
+          <div class="level-name">Leggermente agitato/a</div>
+          <div class="level-desc">Un po' di tensione, qualcosa non va</div>
+        </div>
+        <div class="level-emoji">😕</div>
+      </div>
+      
+      <!-- Livello 4 - Nervoso -->
+      <div class="thermo-level l4" onclick="selectLevel(4)">
+        <div class="level-number" style="background:var(--nervoso)">4</div>
+        <div class="level-content">
+          <div class="level-name">Nervoso/a</div>
+          <div class="level-desc">Fastidio, preoccupazione, inizia a sentirti a disagio</div>
+        </div>
+        <div class="level-emoji">😤</div>
+      </div>
+      
+      <!-- Livello 5 - Molto agitato -->
+      <div class="thermo-level l5" onclick="selectLevel(5)">
+        <div class="level-number" style="background:var(--molto-agitato)">5</div>
+        <div class="level-content">
+          <div class="level-name">Molto agitato/a</div>
+          <div class="level-desc">Difficile controllarsi, le emozioni sono forti</div>
+        </div>
+        <div class="level-emoji">😠</div>
+      </div>
+      
+      <!-- Livello 6 - Arrabbiato -->
+      <div class="thermo-level l6" onclick="selectLevel(6)">
+        <div class="level-number" style="background:var(--arrabbiato)">6</div>
+        <div class="level-content">
+          <div class="level-name">Arrabbiato/a</div>
+          <div class="level-desc">Rabbia forte, tensione alta, stai per "esplodere"</div>
+        </div>
+        <div class="level-emoji">😡</div>
+      </div>
+      
+      <!-- Livello 7 - Esplosione -->
+      <div class="thermo-level l7" onclick="selectLevel(7)">
+        <div class="level-number" style="background:var(--esplosione)">7</div>
+        <div class="level-content">
+          <div class="level-name">Esplosione</div>
+          <div class="level-desc">Fuori controllo, non riesci a fermarti</div>
+        </div>
+        <div class="level-emoji">🤯</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STRATEGIE LIVELLO 1-2 (ZONA VERDE) -->
+  <div id="strategies-1-2" class="section zona-verde" style="display:none">
+    <div class="strategies-box show">
+      <div class="strategies-title">
+        <i class="fas fa-seedling"></i>
+        Strategie per mantenerti sereno
+      </div>
+      <div class="strategy-grid">
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🙏</div>
+            <div class="strategy-name">Gratitudine</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Pensa a 3 cose belle della tua giornata, anche piccole (un sorriso, il sole, un cibo buono).
+            </div>
+            <div class="tip">💡 La gratitudine aiuta il cervello a focalizzarsi sul positivo.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🌬️</div>
+            <div class="strategy-name">Respira aria fresca</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Apri una finestra o fai una passeggiata all'aperto per qualche minuto.
+            </div>
+            <div class="tip">💡 Concentrati sul fresco dell'aria che entra nel naso.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🤝</div>
+            <div class="strategy-name">Passa tempo con gli altri</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Stai con persone che ti fanno stare bene, chiacchiera, gioca, condividi.
+            </div>
+            <div class="tip">💡 Le persone positive sono come una "carica" per il tuo umore!</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">💚</div>
+            <div class="strategy-name">Parole gentili</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Parla a te stesso come parleresti a un amico che vuoi bene. "Ce la faccio", "Sono bravo/a".
+            </div>
+            <div class="tip">💡 Come parli a te stesso conta molto!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STRATEGIE LIVELLO 3-4 (ZONA GIALLA) -->
+  <div id="strategies-3-4" class="section zona-gialla" style="display:none">
+    <div class="strategies-box show">
+      <div class="strategies-title">
+        <i class="fas fa-exclamation-circle"></i>
+        Strategie per calmarti quando inizi ad agitarti
+      </div>
+      <div class="strategy-grid">
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🫁</div>
+            <div class="strategy-name">Respiro profondo</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Inspira per 4 secondi, trattieni per 4, espira per 6. Ripeti 5-10 volte.
+            </div>
+            <div class="tip">💡 Metti una mano sulla pancia per sentire il respiro.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🤸</div>
+            <div class="strategy-name">Muovi il corpo</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Fai stretching, rotazioni del collo, scrolla le spalle, alza le braccia.
+            </div>
+            <div class="tip">💡 Muovi il corpo con dolcezza, senza forzare.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">💬</div>
+            <div class="strategy-name">Parla con qualcuno</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Racconta a una persona di fiducia come ti senti. Non serve trovare subito una soluzione.
+            </div>
+            <div class="tip">💡 Essere ascoltati già aiuta molto!</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">📋</div>
+            <div class="strategy-name">Spezza il problema</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Se hai un problema grande, dividilo in piccoli passi. Concentrati solo sul prossimo.
+            </div>
+            <div class="tip">💡 Un passo alla volta è più facile!</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">✅</div>
+            <div class="strategy-name">Micro-obiettivo</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Fissati un compito piccolo e facile da fare subito. Celebralo quando lo finisci!
+            </div>
+            <div class="tip">💡 Piccoli successi ricostruiscono la fiducia in te stesso.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">❓</div>
+            <div class="strategy-name">Metti in dubbio i pensieri</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Quando hai un pensiero negativo, chiediti: "È davvero vero? Che consiglio darei a un amico?"
+            </div>
+            <div class="tip">💡 I pensieri negativi non sono sempre la verità!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STRATEGIE LIVELLO 5 (ZONA ARANCIONE) -->
+  <div id="strategies-5" class="section zona-arancione" style="display:none">
+    <div class="strategies-box show">
+      <div class="strategies-title">
+        <i class="fas fa-fire"></i>
+        Strategie per quando sei molto agitato
+      </div>
+      <div class="strategy-grid">
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🔟</div>
+            <div class="strategy-name">Conta fino a 10</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Conta lentamente da 1 a 10 (o 20) prima di fare o dire qualcosa.
+            </div>
+            <div class="tip">💡 Conta all'indietro da 20 per concentrarti di più.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🚶</div>
+            <div class="strategy-name">Camminata veloce</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Cammina a passo sostenuto per 5-10 minuti, anche solo in corridoio.
+            </div>
+            <div class="tip">💡 Concentrati sul ritmo dei tuoi passi.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🏀</div>
+            <div class="strategy-name">Stringi qualcosa</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Stringi forte una pallina antistress, un cuscino o un oggetto morbido, poi rilascia.
+            </div>
+            <div class="tip">💡 Sincronizza con il respiro: stringi inspirando, rilascia espirando.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">✍️</div>
+            <div class="strategy-name">Scrivi i sentimenti</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Annota su un foglio cosa provi, senza giudicarti. Puoi anche strapparlo dopo!
+            </div>
+            <div class="tip">💡 Scrivere aiuta a "scaricare" le emozioni.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🚪</div>
+            <div class="strategy-name">Chiedi spazio</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Di chiaramente: "Ho bisogno di 10 minuti per calmarmi, poi torno."
+            </div>
+            <div class="tip">💡 Chiedere una pausa è segno di intelligenza, non di debolezza!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STRATEGIE LIVELLO 6-7 (ZONA ROSSA) -->
+  <div id="strategies-6-7" class="section zona-rossa" style="display:none">
+    <div class="strategies-box show">
+      <div class="strategies-title">
+        <i class="fas fa-exclamation-triangle"></i>
+        Protocollo di emergenza - Agisci subito!
+      </div>
+      <p style="font-size:14px;color:#7f1d1d;margin-bottom:16px">
+        <strong>⚠️ Attenzione:</strong> A questo livello il cervello "pensante" è spento. Non pensare, segui questi passi in ordine:
+      </p>
+      
+      <div class="emergency-box">
+        <div class="emergency-title">
+          <i class="fas fa-shield-alt"></i>
+          I 4 passi per fermare l'esplosione
+        </div>
+        <div class="emergency-steps">
+          <div class="emergency-step">
+            <div class="step-number">1</div>
+            <div class="step-name">STOP</div>
+            <div class="step-desc">Fermati. Non parlare, non agire, non reagire.</div>
+          </div>
+          <div class="emergency-step">
+            <div class="step-number">2</div>
+            <div class="step-name">GUARDA INTORNO</div>
+            <div class="step-desc">5 cose che vedi, 4 che senti, 3 che tocchi, 2 che annusi, 1 che gusti</div>
+          </div>
+          <div class="emergency-step">
+            <div class="step-number">3</div>
+            <div class="step-name">SCARICA</div>
+            <div class="step-desc">Stringi i pugni, respira forte, cammina veloce. L'energia deve uscire!</div>
+          </div>
+          <div class="emergency-step">
+            <div class="step-number">4</div>
+            <div class="step-name">ALLONTANATI</div>
+            <div class="step-desc">Vai via dalla situazione. La distanza fisica aiuta a calmarsi.</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="strategy-grid" style="margin-top:16px">
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🛑</div>
+            <div class="strategy-name">STOP & ESCI</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> Allontanati immediatamente dalla situazione. Non parlare, agisci.
+            </div>
+            <div class="tip">💡 Segnala con un gesto che hai bisogno di una pausa, poi esci.</div>
+          </div>
+        </div>
+        
+        <div class="strategy-card" onclick="toggleStrategy(this)">
+          <div class="strategy-header">
+            <div class="strategy-emoji">🌳</div>
+            <div class="strategy-name">Grounding 5-4-3-2-1</div>
+          </div>
+          <div class="strategy-detail">
+            <div class="how-to">
+              <strong>Come si fa:</strong> 5 cose che vedi · 4 che senti · 3 che tocchi · 2 che annusi · 1 che gusti
+            </div>
+            <div class="tip">💡 Riporta l'attenzione al presente fisico — interrompe il loop mentale.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIEPILOGO -->
+  <div class="section">
+    <div class="section-title">
+      <i class="fas fa-clipboard-list" style="color:#64748b"></i>
+      Riassunto veloce
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card summary-verde">
+        <h4>🟢 Livelli 1-2 (Calmo/Ok)</h4>
+        <ul>
+          <li>Gratitudine quotidiana</li>
+          <li>Respira aria fresca</li>
+          <li>Stai con persone positive</li>
+          <li>Parole gentili con te stesso</li>
+        </ul>
+      </div>
+      <div class="summary-card summary-gialla">
+        <h4>🟡 Livelli 3-4 (Agitato/Nervoso)</h4>
+        <ul>
+          <li>Respiro profondo</li>
+          <li>Muovi il corpo</li>
+          <li>Parla con qualcuno</li>
+          <li>Spezza i problemi in pezzi</li>
+        </ul>
+      </div>
+      <div class="summary-card summary-rossa">
+        <h4>🔴 Livelli 5-6-7 (Molto agitato/Esplosione)</h4>
+        <ul>
+          <li>STOP — non reagire</li>
+          <li>Grounding 5-4-3-2-1</li>
+          <li>Allontanati fisicamente</li>
+          <li>Scarica l'energia in modo sicuro</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentLevel = null;
+
+function selectLevel(level) {
+  // Rimuovi active da tutti i livelli
+  document.querySelectorAll('.thermo-level').forEach(el => {
+    el.classList.remove('active');
+  });
+  
+  // Nascondi tutte le sezioni strategie
+  document.getElementById('strategies-1-2').style.display = 'none';
+  document.getElementById('strategies-3-4').style.display = 'none';
+  document.getElementById('strategies-5').style.display = 'none';
+  document.getElementById('strategies-6-7').style.display = 'none';
+  
+  if (currentLevel === level) {
+    currentLevel = null;
+    return;
+  }
+  
+  currentLevel = level;
+  
+  // Aggiungi active al livello selezionato
+  document.querySelector('.thermo-level.l' + level).classList.add('active');
+  
+  // Mostra le strategie appropriate
+  if (level <= 2) {
+    document.getElementById('strategies-1-2').style.display = 'block';
+    document.getElementById('strategies-1-2').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } else if (level <= 4) {
+    document.getElementById('strategies-3-4').style.display = 'block';
+    document.getElementById('strategies-3-4').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } else if (level === 5) {
+    document.getElementById('strategies-5').style.display = 'block';
+    document.getElementById('strategies-5').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } else {
+    document.getElementById('strategies-6-7').style.display = 'block';
+    document.getElementById('strategies-6-7').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function toggleStrategy(card) {
+  const detail = card.querySelector('.strategy-detail');
+  const isOpen = detail.classList.contains('show');
+  
+  // Chiudi tutte le altre
+  document.querySelectorAll('.strategy-detail').forEach(d => d.classList.remove('show'));
+  
+  if (!isOpen) {
+    detail.classList.add('show');
+  }
+}
+</script>
+
+</body>
+</html>
