@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Completa il Testo · Executive Lab</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4ff; min-height: 100vh; color: #1e293b; }
+
+.header {
+  background: white; border-bottom: 1px solid #e2e8f0;
+  padding: 14px 28px; display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.hlogo { display: flex; align-items: center; gap: 12px; }
+.hicon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg,#6c5ce7,#a855f7); display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; }
+.htitle { font-size: 18px; font-weight: 800; color: #1e293b; }
+.hsub { font-size: 11px; color: #94a3b8; }
+.hstats { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hpill { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 30px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 6px; }
+.hpill i { color: #6c5ce7; }
+#timer-display { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 30px; padding: 6px 16px; font-size: 14px; font-weight: 800; color: #16a34a; display: flex; align-items: center; gap: 6px; min-width: 90px; justify-content: center; transition: all 0.3s; }
+#timer-display.warn { background: #fffbeb; border-color: #fcd34d; color: #b45309; }
+#timer-display.danger { background: #fef2f2; border-color: #fca5a5; color: #dc2626; animation: blink 0.8s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.btn-reset { background: white; border: 1.5px solid #e2e8f0; border-radius: 30px; padding: 7px 16px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.btn-reset:hover { border-color: #6c5ce7; color: #6c5ce7; background: #f5f3ff; }
+
+.main { max-width: 900px; margin: 0 auto; padding: 28px 20px 80px; }
+
+.instructions { background: linear-gradient(135deg,#6c5ce7,#8b5cf6); border-radius: 16px; padding: 16px 22px; margin-bottom: 24px; color: white; display: flex; align-items: flex-start; gap: 14px; }
+.instructions i { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.instructions p { font-size: 14px; line-height: 1.7; opacity: 0.95; }
+.instructions strong { font-weight: 800; }
+
+.bank-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.bank-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.bank-label::after { content:''; flex:1; height:1px; background:#e2e8f0; }
+#word-bank { display: flex; flex-wrap: wrap; gap: 10px; min-height: 48px; align-items: center; }
+.chip { background: linear-gradient(135deg,#6c5ce7,#8b5cf6); color: white; padding: 8px 18px; border-radius: 30px; font-size: 15px; font-weight: 700; cursor: pointer; user-select: none; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 3px 10px rgba(108,92,231,0.3); border: 2px solid transparent; }
+.chip:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 20px rgba(108,92,231,0.4); }
+.chip.active { border-color: #fbbf24; box-shadow: 0 0 0 4px rgba(251,191,36,0.3), 0 8px 20px rgba(108,92,231,0.4); transform: translateY(-3px) scale(1.06); }
+
+.prog-wrap { margin-bottom: 20px; }
+.prog-row { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
+.prog-track { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg,#6c5ce7,#a855f7); border-radius: 3px; transition: width 0.4s; width: 0%; }
+
+.text-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 36px 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom: 28px; }
+.text-para { font-size: 19px; line-height: 2.8; color: #334155; margin-bottom: 24px; }
+.text-para:last-child { margin-bottom: 0; }
+
+.blank { display: inline-block; min-width: 130px; height: 40px; line-height: 38px; background: #f1f5f9; border: 2px dashed #94a3b8; border-radius: 8px; padding: 0 14px; margin: 0 4px; vertical-align: middle; cursor: pointer; font-size: 14px; font-weight: 600; color: #94a3b8; text-align: center; transition: all 0.15s; white-space: nowrap; }
+.blank:hover { border-color: #6c5ce7; background: #f5f3ff; color: #6c5ce7; }
+.blank.filled { background: #ede9fe; border: 2px solid #6c5ce7; color: #4c1d95; font-weight: 800; font-size: 15px; }
+.blank.correct { background: #dcfce7; border: 2px solid #16a34a; color: #15803d; font-weight: 800; font-size: 15px; cursor: default; }
+.blank.wrong { background: #fee2e2; border: 2px solid #dc2626; color: #991b1b; font-weight: 800; font-size: 15px; animation: shake 0.4s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+.verify-wrap { text-align: center; margin-bottom: 28px; }
+.btn-verify { background: linear-gradient(135deg,#6c5ce7,#8b5cf6); color: white; border: none; border-radius: 40px; padding: 16px 56px; font-size: 17px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(108,92,231,0.35); transition: transform 0.15s, box-shadow 0.15s; }
+.btn-verify:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(108,92,231,0.45); }
+
+.errors-panel { background: white; border-radius: 16px; border: 1.5px solid #fca5a5; padding: 20px 24px; margin-bottom: 24px; display: none; }
+.errors-panel.show { display: block; animation: fadeDown 0.3s ease; }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.errors-title { font-size: 15px; font-weight: 800; color: #dc2626; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.error-item { padding: 12px 16px; border-radius: 10px; background: #fef2f2; margin-bottom: 8px; border-left: 4px solid #f87171; }
+.error-item:last-child { margin-bottom: 0; }
+.error-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.error-given { font-size: 14px; font-weight: 700; color: #dc2626; }
+.error-correct { font-size: 14px; font-weight: 700; color: #16a34a; }
+.error-arrow { color: #94a3b8; }
+.error-why { font-size: 13px; color: #475569; line-height: 1.6; }
+.error-why b { color: #1e293b; }
+
+.overlay { display: none; position: fixed; inset: 0; background: rgba(10,8,30,0.82); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+.overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.win-card { background: white; border-radius: 28px; padding: 44px 52px; text-align: center; max-width: 500px; width: 100%; box-shadow: 0 32px 80px rgba(0,0,0,0.35); animation: popUp 0.45s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes popUp { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
+.win-trophy { font-size: 72px; display: block; margin-bottom: 8px; }
+.win-title { font-size: 32px; font-weight: 900; color: #1e293b; margin-bottom: 8px; }
+.win-sub { font-size: 15px; color: #64748b; line-height: 1.7; margin-bottom: 14px; }
+.win-prize { display: inline-block; padding: 8px 22px; border-radius: 30px; font-size: 15px; font-weight: 800; margin-bottom: 20px; }
+.win-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.wstat { background: #f8fafc; border-radius: 12px; padding: 14px 10px; }
+.wstat-val { font-size: 28px; font-weight: 900; color: #6c5ce7; }
+.wstat-label { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.win-explain { background: #f5f3ff; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; font-size: 14px; color: #4c1d95; line-height: 1.7; text-align: left; }
+.win-explain strong { color: #6c5ce7; }
+.btn-again { background: linear-gradient(135deg,#6c5ce7,#8b5cf6); color: white; border: none; border-radius: 40px; padding: 14px 44px; font-size: 16px; font-weight: 800; cursor: pointer; width: 100%; box-shadow: 0 8px 24px rgba(108,92,231,0.35); transition: transform 0.15s; }
+.btn-again:hover { transform: translateY(-2px); }
+
+@media(max-width:640px){
+  .text-card { padding: 20px 16px; }
+  .text-para { font-size: 17px; line-height: 3; }
+  .win-card { padding: 28px 20px; }
+  .win-stats-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hlogo">
+    <div class="hicon">📝</div>
+    <div>
+      <div class="htitle">Completa il Testo</div>
+      <div class="hsub">Executive Lab · Intelligenza Emotiva</div>
+    </div>
+  </div>
+  <div class="hstats">
+    <div class="hpill"><i class="fas fa-check-circle"></i> <span id="h-correct">0</span>/18</div>
+    <div class="hpill"><i class="fas fa-times-circle" style="color:#ef4444"></i> <span id="h-errors" style="color:#ef4444;font-weight:800">0</span> errori</div>
+    <div id="timer-display"><i class="fas fa-clock"></i><span id="timer-val">10:00</span></div>
+    <button class="btn-reset" onclick="resetGame()"><i class="fas fa-redo"></i> Ricomincia</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="instructions">
+    <i class="fas fa-lightbulb"></i>
+    <p>
+      <strong>Come giocare:</strong> Clicca una parola nella banca — diventa evidenziata in giallo.
+      Poi clicca lo spazio tratteggiato nel testo per inserirla.
+      Clicca su una parola già inserita per toglierla e rimettere in banca.
+      Premi <strong>Verifica</strong> quando hai finito!
+    </p>
+  </div>
+
+  <div class="bank-card">
+    <div class="bank-label">Parole disponibili</div>
+    <div id="word-bank"></div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-row"><span>Completamento</span><span id="prog-text">0 di 18</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+
+  <div class="text-card">
+    <p class="text-para">
+      Il test ha analizzato come il nostro sistema reagisce alle
+      <span class="blank" id="b1">· · ·</span>.
+      Se la pressione sale, la
+      <span class="blank" id="b2">· · ·</span>
+      allo
+      <span class="blank" id="b3">· · ·</span>
+      ci permette di non bloccarci.
+      Attraverso l'<span class="blank" id="b4">· · ·</span>
+      di
+      <span class="blank" id="b5">· · ·</span>,
+      impariamo a vedere i fatti senza farci ingannare dalle paure,
+      mentre l'<span class="blank" id="b6">· · ·</span>
+      emotiva ci rende liberi dal giudizio degli altri.
+      La vera forza non è non provare nulla, ma usare la
+      <span class="blank" id="b7">· · ·</span>
+      per adattarsi e le
+      <span class="blank" id="b8">· · ·</span>
+      di
+      <span class="blank" id="b9">· · ·</span>
+      per trasformare la tensione in un'azione efficace.
+    </p>
+    <p class="text-para">
+      Le barre colorate del report mostravano il mio equilibrio emotivo.
+      La capacità di dire ciò che penso con rispetto si chiama
+      <span class="blank" id="b10">· · ·</span>,
+      mentre l'<span class="blank" id="b11">· · ·</span>
+      indica quanto riesco a sintonizzarmi con gli altri.
+      Se so cambiare strategia davanti a un imprevisto, sto usando la mia
+      <span class="blank" id="b12">· · ·</span>.
+      Il test analizza anche la mia
+      <span class="blank" id="b13">· · ·</span>
+      dello
+      <span class="blank" id="b14">· · ·</span>
+      e quanto riesco a controllare l'<span class="blank" id="b15">· · ·</span>
+      nei momenti critici.
+      Tutto questo, insieme all'<span class="blank" id="b16">· · ·</span>
+      e all'<span class="blank" id="b17">· · ·</span>,
+      compone il mio profilo di Intelligenza
+      <span class="blank" id="b18">· · ·</span>.
+    </p>
+  </div>
+
+  <div class="verify-wrap">
+    <button class="btn-verify" onclick="verify()">
+      <i class="fas fa-check-double"></i> &nbsp;Verifica le risposte
+    </button>
+  </div>
+
+  <div class="errors-panel" id="errors-panel">
+    <div class="errors-title"><i class="fas fa-exclamation-circle"></i> Spiegazione degli errori</div>
+    <div id="errors-list"></div>
+  </div>
+
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="win-card">
+    <span class="win-trophy" id="win-trophy">🏆</span>
+    <div class="win-title" id="win-title"></div>
+    <div class="win-sub" id="win-sub"></div>
+    <div class="win-prize" id="win-prize"></div>
+    <div class="win-stats-grid">
+      <div class="wstat"><div class="wstat-val" id="ws-score">-</div><div class="wstat-label">Punteggio</div></div>
+      <div class="wstat"><div class="wstat-val" id="ws-errors" style="color:#ef4444">-</div><div class="wstat-label">Errori totali</div></div>
+      <div class="wstat"><div class="wstat-val" id="ws-time" style="color:#16a34a">-</div><div class="wstat-label">Tempo</div></div>
+    </div>
+    <div class="win-explain" id="win-explain"></div>
+    <button class="btn-again" onclick="resetGame()"><i class="fas fa-redo"></i> &nbsp;Gioca di nuovo</button>
+  </div>
+</div>
+
+<script>
+const ANSWERS = [
+  { id:'b1',  word:'sfide',            label:'sfide',            context:'...come il nostro sistema reagisce alle ___.', why:'Le <b>sfide</b> sono situazioni che mettono alla prova il nostro equilibrio emotivo.' },
+  { id:'b2',  word:'Tolleranza',       label:'Tolleranza',       context:'La ___ allo Stress ci permette di non bloccarci.', why:'La <b>Tolleranza</b> allo Stress è la capacità di reggere la pressione senza andare in blocco.' },
+  { id:'b3',  word:'Stress',           label:'Stress',           context:'La Tolleranza allo ___ ci permette di non bloccarci.', why:'Lo <b>Stress</b> è la risposta psicofisiologica a situazioni di pressione o minaccia percepita.' },
+  { id:'b4',  word:'Esame',            label:'Esame',            context:'Attraverso l\'___ di Realtà impariamo a vedere i fatti.', why:'L\'<b>Esame</b> di Realtà è la capacità di valutare i fatti in modo obiettivo, senza distorsioni.' },
+  { id:'b5',  word:'Realtà',           label:'Realtà',           context:'Attraverso l\'Esame di ___ impariamo a vedere i fatti.', why:'La <b>Realtà</b> — vederla senza filtri emotivi — è alla base del pensiero critico e razionale.' },
+  { id:'b6',  word:'Indipendenza',     label:'Indipendenza',     context:'L\'___ emotiva ci rende liberi dal giudizio degli altri.', why:'L\'<b>Indipendenza</b> emotiva significa non dipendere dal giudizio o dall\'approvazione altrui.' },
+  { id:'b7',  word:'Flessibilità',     label:'Flessibilità',     context:'Usare la ___ per adattarsi.', why:'La <b>Flessibilità</b> è l\'abilità di modificare pensieri e comportamenti quando il contesto cambia.' },
+  { id:'b8',  word:'strategie',        label:'strategie',        context:'Le ___ di Coping per trasformare la tensione.', why:'Le <b>strategie</b> di coping sono gli strumenti concreti — fisici, cognitivi e sociali — per gestire le emozioni difficili.' },
+  { id:'b9',  word:'Coping',           label:'Coping',           context:'Le strategie di ___ per trasformare la tensione.', why:'Il <b>Coping</b> è l\'insieme delle risorse e strategie che usiamo per fronteggiare situazioni stressanti.' },
+  { id:'b10', word:'Assertività',      label:'Assertività',      context:'Dire ciò che penso con rispetto si chiama ___.', why:'L\'<b>Assertività</b> è la capacità di esprimere pensieri e bisogni in modo chiaro e rispettoso, senza aggressività né passività.' },
+  { id:'b11', word:'Empatia',          label:'Empatia',          context:'L\'___ indica quanto riesco a sintonizzarmi con gli altri.', why:'L\'<b>Empatia</b> è la capacità di riconoscere e condividere le emozioni degli altri, sintonizzandosi con il loro stato interiore.' },
+  { id:'b12', word:'Adattabilità',     label:'Adattabilità',     context:'So cambiare strategia davanti a un imprevisto — sto usando la mia ___.', why:'L\'<b>Adattabilità</b> è la flessibilità applicata all\'azione: cambiare piano quando la situazione lo richiede.' },
+  { id:'b13', word:'Gestione',         label:'Gestione',         context:'La mia ___ dello Stress.', why:'La <b>Gestione</b> dello Stress è la capacità di regolare la risposta emotiva quando la pressione aumenta.' },
+  { id:'b14', word:'Stress',           label:'Stress',           context:'La Gestione dello ___.', why:'Lo <b>Stress</b> — quando gestito — diventa energia utile. Quando incontrollato, consuma le risorse cognitive.' },
+  { id:'b15', word:'Impulsività',      label:'Impulsività',      context:'Quanto riesco a controllare l\'___ nei momenti critici.', why:'Controllare l\'<b>Impulsività</b> significa fare una pausa tra lo stimolo e la reazione — spazio in cui entra la scelta consapevole.' },
+  { id:'b16', word:'Ottimismo',        label:'Ottimismo',        context:'Insieme all\'___ e all\'Auto-motivazione.', why:'L\'<b>Ottimismo</b> è la tendenza a vedere possibilità e soluzioni anche nelle situazioni difficili — non ingenuità, ma orientamento al futuro.' },
+  { id:'b17', word:'Auto-motivazione', label:'Auto-motivazione', context:'Insieme all\'Ottimismo e all\'___.', why:'L\'<b>Auto-motivazione</b> è la spinta interiore che sostiene l\'impegno nel tempo, indipendentemente dalle ricompense esterne.' },
+  { id:'b18', word:'Emotiva',          label:'Emotiva',          context:'Il mio profilo di Intelligenza ___.', why:'L\'Intelligenza <b>Emotiva</b> è il profilo complessivo di tutte queste capacità — riconoscere, comprendere e gestire le proprie e altrui emozioni.' },
+];
+
+const BANK_WORDS = [
+  'sfide','Tolleranza','Stress','Esame','Realtà',
+  'Indipendenza','Flessibilità','strategie','Coping',
+  'Assertività','Empatia','Adattabilità','Gestione',
+  'Stress','Impulsività','Ottimismo','Auto-motivazione','Emotiva'
+];
+
+let filled = {};
+let activeWord = null;
+let timerSecs = 600;
+let timerInterval = null;
+let totalErrors = 0;
+let lockedBlanks = new Set(); // correctly answered blanks
+
+function initGame() {
+  renderBank();
+  attachBlanks();
+  startTimer();
+  updateProgress();
+}
+
+function renderBank() {
+  const bank = document.getElementById('word-bank');
+  bank.innerHTML = '';
+
+  // Build list of words still available
+  const usedWords = [];
+  ANSWERS.forEach(a => {
+    if (filled[a.id]) usedWords.push(a.word);
+  });
+  // Also lock correct ones permanently
+  lockedBlanks.forEach(id => {
+    const a = ANSWERS.find(x => x.id === id);
+    if (a) usedWords.push(a.word);
+  });
+
+  const available = [...BANK_WORDS];
+  usedWords.forEach(w => {
+    const idx = available.indexOf(w);
+    if (idx !== -1) available.splice(idx, 1);
+  });
+
+  shuffle(available).forEach(word => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (activeWord === word ? ' active' : '');
+    chip.textContent = word;
+    chip.addEventListener('click', () => {
+      activeWord = (activeWord === word) ? null : word;
+      renderBank();
+    });
+    bank.appendChild(chip);
+  });
+}
+
+function attachBlanks() {
+  document.querySelectorAll('.blank').forEach(el => {
+    el.onclick = () => clickBlank(el.id);
+  });
+}
+
+function clickBlank(id) {
+  if (lockedBlanks.has(id)) return;
+
+  // If already filled → remove
+  if (filled[id]) {
+    delete filled[id];
+    const el = document.getElementById(id);
+    el.textContent = '· · ·';
+    el.className = 'blank';
+    activeWord = null;
+    renderBank();
+    updateProgress();
+    return;
+  }
+
+  if (!activeWord) return;
+
+  filled[id] = activeWord;
+  const el = document.getElementById(id);
+  el.textContent = activeWord;
+  el.className = 'blank filled';
+  activeWord = null;
+  renderBank();
+  updateProgress();
+}
+
+function updateProgress() {
+  const n = Object.keys(filled).length + lockedBlanks.size;
+  document.getElementById('prog-fill').style.width = (n / 18 * 100) + '%';
+  document.getElementById('prog-text').textContent = n + ' di 18';
+}
+
+function verify() {
+  const totalFilled = Object.keys(filled).length + lockedBlanks.size;
+  if (totalFilled < 18) {
+    alert('Completa tutti gli spazi prima di verificare!');
+    return;
+  }
+
+  let newErrors = [];
+  let correctNow = lockedBlanks.size;
+
+  ANSWERS.forEach(a => {
+    if (lockedBlanks.has(a.id)) return;
+    const el = document.getElementById(a.id);
+    const given = filled[a.id];
+    if (!given) return;
+
+    if (given.toLowerCase() === a.word.toLowerCase()) {
+      el.className = 'blank correct';
+      lockedBlanks.add(a.id);
+      delete filled[a.id];
+      correctNow++;
+    } else {
+      el.className = 'blank wrong';
+      newErrors.push({ given, correct: a.word, context: a.context, why: a.why });
+      totalErrors++;
+      setTimeout(() => {
+        delete filled[a.id];
+        el.textContent = '· · ·';
+        el.className = 'blank';
+        renderBank();
+        attachBlanks();
+        updateProgress();
+      }, 1200);
+    }
+  });
+
+  document.getElementById('h-correct').textContent = correctNow;
+  document.getElementById('h-errors').textContent = totalErrors;
+
+  if (newErrors.length > 0) {
+    showErrorsPanel(newErrors);
+  } else {
+    document.getElementById('errors-panel').classList.remove('show');
+  }
+
+  if (correctNow === 18) {
+    clearInterval(timerInterval);
+    setTimeout(() => showWin(correctNow), 700);
+  }
+
+  renderBank();
+  attachBlanks();
+  updateProgress();
+}
+
+function showErrorsPanel(errors) {
+  const list = document.getElementById('errors-list');
+  list.innerHTML = '';
+  errors.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'error-item';
+    div.innerHTML = `
+      <div class="error-row">
+        <span class="error-given">✗ &ldquo;${e.given}&rdquo;</span>
+        <span class="error-arrow">→</span>
+        <span class="error-correct">✓ &ldquo;${e.correct}&rdquo;</span>
+      </div>
+      <div class="error-why"><b>Contesto:</b> <em>${e.context}</em><br><b>Perché "${e.correct}":</b> ${e.why}</div>`;
+    list.appendChild(div);
+  });
+  const panel = document.getElementById('errors-panel');
+  panel.classList.add('show');
+  setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+}
+
+function startTimer() {
+  timerSecs = 600;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerSecs--;
+    updateTimerDisplay();
+    if (timerSecs <= 0) {
+      clearInterval(timerInterval);
+      alert('Tempo scaduto! Verifica quello che hai completato.');
+      verify();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSecs / 60);
+  const s = timerSecs % 60;
+  document.getElementById('timer-val').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  const el = document.getElementById('timer-display');
+  if (timerSecs <= 30) el.className = 'danger';
+  else if (timerSecs <= 120) el.className = 'warn';
+  else el.removeAttribute('class');
+  el.id = 'timer-display';
+}
+
+function showWin(correct) {
+  const elapsed = 600 - timerSecs;
+  const m = Math.floor(elapsed / 60), s = elapsed % 60;
+  const timeStr = m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+
+  let trophy, title, sub, prize, prizeStyle, explain;
+
+  if (totalErrors === 0 && elapsed < 120) {
+    trophy = '🥇'; title = 'CAMPIONE!';
+    sub = 'Perfetto e velocissimo — meno di 2 minuti, zero errori!';
+    prize = '🏅 Medaglia d\'Oro · Maestro dell\'Intelligenza Emotiva';
+    prizeStyle = 'background:#fef9c3;border:2px solid #eab308;color:#92400e';
+    explain = 'Hai dimostrato padronanza completa di tutti i 18 concetti dell\'intelligenza emotiva: Tolleranza allo Stress, Coping, Assertività, Empatia, Adattabilità, Ottimismo e molto altro. Sei pronto a insegnarli!';
+  } else if (totalErrors === 0) {
+    trophy = '🏆'; title = 'Perfetto!';
+    sub = 'Nessun errore. Hai inserito tutte le 18 parole correttamente!';
+    prize = '🥈 Medaglia d\'Argento · Esperto di Intelligenza Emotiva';
+    prizeStyle = 'background:#f1f5f9;border:2px solid #94a3b8;color:#334155';
+    explain = 'Ottima comprensione di tutti i concetti. Rigioca cercando di completare in meno di 2 minuti per la medaglia d\'oro!';
+  } else if (totalErrors <= 3) {
+    trophy = '⭐'; title = 'Molto bene!';
+    sub = 'Solo ' + totalErrors + ' errori lungo la strada — ottima padronanza!';
+    prize = '🥉 Medaglia di Bronzo · Buona conoscenza';
+    prizeStyle = 'background:#fff7ed;border:2px solid #f97316;color:#7c2d12';
+    explain = 'Hai quasi tutto! Rileggi le spiegazioni degli errori e rigioca per arrivare all\'oro. Ci sei quasi!';
+  } else if (totalErrors <= 6) {
+    trophy = '💪'; title = 'Ottimo sforzo!';
+    sub = totalErrors + ' errori — stai imparando i concetti chiave.';
+    prize = '📜 Attestato di Merito';
+    prizeStyle = 'background:#f0fdf4;border:2px solid #86efac;color:#14532d';
+    explain = 'Buon lavoro! Alcuni concetti richiedono ancora un po\' di pratica. Rileggi le spiegazioni e riprova — migliorai ogni volta.';
+  } else {
+    trophy = '📚'; title = 'Completato!';
+    sub = 'Hai finito il brano. Ora rileggi le spiegazioni e riprova!';
+    prize = '📚 Attestato di Partecipazione';
+    prizeStyle = 'background:#eff6ff;border:2px solid #93c5fd;color:#1e40af';
+    explain = 'Completare è già un traguardo. I concetti dell\'intelligenza emotiva si consolidano con la ripetizione — ogni partita ti avvicina alla padronanza!';
+  }
+
+  document.getElementById('win-trophy').textContent = trophy;
+  document.getElementById('win-title').textContent = title;
+  document.getElementById('win-sub').textContent = sub;
+  const pe = document.getElementById('win-prize');
+  pe.textContent = prize;
+  pe.style.cssText = prizeStyle;
+  document.getElementById('ws-score').textContent = correct + '/18';
+  document.getElementById('ws-errors').textContent = totalErrors;
+  document.getElementById('ws-time').textContent = timeStr;
+  document.getElementById('win-explain').innerHTML = explain;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function resetGame() {
+  clearInterval(timerInterval);
+  filled = {};
+  activeWord = null;
+  totalErrors = 0;
+  lockedBlanks = new Set();
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('errors-panel').classList.remove('show');
+  document.getElementById('h-correct').textContent = '0';
+  document.getElementById('h-errors').textContent = '0';
+  document.querySelectorAll('.blank').forEach(el => {
+    el.textContent = '· · ·';
+    el.className = 'blank';
+  });
+  renderBank();
+  attachBlanks();
+  startTimer();
+  updateProgress();
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+initGame();
+</script>
+</body>
+</html>
