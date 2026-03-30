@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Talent Lab - Calibrazione</title>
+    <style>
+        :root {
+            --bg-page: #e8ece9; 
+            --card-white: #fdfdfb; 
+            --primary: #2c4a52; 
+            --accent: #5e8b7e; 
+            --border: #ccd5d1;
+            --danger: #dc2626;
+            --text-muted: #546a70;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--primary);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
+
+        .container { max-width: 850px; width: 100%; }
+
+        .slide-box {
+            background: var(--card-white);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .active { display: block; }
+
+        h2 { text-align: center; }
+        .tag { color: var(--accent); font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        
+        .scale-container {
+            display: flex; justify-content: center; gap: 15px; margin: 30px 0;
+        }
+
+        .scale-btn {
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid var(--border); background: white;
+            cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+
+        .scale-btn:hover { transform: scale(1.1); }
+        .scale-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .btn-next { 
+            background: var(--primary); color: white; border: none; padding: 18px; 
+            border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; 
+            opacity: 0.3; pointer-events: none; transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-next.enabled { opacity: 1; pointer-events: auto; }
+
+        .info-card {
+            background: #f8faf9; padding: 15px; border-radius: 12px; 
+            border-left: 5px solid var(--accent); margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="slide1" class="slide-box active">
+        <span class="tag">Fase 1: Consapevolezza</span>
+        <h2>🌡️ Il Termometro delle Emozioni</h2>
+        <p>Prima di proseguire, osserva il tuo stato interno. A che "temperatura" sei in questo momento?</p>
+        
+        <div class="info-card">
+            <b>Zona 1 (0-1):</b> Calma e connessione. Massima logica.<br>
+            <b>Zona 2 (2-3):</b> Inizio di tensione, preoccupazione e distrazione.<br>
+            <b>Zona 3 (4-5):</b> Rabbia e crisi. La logica si spegne.
+        </div>
+
+        <p style="text-align:center;"><b>Seleziona il tuo livello (0-5) per sbloccare:</b></p>
+        <div class="scale-container" id="scale1">
+            <button class="scale-btn" onclick="selectLevel(1, 0)">0</button>
+            <button class="scale-btn" onclick="selectLevel(1, 1)">1</button>
+            <button class="scale-btn" onclick="selectLevel(1, 2)">2</button>
+            <button class="scale-btn" onclick="selectLevel(1, 3)">3</button>
+            <button class="scale-btn" onclick="selectLevel(1, 4)">4</button>
+            <button class="scale-btn" onclick="selectLevel(1, 5)">5</button>
+        </div>
+
+        <button id="next1" class="btn-next" onclick="showSlide(2)">GUIDA ALL'AUTOREGOLAZIONE ➡️</button>
+    </div>
+
+    <div id="slide2" class="slide-box">
+        <span class="tag">Fase 2: Strategia</span>
+        <h2>🧠 Guida all'Autoregolazione</h2>
+        <p>Usa queste strategie per gestire l'emozione e tornare in controllo della tua corteccia prefrontale:</p>
+        
+        <div class="info-card">
+            <b>1. Riconosci e Nomina:</b> Identifica i segnali fisici. Dare un nome all'emozione ne riduce l'impatto.<br><br>
+            <b>2. Scegli il tuo Kit:</b> <br>
+            • <i>Somatico:</i> Respiro profondo o allontanamento fisico.<br>
+            • <i>Cognitivo:</i> Conta fino a 10 o cambia prospettiva.<br><br>
+            <b>3. Ricalibra:</b> Torna nella "Base di Sicurezza" (Livello 0-1) prima di agire.
+        </div>
+
+        <p style="text-align:center;"><b>Misura nuovamente il tuo stato dopo questa riflessione:</b></p>
+        <div class="scale-container" id="scale2">
+            <button class="scale-btn" onclick="selectLevel(2, 0)">0</button>
+            <button class="scale-btn" onclick="selectLevel(2, 1)">1</button>
+            <button class="scale-btn" onclick="selectLevel(2, 2)">2</button>
+            <button class="scale-btn" onclick="selectLevel(2, 3)">3</button>
+            <button class="scale-btn" onclick="selectLevel(2, 4)">4</button>
+            <button class="scale-btn" onclick="selectLevel(2, 5)">5</button>
+        </div>
+
+        <button id="next2" class="btn-next" onclick="showSlide(3)">SFIDA DI COPING ➡️</button>
+    </div>
+
+    <div id="slide3" class="slide-box" style="text-align:center;">
+        <span class="tag">Esercitazione</span>
+        <h2>🔗 Sfida di Coping Online</h2>
+        <p>Sei pronto per applicare le strategie. Accedi al modulo interattivo:</p>
+        
+        <a href="https://disciplinegiuridicoeconomiche-eng.github.io/executive-training/sfida_di_coping.html" target="_blank" style="text-decoration:none;">
+            <div class="info-card" style="border: 2px dashed var(--accent); color: var(--primary); padding: 30px;">
+                <b>CLICCA QUI PER APRIRE LA SFIDA DI COPING ↗️</b>
+            </div>
+        </a>
+        
+        <button class="btn-next enabled" onclick="location.reload()" style="background: var(--accent); margin-top: 30px;">RICOMINCIA PERCORSO 🔄</button>
+    </div>
+</div>
+
+<script>
+    function selectLevel(slideNum, value) {
+        const container = document.getElementById('scale' + slideNum);
+        container.querySelectorAll('.scale-btn').forEach(btn => btn.classList.remove('selected'));
+        event.target.classList.add('selected');
+        
+        document.getElementById('next' + slideNum).classList.add('enabled');
+
+        if(value >= 4) {
+            alert("⚠️ Sei in Zona Rossa. Rallenta e fai dei respiri profondi prima di proseguire.");
+        }
+    }
+
+    function showSlide(num) {
+        document.querySelectorAll('.slide-box').forEach(s => s.classList.remove('active'));
+        document.getElementById('slide' + num).classList.add('active');
+        window.scrollTo(0,0);
+    }
+</script>
+
+</body>
+</html>
