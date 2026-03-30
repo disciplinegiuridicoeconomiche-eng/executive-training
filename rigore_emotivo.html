@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Executive Lab · Il Rigore delle Emozioni</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(145deg, #0a2f1f 0%, #03170e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .cover-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0b2f1a 0%, #041a0c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.6s ease, transform 0.5s ease;
+        }
+
+        .cover-content {
+            max-width: 650px;
+            width: 90%;
+            background: rgba(255, 250, 235, 0.96);
+            border-radius: 80px;
+            padding: 45px 35px;
+            text-align: center;
+            box-shadow: 0 40px 60px rgba(0,0,0,0.4);
+            border: 2px solid #ffdd99;
+        }
+
+        .executive-badge {
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            color: #b47c44;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .cover-content h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #d98c2b, #7a3e0a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .cover-emotion-icons {
+            font-size: 2.5rem;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .cover-text {
+            font-size: 1.2rem;
+            color: #3a2a1a;
+            line-height: 1.5;
+            margin: 25px 0;
+            font-weight: 500;
+        }
+
+        .enter-btn {
+            background: #e67e22;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 16px 40px;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s linear;
+            box-shadow: 0 8px 0 #9b4b1a;
+            font-family: inherit;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        .enter-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 3px 0 #9b4b1a;
+        }
+
+        .game-wrapper {
+            max-width: 1400px;
+            width: 100%;
+            background: #fffaf0;
+            border-radius: 70px;
+            box-shadow: 0 30px 45px rgba(0,0,0,0.5);
+            padding: 25px 30px 35px;
+            display: none;
+        }
+
+        .game-wrapper.visible {
+            display: block;
+        }
+
+        h1.game-title {
+            text-align: center;
+            font-size: 2.3rem;
+            margin: 0 0 5px;
+            background: linear-gradient(135deg, #e09d32, #8b3c0c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .sub {
+            text-align: center;
+            color: #2b6e42;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .game-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .penalty-area {
+            flex: 2;
+            min-width: 400px;
+        }
+
+        .emotion-panel {
+            flex: 1;
+            min-width: 280px;
+            background: #fdf3e4;
+            border-radius: 55px;
+            padding: 20px;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.1);
+        }
+
+        .canvas-container {
+            background: #1a6e2c;
+            border-radius: 50px;
+            padding: 20px;
+            background-image: radial-gradient(circle at 20% 30%, #3ba34b 2%, transparent 2.5%);
+            background-size: 28px 28px;
+        }
+
+        canvas {
+            background: #2d8c2d;
+            border-radius: 40px;
+            box-shadow: 0 12px 25px black;
+            cursor: crosshair;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .controls {
+            background: #ffefdf;
+            border-radius: 45px;
+            padding: 18px;
+            margin-top: 20px;
+        }
+
+        .power-container {
+            background: #4f2f14;
+            border-radius: 40px;
+            padding: 8px;
+            margin-bottom: 20px;
+        }
+
+        .power-bar {
+            height: 32px;
+            background: linear-gradient(90deg, #ffb347, #ff6a00);
+            border-radius: 30px;
+            width: 0%;
+            transition: width 0.02s linear;
+        }
+
+        .aim-hint {
+            background: #2c241a;
+            color: #ffdd99;
+            padding: 12px;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 0.9rem;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .steps {
+            background: #e6d5b8;
+            border-radius: 40px;
+            padding: 12px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            color: #7a4316;
+            font-size: 0.9rem;
+        }
+
+        .steps span {
+            background: #ffaa33;
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border-radius: 30px;
+            line-height: 28px;
+            margin: 0 5px;
+            color: #2c241a;
+        }
+
+        .kick-btn {
+            background: #e67e22;
+            border: none;
+            font-size: 1.6rem;
+            font-weight: bold;
+            width: 100%;
+            padding: 14px;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            transition: 0.07s linear;
+            box-shadow: 0 8px 0 #9b4b1a;
+            margin-top: 10px;
+        }
+
+        .kick-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 3px 0 #9b4b1a;
+        }
+
+        .emotion-card {
+            background: white;
+            border-radius: 45px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .emotion-emoji {
+            font-size: 4rem;
+        }
+
+        .emotion-name {
+            font-size: 1.7rem;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .emotion-desc {
+            color: #6b4c2c;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .neuroscience-box {
+            background: #e8f0f5;
+            border-radius: 30px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+            font-size: 0.85rem;
+            border-left: 5px solid #2c8fbd;
+        }
+
+        .neuroscience-box strong {
+            color: #134d73;
+        }
+
+        .feedback-text {
+            background: #2c2c2c;
+            border-radius: 40px;
+            padding: 18px;
+            margin-top: 20px;
+            text-align: center;
+            color: #f7d44a;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .reset-btn {
+            background: #b97f44;
+            border: none;
+            padding: 10px;
+            border-radius: 40px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            color: white;
+        }
+
+        .angle-indicator {
+            background: #e6d5b8;
+            border-radius: 30px;
+            padding: 10px 15px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #7a4316;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #6f4f2e;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 800px) {
+            .cover-content h1 { font-size: 2.5rem; }
+            .enter-btn { font-size: 1.3rem; padding: 12px 30px; }
+            .game-wrapper { padding: 15px; }
+            .emotion-name { font-size: 1.3rem; }
+            .neuroscience-box { font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- COPERTINA -->
+<div id="coverPage" class="cover-page">
+    <div class="cover-content">
+        <div class="executive-badge">EXECUTIVE LAB · GIOCO DEL RIGORE</div>
+        <h1>⚽ Il Rigore</h1>
+        <div class="cover-emotion-icons">
+            😡 😨 😌 😰 😎 😔
+        </div>
+        <div class="cover-text">
+            Sei il rigorista. Come ti senti prima di tirare?<br>
+            La tua emozione cambia tutto — l'animazione, il tiro, il risultato.<br>
+            <strong>Scopri come le emozioni influenzano le prestazioni.</strong>
+        </div>
+        <button id="enterGameBtn" class="enter-btn">⚡ Entra in campo ⚡</button>
+    </div>
+</div>
+
+<!-- GIOCO -->
+<div id="gameWrapper" class="game-wrapper">
+    <h1 class="game-title">⚽ EMOTION PENALTY · IL RIGORE DELLE EMOZIONI</h1>
+    <div class="sub">Mira con precisione, il portiere si muove! Ogni emozione influenza la tua performance</div>
+
+    <div class="steps">
+        <span>1</span> CLICCA SUL PALLONE e TRASCINA verso dove vuoi tirare
+        <span>2</span> PREMI "TIRA IL RIGORE" per calciare!
+    </div>
+
+    <div class="game-layout">
+        <div class="penalty-area">
+            <div class="canvas-container">
+                <canvas id="penaltyCanvas" width="750" height="450" style="width:100%; height:auto; max-width:750px; aspect-ratio:750/450"></canvas>
+            </div>
+            <div class="controls">
+                <div class="power-container">
+                    <div id="powerFill" class="power-bar"></div>
+                </div>
+                <div class="aim-hint">
+                    🖱️ TRASCINA DAL PALLONE VERSO LA PORTA<br>
+                    (più lungo = più potenza | la linea tratteggiata mostra la traiettoria)
+                </div>
+                <div id="angleIndicator" class="angle-indicator">
+                    🎯 Direzione: in attesa | 💪 Potenza: 0%
+                </div>
+                <button id="kickBtn" class="kick-btn">⚡ TIRA IL RIGORE ⚡</button>
+            </div>
+        </div>
+
+        <div class="emotion-panel">
+            <div id="emotionDisplay" class="emotion-card">
+                <div class="emotion-emoji">🧠</div>
+                <div class="emotion-name">Pronto a tirare</div>
+                <div class="emotion-desc">1️⃣ Trascina dal pallone 2️⃣ Premi TIRA</div>
+            </div>
+            <div id="feedbackMessage" class="feedback-text">
+                💡 PASSO 1: Trascina dal pallone verso la porta. Il portiere si muoverà in base alla tua mira!
+            </div>
+            <button id="resetGameBtn" class="reset-btn">🔄 NUOVO RIGORE</button>
+        </div>
+    </div>
+    <footer>🔥 Il portiere legge il tuo movimento! Solo la mira perfetta e la giusta gestione emotiva portano al gol.</footer>
+</div>
+
+<script>
+    (function() {
+        // TRANSIZIONE COPERTINA
+        const coverPage = document.getElementById('coverPage');
+        const gameWrapper = document.getElementById('gameWrapper');
+        const enterBtn = document.getElementById('enterGameBtn');
+
+        enterBtn.addEventListener('click', () => {
+            coverPage.style.opacity = '0';
+            coverPage.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                coverPage.style.display = 'none';
+                gameWrapper.classList.add('visible');
+            }, 500);
+        });
+
+        // DIZIONARIO NEUROSCIENZE
+        const neuroscienceExplanations = {
+            "Ansia": "🧠 L'ansia attiva il sistema di allarme del cervello, consumando risorse cognitive. I movimenti automatici — come calciare — vengono 'sovrascritti' dalla preoccupazione. La tecnica per gestirla: respirare lentamente per 4 secondi prima di agire.",
+            "Calma": "🧠 La calma permette alla corteccia prefrontale — la parte razionale del cervello — di guidare l'azione. I movimenti sono precisi, la decisione è lucida. Non è assenza di emozione: è regolazione emotiva consapevole.",
+            "Rabbia": "🧠 La rabbia dà energia ma riduce la precisione. Il cervello in stato di rabbia tende ad agire impulsivamente senza calcolare bene. Un atleta impara a trasformare la rabbia in determinazione — non in aggressività cieca.",
+            "Paura": "🧠 La paura del fallimento è una delle emozioni più potenti nello sport. Attiva l'amigdala e blocca i movimenti automatici. La tecnica: concentrarsi sul processo (dove mettere la palla) invece che sul risultato (non sbagliare).",
+            "Fiducia": "🧠 La fiducia in sé stessi (autoefficacia) è il predittore più forte della prestazione sportiva. Non è arroganza: è la certezza basata sull'allenamento che il proprio corpo sa cosa fare. Si costruisce con la pratica e il dialogo interno positivo.",
+            "Tristezza": "🧠 La tristezza riduce l'energia disponibile e abbassa la motivazione. Il corpo è fisicamente più lento e i movimenti meno decisi. Gli atleti imparano a gestirla con rituali pre-gara e supporto sociale — non ignorandola.",
+            "Fiducia Eroica": "🧠 La fiducia in sé stessi (autoefficacia) è il predittore più forte della prestazione sportiva. Non è arroganza: è la certezza basata sull'allenamento che il proprio corpo sa cosa fare. Si costruisce con la pratica e il dialogo interno positivo.",
+            "Calma Strategica": "🧠 La calma permette alla corteccia prefrontale — la parte razionale del cervello — di guidare l'azione. I movimenti sono precisi, la decisione è lucida. Non è assenza di emozione: è regolazione emotiva consapevole.",
+            "Frustrazione": "🧠 La rabbia dà energia ma riduce la precisione. Il cervello in stato di rabbia tende ad agire impulsivamente senza calcolare bene. Un atleta impara a trasformare la rabbia in determinazione — non in aggressività cieca.",
+            "Delusione": "🧠 La tristezza riduce l'energia disponibile e abbassa la motivazione. Il corpo è fisicamente più lento e i movimenti meno decisi. Gli atleti imparano a gestirla con rituali pre-gara e supporto sociale — non ignorandola."
+        };
+
+        // INIZIALIZZA GIOCO
+        const canvas = document.getElementById('penaltyCanvas');
+        const ctx = canvas.getContext('2d');
+        const CW = 750, CH = 450;
+        canvas.width = CW; canvas.height = CH;
+
+        const BALL_X = CW/2;
+        const BALL_Y = CH - 70;
+        const GOAL_WIDTH = 160;
+        const GOAL_LEFT = CW/2 - GOAL_WIDTH/2;
+        const GOAL_RIGHT = CW/2 + GOAL_WIDTH/2;
+        const GOAL_TOP = 18;
+
+        let aimStart = null;
+        let aimEnd = null;
+        let aimingActive = false;
+        let animationActive = false;
+
+        let selectedAngle = 0.5;
+        let selectedPower = 0.5;
+        let selectedPowerPercent = 0;
+        let confirmedAngle = 0.5;
+        let confirmedPower = 0.5;
+
+        let keeperPosition = 0.5;
+        let keeperDive = false;
+        let diveOffset = 0;
+
+        function getDifficulty(angle) {
+            const dist = Math.abs(angle - 0.5);
+            if (dist > 0.35) return { level: "ESTREMO", mod: 0.4 };
+            if (dist > 0.25) return { level: "DIFFICILE", mod: 0.6 };
+            if (dist > 0.15) return { level: "MEDIO", mod: 0.8 };
+            return { level: "FACILE (centro)", mod: 0.9 };
+        }
+
+        function updateIndicators(angle, powerPercent) {
+            let angleText = "";
+            if (angle < 0.2) angleText = "⬅️ ANGOLO SINISTRO (molto difficile)";
+            else if (angle > 0.8) angleText = "➡️ ANGOLO DESTRO (molto difficile)";
+            else if (angle < 0.35) angleText = "↖️ SINISTRA (difficile)";
+            else if (angle > 0.65) angleText = "↗️ DESTRA (difficile)";
+            else if (angle < 0.45) angleText = "⬅️ SINISTRA CENTRALE";
+            else if (angle > 0.55) angleText = "➡️ DESTRA CENTRALE";
+            else angleText = "🎯 CENTRO PORTA";
+            const diff = getDifficulty(angle);
+            document.getElementById('angleIndicator').innerHTML = `🎯 Direzione: ${angleText} | 💪 Potenza: ${Math.round(powerPercent)}%<br>🎯 Precisione richiesta: ${diff.level}`;
+            document.getElementById('powerFill').style.width = powerPercent + '%';
+        }
+
+        function calculateAimFromDrag(start, end) {
+            if (!start || !end) return { angle: 0.5, power: 0.5, powerPercent: 0 };
+            const dx = end.x - start.x, dy = end.y - start.y;
+            let dist = Math.hypot(dx, dy);
+            dist = Math.min(220, Math.max(0, dist));
+            const powerPercent = (dist / 220) * 100;
+            const power = Math.max(0.2, Math.min(1, powerPercent / 100));
+            let targetX = end.x;
+            let angle = (targetX - GOAL_LEFT) / GOAL_WIDTH;
+            angle = Math.min(0.98, Math.max(0.02, angle));
+            return { angle, power, powerPercent };
+        }
+
+        function calculatePredictedTrajectory(angle, power) {
+            return { x: GOAL_LEFT + (angle * GOAL_WIDTH), y: GOAL_TOP + 5 + (1 - power) * 20 };
+        }
+
+        function drawField(showAimLine = false, startPt = null, endPt = null, ballX = BALL_X, ballY = BALL_Y, showPrediction = false, predStart = null, predEnd = null) {
+            ctx.clearRect(0, 0, CW, CH);
+            ctx.fillStyle = '#3c9e3c';
+            ctx.fillRect(0, 0, CW, CH);
+            ctx.strokeStyle = '#ffffffcc';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(100, 50, CW-200, CH-90);
+            ctx.beginPath();
+            ctx.arc(BALL_X, BALL_Y, 25, 0, Math.PI*2);
+            ctx.stroke();
+            ctx.fillStyle = '#b87c4f';
+            ctx.fillRect(GOAL_LEFT, GOAL_TOP, GOAL_WIDTH, 34);
+            ctx.fillStyle = '#8b5a2b';
+            ctx.fillRect(GOAL_LEFT + 5, GOAL_TOP + 3, GOAL_WIDTH - 10, 27);
+            ctx.beginPath();
+            ctx.strokeStyle = '#ccc';
+            for (let i = 0; i < 8; i++) {
+                ctx.moveTo(GOAL_LEFT + 10, GOAL_TOP + 5 + i * 4);
+                ctx.lineTo(GOAL_RIGHT - 10, GOAL_TOP + 5 + i * 4);
+                ctx.stroke();
+            }
+            const keeperX = GOAL_LEFT + (keeperPosition * GOAL_WIDTH) + diveOffset;
+            ctx.fillStyle = '#d64b2c';
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.ellipse(keeperX, 48 + (keeperDive ? 8 : 0), 22, 32, keeperDive ? 0.3 : 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#f7c873';
+            ctx.beginPath();
+            ctx.arc(keeperX - 7, 40 + (keeperDive ? 6 : 0), 6, 0, Math.PI*2);
+            ctx.arc(keeperX + 7, 40 + (keeperDive ? 6 : 0), 6, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#2b2b2b';
+            ctx.beginPath();
+            ctx.arc(keeperX, 48 + (keeperDive ? 5 : 0), 8, 0, Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#f9f3cf';
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 10, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#222';
+            ctx.beginPath();
+            ctx.moveTo(ballX-4, ballY-4);
+            ctx.lineTo(ballX+4, ballY+4);
+            ctx.moveTo(ballX+4, ballY-4);
+            ctx.lineTo(ballX-4, ballY+4);
+            ctx.stroke();
+            ctx.fillStyle = "black";
+            ctx.font = "bold 14px 'Segoe UI'";
+            ctx.fillText("⚽", ballX-7, ballY-6);
+            if (showPrediction && predStart && predEnd) {
+                ctx.beginPath();
+                ctx.moveTo(predStart.x, predStart.y);
+                ctx.lineTo(predEnd.x, predEnd.y);
+                ctx.strokeStyle = '#88ff88';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([10, 8]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#aaffaa';
+                ctx.beginPath();
+                ctx.arc(predEnd.x, predEnd.y, 6, 0, Math.PI*2);
+                ctx.fill();
+            }
+            if (showAimLine && startPt && endPt) {
+                ctx.beginPath();
+                ctx.moveTo(startPt.x, startPt.y);
+                ctx.lineTo(endPt.x, endPt.y);
+                ctx.strokeStyle = '#ffcc44';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([8, 8]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                const angle = Math.atan2(endPt.y - startPt.y, endPt.x - startPt.x);
+                const arrowSize = 14;
+                ctx.fillStyle = '#ffaa33';
+                ctx.beginPath();
+                ctx.moveTo(endPt.x, endPt.y);
+                ctx.lineTo(endPt.x - arrowSize * Math.cos(angle + 0.8), endPt.y - arrowSize * Math.sin(angle + 0.8));
+                ctx.lineTo(endPt.x - arrowSize * Math.cos(angle - 0.8), endPt.y - arrowSize * Math.sin(angle - 0.8));
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(startPt.x, startPt.y, 8, 0, Math.PI*2);
+                ctx.fillStyle = '#ffaa33cc';
+                ctx.fill();
+            }
+        }
+
+        function updateKeeperReaction(angle) {
+            let targetPos = angle;
+            targetPos = targetPos + (Math.random() - 0.5) * 0.12;
+            targetPos = Math.min(0.95, Math.max(0.05, targetPos));
+            keeperPosition = targetPos;
+            keeperDive = true;
+            diveOffset = (Math.random() - 0.5) * 12;
+            setTimeout(() => { keeperDive = false; diveOffset = 0; drawField(); }, 300);
+        }
+
+        function calculateShotOutcome(angle, power) {
+            const diff = getDifficulty(angle);
+            let accuracyProb = diff.mod * 0.7;
+            if (power < 0.25) accuracyProb -= 0.15;
+            if (power > 0.9) accuracyProb -= 0.1;
+            if (power > 0.55 && power < 0.8) accuracyProb += 0.05;
+            accuracyProb = Math.min(0.88, Math.max(0.2, accuracyProb));
+            
+            const isAccurate = Math.random() < accuracyProb;
+            let finalAngle = angle;
+            if (!isAccurate) {
+                const error = (Math.random() - 0.5) * 0.5;
+                finalAngle = Math.min(0.98, Math.max(0.02, angle + error));
+            }
+            
+            const finalX = GOAL_LEFT + (finalAngle * GOAL_WIDTH);
+            const isInGoal = (finalX >= GOAL_LEFT && finalX <= GOAL_RIGHT);
+            
+            let isGoal = false;
+            if (isInGoal) {
+                const keeperX = GOAL_LEFT + (keeperPosition * GOAL_WIDTH);
+                const distance = Math.abs(finalX - keeperX);
+                let saveProb = 0.6;
+                if (distance < 15) saveProb = 0.85;
+                else if (distance < 30) saveProb = 0.65;
+                else saveProb = 0.45;
+                if (power > 0.7) saveProb -= 0.1;
+                if (power < 0.4) saveProb += 0.1;
+                saveProb = Math.min(0.9, Math.max(0.3, saveProb));
+                isGoal = Math.random() > saveProb;
+            }
+            return { isGoal, finalAngle, isAccurate, finalX };
+        }
+
+        function evaluateEmotion(isGoal, power, angle, isAccurate) {
+            if (isGoal) {
+                if (power > 0.7 && (angle < 0.2 || angle > 0.8) && isAccurate)
+                    return { emotion: "Fiducia Eroica", emoji: "🦁🔥", desc: "Angolo perfetto! Nervi saldi, gestione impeccabile." };
+                if (power > 0.6 && isAccurate && (angle > 0.3 && angle < 0.7))
+                    return { emotion: "Calma", emoji: "😌✨", desc: "Tiro potente e preciso al centro. Hai mantenuto la lucidità." };
+                if (power > 0.5 && isAccurate)
+                    return { emotion: "Fiducia", emoji: "😎⚡", desc: "Gol pulito, gestito con serenità. La fiducia ha premiato." };
+                if (power > 0.35 && isAccurate)
+                    return { emotion: "Calma Strategica", emoji: "🍃💫", desc: "Gol con tocco delicato. Pazienza e tecnica vincente." };
+                return { emotion: "Fiducia", emoji: "😊⚽", desc: "Gol! Hai creduto in te stesso e ha funzionato." };
+            } else {
+                if (!isAccurate && (angle < 0.2 || angle > 0.8))
+                    return { emotion: "Ansia", emoji: "😰🌀", desc: "Hai cercato l'angolo ma non l'hai centrato. L'ansia ha condizionato la precisione." };
+                if (power < 0.3)
+                    return { emotion: "Paura", emoji: "😨❄️", desc: "Tiro troppo debole, la paura ha bloccato la potenza." };
+                if (power > 0.85 && (angle > 0.3 && angle < 0.7))
+                    return { emotion: "Rabbia", emoji: "🤬⚡", desc: "Troppa forza e poca precisione. La rabbia ha tolto lucidità." };
+                if (!isAccurate)
+                    return { emotion: "Ansia", emoji: "😰🌀", desc: "Non hai centrato la mira. L'ansia ha interferito con la tecnica." };
+                if (isAccurate && (angle > 0.35 && angle < 0.65))
+                    return { emotion: "Tristezza", emoji: "😔🌧️", desc: "Tiro preciso ma il portiere ha intuito. La delusione è normale, riprova!" };
+                return { emotion: "Delusione", emoji: "😔💔", desc: "Il portiere ha parato. Non mollare, ogni errore è un passo verso il miglioramento." };
+            }
+        }
+
+        function getNeuroscienceExplanation(emotionName) {
+            return neuroscienceExplanations[emotionName] || neuroscienceExplanations["Calma"];
+        }
+
+        function animateKick(angleVal, powerVal) {
+            if (animationActive) return;
+            animationActive = true;
+            updateKeeperReaction(angleVal);
+            const outcome = calculateShotOutcome(angleVal, powerVal);
+            const emotion = evaluateEmotion(outcome.isGoal, powerVal, angleVal, outcome.isAccurate);
+            const neuroscienceText = getNeuroscienceExplanation(emotion.emotion);
+            
+            const startX = BALL_X, startY = BALL_Y;
+            let finalX, finalY;
+            if (outcome.isGoal) {
+                finalX = outcome.finalX;
+                finalY = GOAL_TOP + 5 + (1 - powerVal) * 18;
+            } else {
+                finalX = outcome.finalX + (Math.random() - 0.5) * 70;
+                finalY = GOAL_TOP + 20 + Math.random() * 35;
+                finalX = Math.min(GOAL_RIGHT + 60, Math.max(GOAL_LEFT - 60, finalX));
+            }
+            let progress = 0;
+            const duration = 450;
+            const startTime = performance.now();
+            function step(now) {
+                const elapsed = now - startTime;
+                progress = Math.min(1, elapsed / duration);
+                const ease = 1 - Math.pow(1 - progress, 1.2);
+                const curX = startX + (finalX - startX) * ease;
+                const curY = startY + (finalY - startY) * ease;
+                drawField(false, null, null, curX, curY);
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    drawField(false, null, null, finalX, finalY);
+                    document.getElementById('emotionDisplay').innerHTML = `
+                        <div class="emotion-emoji">${emotion.emoji}</div>
+                        <div class="emotion-name">${emotion.emotion}</div>
+                        <div class="emotion-desc">${emotion.desc}</div>
+                        <div class="neuroscience-box">
+                            <strong>🔬 Cosa succede nel cervello:</strong><br>
+                            ${neuroscienceText}
+                        </div>
+                        <div style="font-size:0.75rem; margin-top:10px; background:#f0e2d0; border-radius:30px; padding:8px;">
+                            ${outcome.isGoal ? "⚽ GOOOOL!" : "🧤 PARATO!"}<br>
+                            Mira: ${angleVal < 0.25 ? "sinistra" : angleVal > 0.75 ? "destra" : "centro"} | Potenza: ${Math.round(powerVal*100)}%<br>
+                            ${outcome.isAccurate ? "✅ Tiro preciso" : "❌ Tiro impreciso"}
+                        </div>
+                    `;
+                    document.getElementById('feedbackMessage').innerHTML = outcome.isGoal ? 
+                        `🏆 GOAL! ${emotion.desc} Premi "NUOVO RIGORE" per giocare ancora! 🏆` : 
+                        `🧤 PARATO! ${emotion.desc} Premi "NUOVO RIGORE" per riprovare! 🧤`;
+                    setTimeout(() => {
+                        drawField(false);
+                        animationActive = false;
+                    }, 2800);
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let cx, cy;
+            if (e.touches) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+            else { cx = e.clientX; cy = e.clientY; }
+            let x = (cx - rect.left) * scaleX;
+            let y = (cy - rect.top) * scaleY;
+            x = Math.min(Math.max(5, x), CW-5);
+            y = Math.min(Math.max(5, y), CH-5);
+            return { x, y };
+        }
+
+        function onStart(e) {
+            if (animationActive) return;
+            e.preventDefault();
+            const pos = getCoords(e);
+            if (Math.hypot(pos.x - BALL_X, pos.y - BALL_Y) > 45) {
+                document.getElementById('feedbackMessage').innerHTML = "⚠️ Clicca SUL PALLONE per iniziare a mirare!";
+                return;
+            }
+            aimStart = { x: BALL_X, y: BALL_Y };
+            aimingActive = true;
+            document.getElementById('feedbackMessage').innerHTML = "🎯 Trascina verso dove vuoi tirare! La linea verde mostra la traiettoria.";
+        }
+
+        function onMove(e) {
+            if (!aimingActive || !aimStart || animationActive) return;
+            e.preventDefault();
+            const pos = getCoords(e);
+            aimEnd = pos;
+            const { angle, power, powerPercent } = calculateAimFromDrag(aimStart, aimEnd);
+            selectedAngle = angle; selectedPower = power; selectedPowerPercent = powerPercent;
+            updateIndicators(selectedAngle, selectedPowerPercent);
+            const pred = calculatePredictedTrajectory(selectedAngle, selectedPower);
+            drawField(true, aimStart, aimEnd, BALL_X, BALL_Y, true, aimStart, pred);
+        }
+
+        function onEnd(e) {
+            if (!aimingActive || animationActive) { aimingActive = false; drawField(false); return; }
+            aimingActive = false;
+            if (aimStart && aimEnd) {
+                const { angle, power, powerPercent } = calculateAimFromDrag(aimStart, aimEnd);
+                confirmedAngle = angle; confirmedPower = power; selectedPowerPercent = powerPercent;
+                updateIndicators(confirmedAngle, selectedPowerPercent);
+                const pred = calculatePredictedTrajectory(confirmedAngle, confirmedPower);
+                drawField(false, null, null, BALL_X, BALL_Y, true, aimStart, pred);
+                document.getElementById('feedbackMessage').innerHTML = `✅ MIRA IMPOSTATA! ${Math.round(confirmedPower*100)}% potenza. ORA PREMI "TIRA IL RIGORE"!`;
+                setTimeout(() => { if (!animationActive) drawField(false); }, 800);
+            } else {
+                confirmedAngle = 0.5; confirmedPower = 0.5; selectedPowerPercent = 50;
+                updateIndicators(0.5, 50);
+                drawField(false);
+                document.getElementById('feedbackMessage').innerHTML = "⚡ Tiro centrale di default. PREMI TIRA!";
+            }
+            aimStart = null; aimEnd = null;
+        }
+
+        canvas.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+        canvas.addEventListener('touchstart', onStart);
+        window.addEventListener('touchmove', onMove);
+        window.addEventListener('touchend', onEnd);
+
+        document.getElementById('kickBtn').addEventListener('click', () => {
+            if (animationActive) { document.getElementById('feedbackMessage').innerHTML = "⏳ Aspetta che il tiro finisca..."; return; }
+            let angle = confirmedAngle, power = confirmedPower;
+            if (power < 0.1) power = 0.5;
+            if (angle < 0 || angle > 1) angle = 0.5;
+            animateKick(angle, power);
+        });
+
+        document.getElementById('resetGameBtn').addEventListener('click', () => {
+            if (animationActive) return;
+            confirmedAngle = 0.5; confirmedPower = 0.5; selectedPowerPercent = 0; keeperPosition = 0.5;
+            updateIndicators(0.5, 0);
+            drawField(false);
+            document.getElementById('emotionDisplay').innerHTML = `<div class="emotion-emoji">🧠</div><div class="emotion-name">Pronto a tirare</div><div class="emotion-desc">1️⃣ Trascina dal pallone 2️⃣ Premi TIRA</div>`;
+            document.getElementById('feedbackMessage').innerHTML = "💡 PASSO 1: Trascina dal pallone verso la porta. Il portiere si muoverà in base alla tua mira!";
+        });
+
+        drawField(false);
+        updateIndicators(0.5, 0);
+    })();
+</script>
+</body>
+</html>
