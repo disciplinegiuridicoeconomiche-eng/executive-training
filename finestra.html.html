@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🪞 La Tua Finestra di Johari</title>
+<style>
+  :root {
+    --open: #16a34a; --blind: #d97706; --hidden: #2563eb; --unknown: #64748b;
+    --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --accent: #4f46e5;
+    --success: #10b981; --error: #ef4444; --neutral: #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; }
+  .container { max-width: 700px; width: 100%; background: var(--card); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden; position: relative; }
+  header { background: var(--accent); color: white; padding: 20px; text-align: center; }
+  h1 { font-size: 1.5rem; margin-bottom: 4px; }
+  .subtitle { font-size: 0.9rem; opacity: 0.9; }
+  .progress { height: 6px; background: #e2e8f0; }
+  .progress-bar { height: 100%; background: white; width: 0%; transition: width 0.4s ease; }
+  .screen { padding: 24px; display: none; min-height: 400px; flex-direction: column; }
+  .screen.active { display: flex; }
+  .trait-box { background: #f1f5f9; padding: 24px; border-radius: 12px; text-align: center; font-size: 1.15rem; font-weight: 500; margin-bottom: 20px; line-height: 1.4; border-left: 4px solid var(--accent); }
+  .zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .zone { padding: 18px; border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid #e2e8f0; background: white; }
+  .zone:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .zone.selected { border-color: var(--accent); background: #eef2ff; box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
+  .zone h3 { font-size: 1rem; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .zone p { font-size: 0.8rem; color: var(--neutral); }
+  .zone[data-zone="open"] h3 { color: var(--open); }
+  .zone[data-zone="blind"] h3 { color: var(--blind); }
+  .zone[data-zone="hidden"] h3 { color: var(--hidden); }
+  .zone[data-zone="unknown"] h3 { color: var(--unknown); }
+  .feedback { padding: 16px; border-radius: 10px; margin: 16px 0; background: #f8fafc; border-left: 4px solid var(--neutral); line-height: 1.5; font-size: 0.95rem; display: none; }
+  .feedback.correct { border-color: var(--success); background: #f0fdf4; }
+  .feedback.incorrect { border-color: var(--error); background: #fef2f2; }
+  .reflection-prompt { background: #fefce8; border: 1px solid #facc15; padding: 14px; border-radius: 10px; margin: 16px 0; font-style: italic; color: #854d0e; display: none; }
+  .btn { padding: 14px 24px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; background: var(--accent); color: white; width: 100%; margin-top: auto; transition: all 0.2s; font-size: 1rem; }
+  .btn:hover { background: #4338ca; }
+  .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--accent); border: 2px solid var(--accent); margin-top: 10px; }
+  .intro-list, .summary-list { list-style: none; padding: 0; }
+  .intro-list li, .summary-list li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; display: flex; align-items: start; gap: 10px; }
+  .intro-list li:last-child, .summary-list li:last-child { border-bottom: none; }
+  .icon { font-size: 1.2rem; flex-shrink: 0; }
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+  .stat-card { background: #f8fafc; padding: 12px; border-radius: 10px; text-align: center; }
+  .stat-card .num { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .stat-card .label { font-size: 0.8rem; color: var(--neutral); margin-top: 4px; }
+  @media (max-width: 500px) { .zones { grid-template-columns: 1fr; } h1 { font-size: 1.3rem; } }
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🪞 La Tua Finestra di Johari</h1>
+    <p class="subtitle">Confronta come ti vedi tu con come potresti essere visto dagli altri</p>
+    <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  </header>
+
+  <!-- SCHERMATA 1: INTRO -->
+  <div class="screen active fade-in" id="screen-intro">
+    <h2 style="margin-bottom:12px">Come funziona</h2>
+    <ul class="intro-list">
+      <li><span class="icon">👁️</span> Leggi ogni affermazione con calma</li>
+      <li><span class="icon">👆</span> Tocca l'area che secondo te le corrisponde</li>
+      <li><span class="icon">💭</span> Leggi il feedback e rispondi alla domanda di riflessione</li>
+      <li><span class="icon">⏱️</span> Prenditi il tempo che serve. Non c'è fretta.</li>
+    </ul>
+    <p style="margin:12px 0 20px; color:#64748b; font-size:0.9rem">🎯 Obiettivo: allenare la consapevolezza di sé e prepararsi al confronto con il punto di vista altrui.</p>
+    <button class="btn" onclick="startGame()">Inizia l'attività</button>
+  </div>
+
+  <!-- SCHERMATA 2: GIOCO -->
+  <div class="screen fade-in" id="screen-game">
+    <div class="trait-box" id="trait-text">...</div>
+    <div class="zones" id="zones">
+      <div class="zone" data-zone="open"><h3>🌤️ Aperta</h3><p>Io lo so • Gli altri lo vedono</p></div>
+      <div class="zone" data-zone="blind"><h3>👁️ Cieca</h3><p>Io non me ne accorgo • Gli altri sì</p></div>
+      <div class="zone" data-zone="hidden"><h3>🔒 Nascosta</h3><p>Io lo so • Scelgo di non mostrarlo</p></div>
+      <div class="zone" data-zone="unknown"><h3>🌑 Ignota</h3><p>Nessuno può saperlo (ancora)</p></div>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="reflection-prompt" id="reflection"></div>
+    <button class="btn" id="next-btn" disabled onclick="nextItem()">Continua</button>
+  </div>
+
+  <!-- SCHERMATA 3: SINTESI -->
+  <div class="screen fade-in" id="screen-summary">
+    <h2 style="margin-bottom:8px">📊 La tua mappa di consapevolezza</h2>
+    <div class="stats-grid" id="stats"></div>
+    <p style="margin:16px 0 8px; font-weight:500">🪞 Spunti per il confronto in classe:</p>
+    <ul class="summary-list">
+      <li><span class="icon">🔄</span> Quale area ti ha sorpreso di più? Perché?</li>
+      <li><span class="icon">👥</span> Come potresti "illuminare" un'area Cieca questa settimana?</li>
+      <li><span class="icon">📝</span> Scrivi un impegno concreto per ampliare la tua Area Aperta in modo rispettoso.</li>
+    </ul>
+    <p style="margin:16px 0 8px; color:#64748b; font-size:0.9rem">💡 Porta queste riflessioni nel prossimo momento di confronto guidato dall'insegnante.</p>
+    <button class="btn" onclick="resetGame()">Ricomincia</button>
+    <button class="btn btn-secondary" onclick="window.print()">🖨️ Salva/Stampa riepilogo</button>
+  </div>
+</div>
+
+<script>
+// === DATI: 15 tratti + feedback + riflessione ===
+const traits = [
+  { text: "Parlo volentieri in pubblico", zone: "open", explanation: "È un comportamento manifesto: tu lo riconosci e gli altri possono osservarlo direttamente.", reflection: "Quando ti esprimi in pubblico, cosa noti di come gli altri reagiscono a te?" },
+  { text: "Ho una risata contagiosa", zone: "blind", explanation: "Spesso non percepiamo il suono della nostra voce o del nostro modo di ridere, ma gli altri lo notano subito.", reflection: "Hai mai ricevuto un commento inaspettato sul tuo modo di esprimere emozioni?" },
+  { text: "Tengo segreti i miei sogni più grandi", zone: "hidden", explanation: "Lo sai bene tu, ma per protezione o timore di giudizio hai scelto di non condividerlo apertamente.", reflection: "Cosa ti trattiene dal condividere un aspetto importante di te?" },
+  { text: "Come reagirò a una crisi improvvisa?", zone: "unknown", explanation: "Nessuno può prevedere con certezza le proprie reazioni in situazioni mai sperimentate prima.", reflection: "Quali risorse interne pensi potresti attivare se dovessi affrontare l'imprevisto?" },
+  { text: "Sono affidabile nei lavori di gruppo", zone: "open", explanation: "Lo dimostri con coerenza: tu ne sei consapevole e il gruppo lo verifica nei fatti.", reflection: "Come fai a sapere di essere percepito come affidabile?" },
+  { text: "Interrompo gli altri senza accorgermene", zone: "blind", explanation: "Abitudine relazionale spesso inconsapevole, ma evidente per chi cerca di prendere la parola.", reflection: "Come potresti chiedere un feedback gentile su questo aspetto?" },
+  { text: "Nascondo le mie insicurezze dietro l'ironia", zone: "hidden", explanation: "Strategia consapevole di autodifesa emotiva, usata per gestire la vulnerabilità senza esporsi.", reflection: "In quali contesti ti senti abbastanza sicuro da mostrare la tua vulnerabilità?" },
+  { text: "Quale talento scoprirò tra qualche anno?", zone: "unknown", explanation: "Il potenziale futuro non è ancora emerso perché manca l'esperienza o il contesto giusto per attivarlo.", reflection: "Quale attività potresti provare per esplorare una parte ancora sconosciuta di te?" },
+  { text: "Mi piace aiutare i compagni in difficoltà", zone: "open", explanation: "Azione osservabile e intenzionale, riconosciuta da te e confermata dalle relazioni che costruisci.", reflection: "Come si collega questo tuo tratto alla tua motivazione personale?" },
+  { text: "Parlo troppo veloce quando sono nervoso", zone: "blind", explanation: "Segnale fisiologico-comportamentale spesso percepito dagli altri prima che da chi lo vive.", reflection: "Quali segnali del tuo corpo potresti imparare a riconoscere in anticipo?" },
+  { text: "Ho paure che non confesso a nessuno", zone: "hidden", explanation: "Contenuto emotivo volontariamente celato per proteggere te stesso o evitare fraintendimenti.", reflection: "Cosa dovrebbe cambiare perché tu ti senta libero/a di condividere una piccola preoccupazione?" },
+  { text: "Quale impatto avrò sul mio percorso di studi?", zone: "unknown", explanation: "Domanda aperta sul futuro: il risultato dipenderà da scelte, incontri e crescita personale ancora da vivere.", reflection: "Qual è un piccolo passo concreto che puoi fare oggi per orientare il tuo percorso?" },
+  { text: "Mantengo la calma durante le verifiche", zone: "open", explanation: "Comportamento osservabile e gestito consapevolmente, riconosciuto da te e dai docenti.", reflection: "Quali strategie usi che potresti insegnare a un compagno?" },
+  { text: "Tendo a sottovalutare i miei progressi", zone: "blind", explanation: "Bias cognitivo comune: gli altri spesso notano i tuoi miglioramenti prima che tu li riconosca.", reflection: "Come potresti allenarti a riconoscere e validare i tuoi passi avanti?" },
+  { text: "Scelgo di non partecipare a certi conflitti", zone: "hidden", explanation: "Decisione consapevole basata su valori personali, non sempre visibile o comprensibile all'esterno.", reflection: "Come comunichi le tue scelte quando non sei d'accordo con il gruppo?" }
+];
+
+let current = 0;
+let stats = { open:0, blind:0, hidden:0, unknown:0, correct:0, total: traits.length };
+let answered = false;
+
+const els = {
+  screens: { intro: document.getElementById('screen-intro'), game: document.getElementById('screen-game'), summary: document.getElementById('screen-summary') },
+  progress: document.getElementById('progress'),
+  traitText: document.getElementById('trait-text'),
+  zones: document.querySelectorAll('.zone'),
+  feedback: document.getElementById('feedback'),
+  reflection: document.getElementById('reflection'),
+  nextBtn: document.getElementById('next-btn'),
+  stats: document.getElementById('stats')
+};
+
+function showScreen(name) {
+  Object.values(els.screens).forEach(s => s.classList.remove('active'));
+  els.screens[name].classList.add('active');
+}
+
+function startGame() {
+  current = 0;
+  stats = { open:0, blind:0, hidden:0, unknown:0, correct:0, total: traits.length };
+  loadTrait();
+  showScreen('game');
+}
+
+function loadTrait() {
+  answered = false;
+  const t = traits[current];
+  els.traitText.textContent = `"${t.text}"`;
+  els.feedback.style.display = 'none';
+  els.reflection.style.display = 'none';
+  els.nextBtn.disabled = true;
+  els.zones.forEach(z => z.classList.remove('selected'));
+  els.progress.style.width = `${(current / traits.length) * 100}%`;
+}
+
+els.zones.forEach(zone => {
+  zone.addEventListener('click', () => {
+    if (answered) return;
+    answered = true;
+    
+    const selected = zone.dataset.zone;
+    const t = traits[current];
+    const isCorrect = selected === t.zone;
+    
+    stats[selected]++;
+    if (isCorrect) stats.correct++;
+    
+    // Feedback
+    els.feedback.innerHTML = `<strong>${isCorrect ? '✅ Corretto' : '❌ Rifletti'}</strong><br>${t.explanation}`;
+    els.feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    els.feedback.style.display = 'block';
+    
+    // Domanda di riflessione
+    els.reflection.textContent = `💭 ${t.reflection}`;
+    els.reflection.style.display = 'block';
+    
+    els.nextBtn.disabled = false;
+    zone.classList.add('selected');
+  });
+});
+
+function nextItem() {
+  current++;
+  if (current >= traits.length) {
+    showSummary();
+  } else {
+    loadTrait();
+  }
+}
+
+function showSummary() {
+  showScreen('summary');
+  els.progress.style.width = '100%';
+  
+  const labels = { open: '🌤️ Area Aperta', blind: '👁️ Area Cieca', hidden: '🔒 Area Nascosta', unknown: '🌑 Area Ignota' };
+  const colors = { open: 'var(--open)', blind: 'var(--blind)', hidden: 'var(--hidden)', unknown: 'var(--unknown)' };
+  
+  let html = '';
+  for (const [key, count] of Object.entries(stats).filter(([k]) => k !== 'correct' && k !== 'total')) {
+    const pct = Math.round((count / traits.length) * 100);
+    html += `<div class="stat-card" style="border-top:3px solid ${colors[key]}">
+      <div class="num">${count}</div>
+      <div class="label">${labels[key]}<br><small>${pct}% delle risposte</small></div>
+    </div>`;
+  }
+  html += `<div class="stat-card" style="border-top:3px solid var(--success)">
+    <div class="num">${stats.correct}/${traits.length}</div>
+    <div class="label">Risposte allineate<br>al modello Johari</div>
+  </div>`;
+  
+  els.stats.innerHTML = html;
+}
+
+function resetGame() {
+  showScreen('intro');
+}
+</script>
+</body>
+</html>
