@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costruiamo la Nostra Societa - ITE 4^</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#0c1117;--bg2:#151d27;--card:#1a2332;--border:rgba(255,255,255,0.08);--text:#f0f2f5;--text-muted:#8899aa;--accent:#f59e0b;--accent-glow:rgba(245,158,11,0.15);--accent2:#10b981;--hard:#3b82f6;--soft:#10b981;--error:#ef4444;--error-bg:rgba(239,68,68,0.1);--purple:#a78bfa;--purple-glow:rgba(167,139,250,0.12);--radius:14px;--radius-sm:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.7;font-size:16px;overflow-x:hidden}
+.bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 600px 400px at 10% 15%,rgba(245,158,11,0.06) 0%,transparent 70%),radial-gradient(ellipse 500px 500px at 90% 85%,rgba(16,185,129,0.05) 0%,transparent 70%),radial-gradient(ellipse 800px 300px at 50% 50%,rgba(59,130,246,0.03) 0%,transparent 70%)}
+.grid-pattern{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.025;background-image:linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px);background-size:60px 60px}
+.float-orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbFloat 20s ease-in-out infinite alternate}
+@keyframes orbFloat{0%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-40px) scale(1.1)}100%{transform:translate(-20px,20px) scale(0.95)}}
+.app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:20px 16px 60px}
+.app-header{text-align:center;padding:40px 20px 30px}
+.app-header h1{font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:900;letter-spacing:-1px;background:linear-gradient(135deg,var(--accent) 0%,#fbbf24 40%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.app-header .tagline{color:var(--text-muted);font-size:1.05rem;margin-top:8px}
+.app-header .badge{display:inline-block;margin-top:14px;padding:5px 16px;background:var(--accent-glow);border:1px solid rgba(245,158,11,0.3);border-radius:20px;font-size:0.8rem;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+.stepper{display:flex;align-items:center;justify-content:center;gap:0;margin:30px auto 40px;max-width:750px;padding:0 10px;flex-wrap:wrap;row-gap:10px}
+.step-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;background:var(--card);border:2px solid var(--border);color:var(--text-muted);transition:all 0.4s;flex-shrink:0}
+.step-circle.active{background:var(--accent);border-color:var(--accent);color:#000;box-shadow:0 0 20px rgba(245,158,11,0.3)}
+.step-circle.done{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.step-line{width:30px;height:2px;background:var(--border);transition:background 0.4s;flex-shrink:0}
+.step-line.done{background:var(--accent2)}
+.step-wrapper{position:relative}
+.step-label{position:absolute;top:42px;left:50%;transform:translateX(-50%);font-size:0.6rem;color:var(--text-muted);white-space:nowrap;font-weight:600;letter-spacing:0.5px;text-transform:uppercase}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;margin-bottom:24px;transition:border-color 0.3s}
+.card:hover{border-color:rgba(255,255,255,0.12)}
+.card-accent{border-left:4px solid var(--accent)}
+.card-green{border-left:4px solid var(--accent2)}
+.card-purple{border-left:4px solid var(--purple)}
+label{display:block;font-weight:700;margin-bottom:6px;color:var(--text);font-size:0.95rem}
+label .req{color:var(--error)}
+label .hint{font-weight:400;color:var(--text-muted);font-size:0.82rem;display:block;margin-top:2px}
+.input,.textarea,.select{width:100%;padding:12px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:1rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none}
+.input:focus,.textarea:focus,.select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.textarea{resize:vertical;min-height:90px;line-height:1.6}
+.select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238899aa' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.field{margin-bottom:20px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.field-row{grid-template-columns:1fr}}
+.member-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;position:relative;transition:all 0.3s}
+.member-card:hover{border-color:rgba(255,255,255,0.15)}
+.member-card .member-num{position:absolute;top:-12px;left:20px;background:var(--accent);color:#000;font-weight:800;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem}
+.member-remove{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.1rem;transition:color 0.2s;padding:4px}
+.member-remove:hover{color:var(--error)}
+.member-remove:disabled{opacity:0.2;cursor:not-allowed}
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;border:1.5px solid var(--border);color:var(--text-muted);background:transparent;user-select:none}
+.chip:hover{border-color:rgba(255,255,255,0.2);color:var(--text)}
+.chip.hard.active{background:rgba(59,130,246,0.15);border-color:var(--hard);color:var(--hard)}
+.chip.soft.active{background:rgba(16,185,129,0.15);border-color:var(--soft);color:var(--soft)}
+.chip.hard.active::before,.chip.soft.active::before{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;font-size:0.65rem}
+.level-btn-group{display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap}
+.level-btn-label{font-size:0.78rem;color:var(--text-muted);font-weight:600;white-space:nowrap}
+.level-btn{padding:5px 14px;border-radius:6px;font-size:0.78rem;font-weight:700;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;transition:all 0.2s;font-family:inherit}
+.level-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text)}
+.level-btn.hard.active{background:rgba(59,130,246,0.15);border-color:var(--hard);color:var(--hard);box-shadow:0 0 8px rgba(59,130,246,0.2)}
+.level-btn.soft.active{background:rgba(16,185,129,0.15);border-color:var(--soft);color:var(--soft);box-shadow:0 0 8px rgba(16,185,129,0.2)}
+.level-info{font-size:0.78rem;color:var(--text-muted);margin-left:auto;font-weight:600;white-space:nowrap;transition:color 0.3s}
+.level-info.active-hard{color:var(--hard)}
+.level-info.active-soft{color:var(--soft)}
+.role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:12px}
+.role-option{background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:16px;cursor:pointer;text-align:center;transition:all 0.2s;position:relative}
+.role-option:hover{border-color:rgba(255,255,255,0.2)}
+.role-option.assigned{border-color:var(--accent);background:var(--accent-glow)}
+.role-option.assigned .assigned-name{display:block;font-size:0.75rem;color:var(--accent);font-weight:700;margin-top:8px}
+.role-option .assigned-name{display:none}
+.role-option .role-icon{font-size:1.5rem;margin-bottom:6px;color:var(--text-muted)}
+.role-option.assigned .role-icon{color:var(--accent)}
+.role-option .role-title{font-weight:700;font-size:0.88rem}
+.role-option .role-desc{font-size:0.72rem;color:var(--text-muted);margin-top:4px}
+.obj-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;margin-bottom:12px}
+.obj-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.obj-tag.breve{background:rgba(59,130,246,0.15);color:var(--hard)}
+.obj-tag.medio{background:rgba(245,158,11,0.15);color:var(--accent)}
+.obj-tag.lungo{background:rgba(16,185,129,0.15);color:var(--accent2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;text-decoration:none}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{background:#d97706;box-shadow:0 4px 20px rgba(245,158,11,0.3)}
+.btn-secondary{background:transparent;color:var(--text-muted);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--text-muted);color:var(--text)}
+.btn-success{background:var(--accent2);color:#000}
+.btn-success:hover{background:#059669;box-shadow:0 4px 20px rgba(16,185,129,0.3)}
+.btn-purple{background:var(--purple);color:#000}
+.btn-purple:hover{background:#8b5cf6;box-shadow:0 4px 20px rgba(167,139,250,0.3)}
+.btn-sm{padding:8px 16px;font-size:0.85rem}
+.btn-ghost{background:transparent;color:var(--accent);border:1.5px dashed rgba(245,158,11,0.4)}
+.btn-ghost:hover{background:var(--accent-glow);border-color:var(--accent)}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.report-output{background:#080c10;color:var(--accent2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:28px;font-family:'Courier New',monospace;font-size:0.85rem;line-height:1.9;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card);border:1px solid var(--border);padding:14px 28px;border-radius:var(--radius-sm);font-weight:600;font-size:0.95rem;z-index:999;box-shadow:0 10px 40px rgba(0,0,0,0.5);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;gap:10px;max-width:90vw}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:var(--error);color:var(--error)}
+.toast.success{border-color:var(--accent2);color:var(--accent2)}
+.fade-in{animation:fadeIn 0.4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.step-panel{display:none}
+.step-panel.active{display:block}
+.info-box{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start}
+.info-box i{color:var(--hard);margin-top:3px;font-size:1rem;flex-shrink:0}
+.info-box p{color:var(--text-muted);font-size:0.9rem}
+.info-box p strong{color:var(--text)}
+.warn-box{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start}
+.warn-box i{color:var(--accent);margin-top:3px;flex-shrink:0}
+.warn-box p{color:var(--text-muted);font-size:0.9rem}
+.warn-box p strong{color:var(--text)}
+.skill-counter{font-size:0.8rem;color:var(--text-muted);margin-top:6px}
+.skill-counter .count{font-weight:800;color:var(--accent)}
+.sep{height:1px;background:var(--border);margin:24px 0}
+.other-input-wrap{margin-top:10px;display:none}
+.other-input-wrap.visible{display:block}
+.upload-zone{border:2px dashed rgba(255,255,255,0.12);border-radius:var(--radius-sm);padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.3s;background:rgba(255,255,255,0.02);position:relative}
+.upload-zone:hover{border-color:var(--purple);background:var(--purple-glow)}
+.upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone .uz-icon{font-size:1.8rem;color:var(--text-muted);margin-bottom:8px}
+.upload-zone p{color:var(--text-muted);font-size:0.85rem}
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px;margin-top:14px}
+.preview-item{position:relative;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);aspect-ratio:1;background:var(--bg2)}
+.preview-item img{width:100%;height:100%;object-fit:cover}
+.preview-item .remove-img{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(239,68,68,0.9);color:#fff;border:none;cursor:pointer;font-size:0.65rem;display:flex;align-items:center;justify-content:center;transition:transform 0.2s}
+.preview-item .remove-img:hover{transform:scale(1.15)}
+.preview-item .img-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.75);color:#ccc;font-size:0.68rem;padding:3px 5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.img-category{margin-bottom:28px}
+.img-cat-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.img-cat-icon{width:40px;height:40px;border-radius:10px;background:var(--purple-glow);border:1px solid rgba(167,139,250,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--purple);font-size:1.1rem}
+.img-cat-texts{flex:1}
+.img-cat-title{font-weight:800;font-size:0.95rem;color:var(--text)}
+.img-cat-desc{font-size:0.82rem;color:var(--text-muted);margin-top:2px}
+.img-desc-field{margin-top:12px}
+.img-desc-field .textarea{min-height:70px;font-size:0.9rem;padding:10px 14px}
+.modal-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);animation:fadeIn 0.2s ease}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:600px;width:92%;max-height:90vh;overflow-y:auto}
+.modal-box h3{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:16px}
+.modal-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+.modal-step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#000;font-weight:800;font-size:0.8rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-step-text{font-size:0.92rem;color:var(--text-muted);line-height:1.5}
+.modal-step-text strong{color:var(--text)}
+.modal-step-text .email-highlight{display:inline-block;background:var(--accent-glow);border:1px solid rgba(245,158,11,0.3);padding:2px 8px;border-radius:6px;font-size:0.85rem;color:var(--accent);font-weight:700;margin-top:4px;word-break:break-all}
+.modal-step-text .file-highlight{display:inline-block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);padding:4px 12px;border-radius:8px;font-size:0.88rem;color:var(--accent2);font-weight:700;margin-top:4px}
+.modal-step-text kbd{display:inline-block;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1px 7px;font-family:inherit;font-size:0.82rem;font-weight:700;color:var(--accent);margin:0 2px}
+.check-anim{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;background:rgba(16,185,129,0.1);border:1.5px solid rgba(16,185,129,0.3);border-radius:var(--radius-sm);color:var(--accent2);font-weight:700;font-size:0.95rem;margin:16px 0;animation:chkPulse 1.5s ease-in-out infinite}
+@keyframes chkPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.2)}50%{box-shadow:0 0 0 8px rgba(16,185,129,0)}}
+.check-anim i{animation:chkBounce 1s ease-in-out infinite}
+@keyframes chkBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.info-row{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:14px 16px;margin:12px 0;display:flex;align-items:flex-start;gap:10px}
+.info-row i{color:var(--hard);margin-top:2px;flex-shrink:0}
+.info-row-text{font-size:0.88rem;color:var(--text-muted);line-height:1.6}
+.info-row-text strong{color:var(--text)}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+@media print{body{background:#fff;color:#000}.app-header h1{-webkit-text-fill-color:#000;background:none}.stepper,.btn-row,.bg-layer,.grid-pattern,.float-orb,.toast,.modal-overlay{display:none!important}.card{border:1px solid #ccc;background:#fff}.step-panel{display:none!important}#step-7{display:block!important}.report-output{background:#fff;color:#000;border:1px solid #ccc}}
+.org-section{margin-bottom:26px}
+.org-section-title{font-weight:800;font-size:1rem;margin-bottom:4px}
+.org-section-title i{color:var(--accent2);margin-right:8px}
+.org-section-sub{color:var(--text-muted);font-size:0.85rem;margin-bottom:16px}
+.org-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:640px){.org-grid{grid-template-columns:1fr}}
+.org-card{background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius);padding:28px 20px 24px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+.org-card::before{content:'';position:absolute;inset:0;background:transparent;transition:background 0.3s;z-index:0}
+.org-card:hover{border-color:rgba(255,255,255,0.18);transform:translateY(-2px)}
+.org-card.selected{border-color:var(--accent2);background:rgba(16,185,129,0.06)}
+.org-card.selected::before{background:rgba(16,185,129,0.04)}
+.org-card-check{position:absolute;top:12px;right:12px;width:26px;height:26px;border-radius:50%;background:var(--accent2);color:#000;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;opacity:0;transform:scale(0);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:2}
+.org-card.selected .org-card-check{opacity:1;transform:scale(1)}
+.org-card-icon{font-size:2.2rem;margin-bottom:14px;color:var(--text-muted);transition:color 0.3s;position:relative;z-index:1}
+.org-card.selected .org-card-icon{color:var(--accent2)}
+.org-card-title{font-weight:800;font-size:0.92rem;margin-bottom:8px;position:relative;z-index:1;color:var(--text)}
+.org-card-desc{font-size:0.8rem;color:var(--text-muted);line-height:1.6;position:relative;z-index:1}
+.org-card:hover .org-card-desc{color:var(--text)}
+.org-card.selected .org-card-desc{color:var(--text)}
+.slogan-field{margin-bottom:24px}
+.slogan-field .input{font-size:1.05rem;padding:14px 18px;letter-spacing:0.3px}
+.creativita-box{background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:var(--radius-sm);padding:16px;margin-bottom:24px;display:flex;gap:12px;align-items:flex-start}
+.creativita-box i{color:var(--purple);margin-top:3px;font-size:1rem;flex-shrink:0}
+.creativita-box p{color:var(--text-muted);font-size:0.9rem;line-height:1.6}
+.creativita-box p strong{color:var(--text)}
+.creativita-box .tool-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.creativita-box .tool-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;background:rgba(167,139,250,0.12);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
+.method-tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid var(--border)}
+.method-tab{padding:10px 20px;font-weight:700;font-size:0.88rem;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s}
+.method-tab:hover{color:var(--text)}
+.method-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.method-panel{display:none}
+.method-panel.active{display:block}
+.notepad-steps{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;margin:16px 0}
+.notepad-step{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px}
+.notepad-step:last-child{margin-bottom:0}
+.notepad-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;flex-shrink:0}
+.notepad-text{font-size:0.9rem;color:var(--text-muted);line-height:1.6;padding-top:3px}
+.notepad-text strong{color:var(--text)}
+.copy-area{position:relative;margin:16px 0}
+.copy-area textarea{width:100%;height:160px;background:#050810;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--accent2);font-family:'Courier New',monospace;font-size:0.78rem;padding:16px;resize:vertical;line-height:1.5;outline:none}
+.copy-area textarea:focus{border-color:var(--purple)}
+.copy-bar{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="grid-pattern"></div>
+<div class="float-orb" style="width:400px;height:400px;background:rgba(245,158,11,0.04);top:-100px;left:-100px;"></div>
+<div class="float-orb" style="width:300px;height:300px;background:rgba(16,185,129,0.04);bottom:-80px;right:-80px;animation-delay:-7s;"></div>
+
+<div id="toast" class="toast"></div>
+
+<div class="app">
+
+  <header class="app-header fade-in">
+    <h1>Costruiamo la Nostra Societa</h1>
+    <p class="tagline">Attivita di gruppo - ITE Classi 4^</p>
+    <span class="badge"><i class="fa-solid fa-users"></i>&ensp;Gruppi di 1-4 studenti</span>
+  </header>
+
+  <nav class="stepper" id="stepper"></nav>
+
+  <section class="step-panel active" id="step-1">
+    <div class="card card-accent fade-in">
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:6px;"><i class="fa-solid fa-handshake" style="color:var(--accent);margin-right:8px;"></i>Formazione del Gruppo</h2>
+      <p style="color:var(--text-muted);margin-bottom:24px;">Inserite i dati del vostro gruppo di lavoro.</p>
+      <div class="info-box"><i class="fa-solid fa-circle-info"></i><p><strong>Istruzioni:</strong> Ogni gruppo &egrave; composto da un minimo di 1 (ditta individuale) a un massimo di 4 componenti.</p></div>
+      <div class="field"><label>Nome del Gruppo <span class="req">*</span></label><input class="input" id="groupName" type="text" placeholder="Es. I Pirati del Bilancio" maxlength="40"></div>
+      <div class="field-row">
+        <div class="field"><label>Data <span class="req">*</span></label><input class="input" id="groupDate" type="date"></div>
+        <div class="field"><label>Classe <span class="req">*</span></label><select class="select" id="groupClass"><option value="">Seleziona...</option><option>4CAFM</option><option>4CRIM</option></select></div>
+      </div>
+      <div class="sep"></div>
+      <h3 style="font-weight:800;margin-bottom:14px;font-size:1.1rem;"><i class="fa-solid fa-user-group" style="color:var(--accent2);margin-right:6px;"></i>Componenti <span style="font-weight:400;color:var(--text-muted);font-size:0.85rem;margin-left:8px;" id="memberCountLabel">1 / 4</span></h3>
+      <div id="membersContainer"></div>
+      <button class="btn btn-ghost btn-sm" id="addMemberBtn" style="margin-top:8px;"><i class="fa-solid fa-plus"></i> Aggiungi componente</button>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" id="toStep2">Procedi <i class="fa-solid fa-arrow-right"></i></button></div>
+  </section>
+
+  <section class="step-panel" id="step-2">
+    <div class="card card-green fade-in">
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:6px;"><i class="fa-solid fa-building" style="color:var(--accent2);margin-right:8px;"></i>La Vostra Societa</h2>
+      <p style="color:var(--text-muted);margin-bottom:24px;">Definite l'identita della vostra societa immaginaria.</p>
+      <div class="field"><label>Ragione Sociale <span class="req">*</span></label><input class="input" id="companyName" type="text" placeholder="Es. Studio Commercialista Rossi & Associati" maxlength="80"><span class="hint">Il nome ufficiale della societa</span></div>
+      <div class="field"><label>Settore Merceologico <span class="req">*</span></label><select class="select" id="companySector"><option value="">Seleziona...</option><option>Consulenza aziendale</option><option>Contabilita e fiscalita</option><option>Marketing e comunicazione</option><option>Commercio / Export</option><option>Servizi amministrativi</option><option>Logistica e trasporti</option><option>Turismo</option><option>IT e digitale</option><option value="__altro__">Altro (specificare)</option></select><div class="other-input-wrap" id="sectorOtherWrap"><input class="input" id="companySectorOther" type="text" placeholder="Specifica il settore..." maxlength="60" style="margin-top:8px;"></div></div>
+      <div class="field-row">
+        <div class="field"><label>Forma Giuridica <span class="req">*</span></label><select class="select" id="companyType"><option value="">Seleziona...</option><option>Ditta individuale</option><option>SNC - Societa in nome collettivo</option><option>SAS - Societa in accomandita semplice</option><option>Srl - Societa a responsabilita limitata</option><option>Srls - Srl semplificata</option><option>Spa - Societa per azioni</option><option>Sapa - Societa in accomandita per azioni</option><option>Cooperativa</option><option>Associazione</option></select></div>
+        <div class="field"><label>Sede Legale <span class="req">*</span></label><input class="input" id="companyLocation" type="text" placeholder="Es. Bari (BA), Via Roma 15" maxlength="100"></div>
+      </div>
+      <div class="field"><label>Missione <span class="req">*</span></label><textarea class="textarea" id="companyMission" placeholder="In una frase: perche esiste la vostra societa?"></textarea></div>
+      <div class="field"><label>Descrizione dell'Attivita <span class="req">*</span></label><textarea class="textarea" id="companyDesc" placeholder="Cosa fate concretamente?" style="min-height:110px;"></textarea></div>
+      <div class="field"><label>Clientela Target <span class="req">*</span></label><textarea class="textarea" id="companyClients" placeholder="A chi vi rivolgete?"></textarea></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" id="backStep1"><i class="fa-solid fa-arrow-left"></i> Indietro</button><button class="btn btn-primary" id="toStep3">Procedi <i class="fa-solid fa-arrow-right"></i></button></div>
+  </section>
+
+  <section class="step-panel" id="step-3">
+    <div class="card card-purple fade-in">
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:6px;"><i class="fa-solid fa-palette" style="color:var(--purple);margin-right:8px;"></i>Identita Visiva e Creativa</h2>
+      <p style="color:var(--text-muted);margin-bottom:24px;">Date forma all'immagine della vostra societa.</p>
+      <div class="creativita-box"><i class="fa-solid fa-wand-magic-sparkles"></i><p><strong>Siate creativi!</strong> Usate Canva, Figma o disegnate a mano. L'importante e che ogni elemento racconti qualcosa della vostra societa.<div class="tool-tags"><span class="tool-tag">Canva</span><span class="tool-tag">Figma</span><span class="tool-tag">Photoshop</span><span class="tool-tag">Disegno a mano</span><span class="tool-tag">IA</span></div></p></div>
+      <div class="slogan-field"><label><i class="fa-solid fa-quote-left" style="color:var(--purple);margin-right:6px;font-size:0.85rem;"></i>Slogan / Motto della societa <span class="req">*</span></label><input class="input" id="companySlogan" type="text" placeholder="Es. L'eccellenza che cresce con voi" maxlength="100" style="margin-top:8px;"><span class="hint">Obbligatorio: una frase che rappresenta la vostra societa</span></div>
+      <div class="sep"></div>
+      <div class="img-category"><div class="img-cat-header"><div class="img-cat-icon"><i class="fa-solid fa-image"></i></div><div class="img-cat-texts"><div class="img-cat-title">Logo</div></div></div><div class="upload-zone" id="upload-logo"><input type="file" accept="image/*" data-category="logo" class="file-input"><div class="uz-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div><p>Clicca o trascina</p></div><div class="preview-grid" id="preview-logo"></div><div class="img-desc-field"><label style="font-size:0.88rem;">Descrizione del logo <span class="req">*</span></label><textarea class="textarea img-desc-textarea" data-category="logo" placeholder="Spiegazione del significato, colori, elementi grafici..." style="margin-top:4px;"></textarea></div></div>
+      <div class="img-category"><div class="img-cat-header"><div class="img-cat-icon"><i class="fa-solid fa-trademark"></i></div><div class="img-cat-texts"><div class="img-cat-title">Marchio / Trademark</div></div></div><div class="upload-zone" id="upload-marchio"><input type="file" accept="image/*" data-category="marchio" class="file-input"><div class="uz-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div><p>Clicca o trascina</p></div><div class="preview-grid" id="preview-marchio"></div><div class="img-desc-field"><label style="font-size:0.88rem;">Descrizione del marchio <span class="req">*</span></label><textarea class="textarea img-desc-textarea" data-category="marchio" placeholder="Caratteristiche tipografiche, stile..." style="margin-top:4px;"></textarea></div></div>
+      <div class="img-category"><div class="img-cat-header"><div class="img-cat-icon"><i class="fa-solid fa-pencil-ruler"></i></div><div class="img-cat-texts"><div class="img-cat-title">Design Prodotto / Servizio</div></div></div><div class="upload-zone" id="upload-prodotto"><input type="file" accept="image/*" data-category="prodotto" class="file-input"><div class="uz-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div><p>Clicca o trascina</p></div><div class="preview-grid" id="preview-prodotto"></div><div class="img-desc-field"><label style="font-size:0.88rem;">Descrizione del prodotto/servizio <span class="req">*</span></label><textarea class="textarea img-desc-textarea" data-category="prodotto" placeholder="Funzionalita, destinazione d'uso..." style="margin-top:4px;"></textarea></div></div>
+      <div class="img-category"><div class="img-cat-header"><div class="img-cat-icon"><i class="fa-solid fa-shapes"></i></div><div class="img-cat-texts"><div class="img-cat-title">Altro materiale</div></div></div><div class="upload-zone" id="upload-altro"><input type="file" accept="image/*" multiple data-category="altro" class="file-input"><div class="uz-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div><p>Clicca o trascina (anche piu immagini)</p></div><div class="preview-grid" id="preview-altro"></div><div class="img-desc-field"><label style="font-size:0.88rem;">Descrizione del materiale aggiuntivo <span class="req">*</span></label><textarea class="textarea img-desc-textarea" data-category="altro" placeholder="Cosa rappresentano i materiali caricati..." style="margin-top:4px;"></textarea></div></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" id="backStep2"><i class="fa-solid fa-arrow-left"></i> Indietro</button><button class="btn btn-primary" id="toStep4">Procedi <i class="fa-solid fa-arrow-right"></i></button></div>
+  </section>
+
+  <section class="step-panel" id="step-4">
+    <div class="card card-accent fade-in">
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:6px;"><i class="fa-solid fa-puzzle-piece" style="color:var(--accent);margin-right:8px;"></i>Mappatura Competenze</h2>
+      <p style="color:var(--text-muted);margin-bottom:20px;">Ogni componente seleziona le proprie competenze e indica il livello.</p>
+      <div class="warn-box"><i class="fa-solid fa-triangle-exclamation"></i><p><strong>Siete onesti!</strong> Selezionate solo le competenze che possedete realmente.</p></div>
+      <div id="skillsContainer"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" id="backStep3"><i class="fa-solid fa-arrow-left"></i> Indietro</button><button class="btn btn-primary" id="toStep5">Procedi <i class="fa-solid fa-arrow-right"></i></button></div>
+  </section>
+
+  <section class="step-panel" id="step-5">
+    <div class="card card-green fade-in">
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:6px;"><i class="fa-solid fa-user-tie" style="color:var(--accent2);margin-right:8px;"></i>Assegnazione Ruoli</h2>
+      <p style="color:var(--text-muted);margin-bottom:20px;">Assegnate a ogni componente un ruolo nella societa.</p>
+      <div class="info-box"><i class="fa-solid fa-circle-info"></i><p><strong>Come fare:</strong> Cliccate su un ruolo, poi scegliete a chi assegnarlo. Ogni membro deve avere <strong>almeno un ruolo</strong>.</p></div>
+      <div class="org-section"><div class="org-section-title"><i class="fa-solid fa-sitemap"></i>Tipo di Organizzazione</div><div class="org-section-sub">Scegliete il modello che meglio descrive come vi dividete i compiti.</div><div class="org-grid" id="orgTypeGrid"><div class="org-card" data-orgtype="gerarchico"><div class="org-card-check"><i class="fa-solid fa-check"></i></div><div class="org-card-icon"><i class="fa-solid fa-sitemap"></i></div><div class="org-card-title">Organizzazione gerarchica</div><div class="org-card-desc">C'e un responsabile che coordina.</div></div><div class="org-card" data-orgtype="orizzontale"><div class="org-card-check"><i class="fa-solid fa-check"></i></div><div class="org-card-icon"><i class="fa-solid fa-people-arrows"></i></div><div class="org-card-title">Organizzazione paritaria</div><div class="org-card-desc">Tutti partecipano alle decisioni.</div></div><div class="org-card" data-orgtype="rotazione"><div class="org-card-check"><i class="fa-solid fa-check"></i></div><div class="org-card-icon"><i class="fa-solid fa-arrows-rotate"></i></div><div class="org-card-title">Organizzazione a rotazione</div><div class="org-card-desc">Responsabile a rotazione per progetto.</div></div></div></div>
+      <div class="sep"></div><div id="rolesContainer"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" id="backStep4"><i class="fa-solid fa-arrow-left"></i> Indietro</button><button class="btn btn-primary" id="toStep6">Procedi <i class="fa-solid fa-arrow-right"></i></button></div>
+  </section>
+
+  <section class="step-panel" id="step-6">
+    <div class="card card-accent fade-in">
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:6px;"><i class="fa-solid fa-bullseye" style="color:var(--accent);margin-right:8px;"></i>Piano Strategico</h2>
+      <p style="color:var(--text-muted);margin-bottom:20px;">Definite gli obiettivi della vostra societa.</p>
+      <div class="info-box"><i class="fa-solid fa-circle-info"></i><p><strong>Organizzatevi:</strong> Ogni obiettivo deve avere una tempistica e un responsabile.</p></div>
+      <div id="objectivesContainer">
+        <div class="obj-card" data-idx="0"><div style="margin-bottom:12px;"><span class="obj-tag breve">Breve termine (0-6 mesi)</span></div><div class="field" style="margin-bottom:12px;"><label>Descrizione <span class="req">*</span></label><textarea class="textarea obj-desc" placeholder="Es. Acquisire i primi 3 clienti" rows="2"></textarea></div><div class="field-row"><div class="field"><label>Responsabile <span class="req">*</span></label><select class="select obj-resp"></select></div><div class="field"><label>Risorse</label><input class="input obj-res" type="text" placeholder="Es. PC, software..."></div></div></div>
+        <div class="obj-card" data-idx="1"><div style="margin-bottom:12px;"><span class="obj-tag medio">Medio termine (6-18 mesi)</span></div><div class="field" style="margin-bottom:12px;"><label>Descrizione <span class="req">*</span></label><textarea class="textarea obj-desc" placeholder="Es. Aprire una seconda sede" rows="2"></textarea></div><div class="field-row"><div class="field"><label>Responsabile <span class="req">*</span></label><select class="select obj-resp"></select></div><div class="field"><label>Risorse</label><input class="input obj-res" type="text" placeholder="Es. Personale..."></div></div></div>
+        <div class="obj-card" data-idx="2"><div style="margin-bottom:12px;"><span class="obj-tag lungo">Lungo termine (18+ mesi)</span></div><div class="field" style="margin-bottom:12px;"><label>Descrizione <span class="req">*</span></label><textarea class="textarea obj-desc" placeholder="Es. Espansione internazionale" rows="2"></textarea></div><div class="field-row"><div class="field"><label>Responsabile <span class="req">*</span></label><select class="select obj-resp"></select></div><div class="field"><label>Risorse</label><input class="input obj-res" type="text" placeholder="Es. Partner esteri..."></div></div></div>
+      </div>
+      <div class="sep"></div>
+      <div class="field"><label>Analisi SWOT del gruppo <span class="req">*</span></label><span class="hint">Obbligatoria: compilate tutte e quattro le sezioni</span><div class="field-row" style="margin-top:10px;"><div class="field"><label style="color:var(--accent2);">Strengths <span class="req">*</span></label><textarea class="textarea swot" data-swot="s" placeholder="Cosa sapete fare bene?" rows="3"></textarea></div><div class="field"><label style="color:var(--error);">Weaknesses <span class="req">*</span></label><textarea class="textarea swot" data-swot="w" placeholder="Cosa vi manca?" rows="3"></textarea></div></div><div class="field-row"><div class="field"><label style="color:var(--hard);">Opportunities <span class="req">*</span></label><textarea class="textarea swot" data-swot="o" placeholder="Quali occasioni ci sono?" rows="3"></textarea></div><div class="field"><label style="color:var(--accent);">Threats <span class="req">*</span></label><textarea class="textarea swot" data-swot="t" placeholder="Quali rischi?" rows="3"></textarea></div></div></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" id="backStep5"><i class="fa-solid fa-arrow-left"></i> Indietro</button><button class="btn btn-primary" id="toStep7">Genera Report <i class="fa-solid fa-file-lines"></i></button></div>
+  </section>
+
+  <section class="step-panel" id="step-7">
+    <div class="card fade-in" style="border-color:rgba(245,158,11,0.3);">
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:6px;text-align:center;"><i class="fa-solid fa-scroll" style="color:var(--accent);margin-right:8px;"></i>Report della Societa</h2>
+      <p style="color:var(--text-muted);margin-bottom:20px;text-align:center;">Il vostro documento finale.</p>
+      <div id="reportGallery" style="display:none;margin-bottom:20px;"><h3 style="font-weight:800;margin-bottom:14px;font-size:1.05rem;"><i class="fa-solid fa-palette" style="color:var(--purple);margin-right:8px;"></i>Materiali Grafici</h3><div id="reportGalleryGrid" style="display:flex;flex-wrap:wrap;gap:10px;"></div></div>
+      <div class="report-output" id="reportOutput"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="backStep6"><i class="fa-solid fa-arrow-left"></i> Indietro</button>
+        <button class="btn btn-success" id="copyReport"><i class="fa-solid fa-copy"></i> Copia Report Testo</button>
+        <button class="btn btn-primary" id="openHTMLBtn" style="background:#2563eb;"><i class="fa-solid fa-up-right-from-square"></i> Anteprima HTML</button>
+        <button class="btn btn-purple" id="copyHTMLBtn"><i class="fa-solid fa-code"></i> Copia Codice HTML</button>
+        <button class="btn btn-primary" id="emailReport" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fa-solid fa-paper-plane"></i> Invia per Email</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var $$=function(s){return document.querySelectorAll(s)};
+  var HARD_SKILLS=[{id:'h1',text:'Partita Doppia'},{id:'h2',text:'Fatturazione Elettronica'},{id:'h3',text:"Bilancio d'Esercizio"},{id:'h4',text:'Calcolo IVA e Tributi'},{id:'h5',text:'Excel Base'},{id:'h6',text:'Excel Avanzato'},{id:'h7',text:'PowerPoint'},{id:'h8',text:'Word'},{id:'h9',text:'Inglese B1'},{id:'h10',text:'Inglese B2'},{id:'h11',text:'Francese'},{id:'h12',text:'GDPR / Privacy'},{id:'h13',text:'Sicurezza sul Lavoro'},{id:'h14',text:'Software Gestionale'},{id:'h15',text:'Buste Paga'},{id:'h16',text:'Diritto Commerciale'},{id:'h17',text:'Diritto del Lavoro'},{id:'h18',text:'Marketing Digitale'},{id:'h19',text:'Social Media'},{id:'h20',text:'Statistica'},{id:'h21',text:'Business Plan'},{id:'h22',text:'Commercio Estero'},{id:'h23',text:'E-commerce'},{id:'h24',text:'Web Design Base'}];
+  var SOFT_SKILLS=[{id:'s1',text:'Teamwork'},{id:'s2',text:'Comunicazione efficace'},{id:'s3',text:'Problem Solving'},{id:'s4',text:'Gestione del tempo'},{id:'s5',text:'Leadership'},{id:'s6',text:'Pianificazione'},{id:'s7',text:'Adattabilita'},{id:'s8',text:'Precisione'},{id:'s9',text:'Affidabilita'},{id:'s10',text:'Creativita'},{id:'s11',text:'Ascolto attivo'},{id:'s12',text:'Negoziazione'},{id:'s13',text:'Gestione dello stress'},{id:'s14',text:'Pensiero critico'},{id:'s15',text:'Resilienza'},{id:'s16',text:'Proactivita'},{id:'s17',text:'Empatia'},{id:'s18',text:'Motivazione'}];
+  var ROLES=[{id:'r1',title:'Amministratore Delegato',desc:'Coordinamento generale',icon:'fa-crown'},{id:'r2',title:'Responsabile Contabile',desc:'Contabilita, bilancio',icon:'fa-calculator'},{id:'r3',title:'Responsabile Commerciale',desc:'Vendite, clienti',icon:'fa-handshake'},{id:'r4',title:'Responsabile Marketing',desc:'Comunicazione, social',icon:'fa-bullhorn'},{id:'r5',title:'Ufficio Risorse Umane',desc:'Personale, formazione',icon:'fa-people-group'},{id:'r6',title:'Back Office',desc:'Amministrazione, documenti',icon:'fa-folder-open'},{id:'r7',title:'Responsabile IT',desc:'Sistemi, sito web',icon:'fa-laptop-code'},{id:'r8',title:'Addetto Export',desc:'Commercio internazionale',icon:'fa-globe'},{id:'r9',title:'Responsabile Qualita',desc:'Controllo, standard',icon:'fa-check-double'},{id:'r10',title:'Addetto Logistica',desc:'Magazzino, spedizioni',icon:'fa-truck'}];
+  var STEP_LABELS=['Gruppo','Societa','Visiva','Competenze','Ruoli','Strategia','Report'];
+  var TOTAL_STEPS=7,MIN_MEMBERS=1,MAX_MEMBERS=4,currentStep=0;
+  var members=[{name:'',surname:'',email:''}];
+  var memberSkills={},memberCustomSkills={},roleAssignments={},selectedRoleForAssign=null;
+  var uploadedImages={logo:[],marchio:[],prodotto:[],altro:[]};
+  var selectedOrgType='';
+  var LEVEL_LABELS=['','Basso','Medio','Alto'];
+  var ORG_TYPE_LABELS={gerarchico:'Organizzazione gerarchica - Un responsabile coordina e assegna i compiti',orizzontale:'Organizzazione paritaria - Tutti partecipano alle decisioni e il lavoro e diviso in modo equo',rotazione:'Organizzazione a rotazione - Per ogni nuovo progetto, si sceglie un responsabile a rotazione'};
+  var DEST_EMAIL='disciplinegiuridicoeconomiche@gmail.com';
+  var cachedHTMLString='';
+
+  $$('.org-card').forEach(function(card){card.addEventListener('click',function(){var ot=this.dataset.orgtype;$$('.org-card').forEach(function(c){c.classList.remove('selected')});this.classList.add('selected');selectedOrgType=ot})});
+  $('#companySector').addEventListener('change',function(){var w=$('#sectorOtherWrap');if(this.value==='__altro__'){w.classList.add('visible');$('#companySectorOther').focus()}else{w.classList.remove('visible');$('#companySectorOther').value=''}});
+  $$('.file-input').forEach(function(input){input.addEventListener('change',function(){var cat=this.dataset.category;var files=this.files;for(var i=0;i<files.length;i++){(function(file){if(!file.type.startsWith('image/')){showToast('Solo file immagine');return}if(file.size>5*1024*1024){showToast('Max 5MB per immagine');return}var reader=new FileReader();reader.onload=function(e){uploadedImages[cat].push({name:file.name,data:e.target.result});renderPreviews(cat)};reader.readAsDataURL(file)})(files[i])}this.value=''})});
+
+  function renderPreviews(cat){var c=$('#preview-'+cat);c.innerHTML='';var labels={logo:'Logo',marchio:'Marchio',prodotto:'Prodotto',altro:'Altro'};uploadedImages[cat].forEach(function(img,idx){var item=document.createElement('div');item.className='preview-item';item.innerHTML='<img src="'+img.data+'" alt="'+img.name+'"><button class="remove-img" title="Rimuovi"><i class="fa-solid fa-xmark"></i></button><div class="img-label">'+labels[cat]+'</div>';item.querySelector('.remove-img').onclick=function(){uploadedImages[cat].splice(idx,1);renderPreviews(cat)};c.appendChild(item)})}
+
+  var toastTimer=null;
+  function showToast(msg,type){type=type||'error';var t=$('#toast');t.className='toast '+type;t.innerHTML='<i class="fa-solid '+(type==='error'?'fa-circle-xmark':'fa-circle-check')+'"></i> '+msg;clearTimeout(toastTimer);requestAnimationFrame(function(){t.classList.add('show')});toastTimer=setTimeout(function(){t.classList.remove('show')},3500)}
+
+  function renderStepper(){var c=$('#stepper');c.innerHTML='';for(var i=0;i<TOTAL_STEPS;i++){if(i>0){var line=document.createElement('div');line.className='step-line'+(i<=currentStep?' done':'');c.appendChild(line)}var wrap=document.createElement('div');wrap.className='step-wrapper';var circle=document.createElement('div');circle.className='step-circle'+(i===currentStep?' active':(i<currentStep?' done':''));circle.innerHTML=i<currentStep?'<i class="fa-solid fa-check" style="font-size:0.7rem;"></i>':String(i+1);var label=document.createElement('div');label.className='step-label';label.textContent=STEP_LABELS[i];wrap.appendChild(circle);wrap.appendChild(label);c.appendChild(wrap)}}
+
+  function goToStep(n){$$('.step-panel').forEach(function(p){p.classList.remove('active')});currentStep=n;renderStepper();var panel=$('#step-'+(n+1));panel.classList.add('active');panel.classList.remove('fade-in');void panel.offsetWidth;panel.classList.add('fade-in');window.scrollTo({top:0,behavior:'smooth'})}
+
+  function updateMemberCountLabel(){$('#memberCountLabel').textContent=members.length+' / '+MAX_MEMBERS}
+
+  function renderMembers(){var c=$('#membersContainer');c.innerHTML='';members.forEach(function(m,i){var card=document.createElement('div');card.className='member-card';var num=document.createElement('div');num.className='member-num';num.textContent=String(i+1);card.appendChild(num);var removeBtn=document.createElement('button');removeBtn.className='member-remove';removeBtn.innerHTML='<i class="fa-solid fa-xmark"></i>';removeBtn.disabled=members.length<=MIN_MEMBERS;removeBtn.onclick=function(){if(members.length<=MIN_MEMBERS)return;var ns={},nc={},nr={};Object.keys(memberSkills).forEach(function(k){var idx=parseInt(k);if(idx<i)ns[idx]=memberSkills[k];else if(idx>i)ns[idx-1]=memberSkills[k]});memberSkills=ns;Object.keys(memberCustomSkills).forEach(function(k){var idx=parseInt(k);if(idx<i)nc[idx]=memberCustomSkills[k];else if(idx>i)nc[idx-1]=memberCustomSkills[k]});memberCustomSkills=nc;Object.keys(roleAssignments).forEach(function(rId){var mIdx=roleAssignments[rId];if(mIdx===undefined)return;if(mIdx<i){}else if(mIdx>i)nr[rId]=mIdx-1});roleAssignments=nr;members.splice(i,1);renderMembers()};card.appendChild(removeBtn);var row=document.createElement('div');row.className='field-row';var nf=document.createElement('div');nf.className='field';var nl=document.createElement('label');nl.innerHTML='Nome <span class="req">*</span>';var ni=document.createElement('input');ni.className='input';ni.type='text';ni.placeholder='Mario';ni.value=m.name;ni.maxLength=30;ni.oninput=function(e){members[i].name=e.target.value};nf.appendChild(nl);nf.appendChild(ni);var sf=document.createElement('div');sf.className='field';var sl=document.createElement('label');sl.innerHTML='Cognome <span class="req">*</span>';var si=document.createElement('input');si.className='input';si.type='text';si.placeholder='Rossi';si.value=m.surname;si.maxLength=30;si.oninput=function(e){members[i].surname=e.target.value};sf.appendChild(sl);sf.appendChild(si);row.appendChild(nf);row.appendChild(sf);card.appendChild(row);var ef=document.createElement('div');ef.className='field';var el=document.createElement('label');el.textContent='Email (opzionale)';var ei=document.createElement('input');ei.className='input';ei.type='email';ei.placeholder='mario@scuola.it';ei.value=m.email;ei.oninput=function(e){members[i].email=e.target.value};ef.appendChild(el);ef.appendChild(ei);card.appendChild(ef);c.appendChild(card)});$('#addMemberBtn').style.display=members.length>=MAX_MEMBERS?'none':'inline-flex';updateMemberCountLabel()}
+
+  function validateStep1(){if(!$('#groupName').value.trim()){showToast('Inserite il nome del gruppo');return false}if(!$('#groupDate').value){showToast('Inserite la data');return false}if(!$('#groupClass').value){showToast('Selezionate la classe');return false}for(var i=0;i<members.length;i++){if(!members[i].name.trim()||!members[i].surname.trim()){showToast('Completate nome e cognome del componente '+(i+1));return false}}return true}
+  function validateStep2(){var fields=[['companyName','Ragione Sociale'],['companyLocation','Sede Legale'],['companyType','Forma Giuridica'],['companyMission','Missione'],['companyDesc','Descrizione Attivita'],['companyClients','Clientela Target']];for(var f=0;f<fields.length;f++){if(!$('#'+fields[f][0]).value.trim()){showToast('Compilare: '+fields[f][1]);return false}}var sv=$('#companySector').value;if(!sv){showToast('Selezionate il settore');return false}if(sv==='__altro__'&&!$('#companySectorOther').value.trim()){showToast('Specificate il settore');return false}return true}
+  function validateStep3(){if(!$('#companySlogan').value.trim()){showToast('Inserite lo slogan della societa');return false}var cats=['logo','marchio','prodotto','altro'];var names=['Logo','Marchio','Prodotto/Servizio','Altro materiale'];for(var i=0;i<cats.length;i++){var ta=document.querySelector('.img-desc-textarea[data-category="'+cats[i]+'"]');if(ta&&!ta.value.trim()){showToast('Compilate la descrizione: '+names[i]);return false}}return true}
+
+  function getImgDesc(cat){var ta=$$('.img-desc-textarea[data-category="'+cat+'"]');if(ta.length>0)return ta[0].value.trim();return ''}
+  function getSkillText(type,id){var pool=type==='hard'?HARD_SKILLS:SOFT_SKILLS;for(var i=0;i<pool.length;i++){if(pool[i].id===id)return pool[i].text}return ''}
+
+  function renderLevelButtons(container,type,mi,avg){
+    var group=document.createElement('div');
+    group.className='level-btn-group';
+    group.id=type==='hard'?'hlb-'+mi:'slb-'+mi;
+    var lbl=document.createElement('span');
+    lbl.className='level-btn-label';
+    lbl.textContent='Imposta livello:';
+    group.appendChild(lbl);
+    for(var lv=1;lv<=3;lv++){
+      var btn=document.createElement('button');
+      btn.className='level-btn '+type+(avg===lv?' active':'');
+      btn.dataset.mi=mi;
+      btn.dataset.st=type;
+      btn.dataset.lv=lv;
+      btn.textContent=LEVEL_LABELS[lv];
+      btn.onclick=function(){setLevel(this)};
+      group.appendChild(btn);
+    }
+    var info=document.createElement('span');
+    info.className='level-info';
+    info.id=type==='hard'?'hlt-'+mi:'slt-'+mi;
+    if(avg>0){info.textContent='Livello medio: '+LEVEL_LABELS[avg];info.classList.add(type==='hard'?'active-hard':'active-soft')}
+    group.appendChild(info);
+    container.appendChild(group);
+  }
+
+  function renderSkillsStep(){members.forEach(function(_,i){if(!memberSkills[i])memberSkills[i]={hard:{},soft:{}};if(!memberCustomSkills[i])memberCustomSkills[i]={hard:'',soft:''}});Object.keys(memberSkills).forEach(function(k){if(parseInt(k)>=members.length)delete memberSkills[k]});Object.keys(memberCustomSkills).forEach(function(k){if(parseInt(k)>=members.length)delete memberCustomSkills[k]});var c=$('#skillsContainer');c.innerHTML='';members.forEach(function(m,i){var fullName=m.name.trim()+' '+m.surname.trim();var card=document.createElement('div');card.className='member-card';var num=document.createElement('div');num.className='member-num';num.textContent=String(i+1);card.appendChild(num);var title=document.createElement('h3');title.style.cssText='font-size:1.1rem;font-weight:800;margin-bottom:4px;padding-right:30px;';title.textContent=fullName;card.appendChild(title);var ht=document.createElement('div');ht.style.cssText='font-weight:700;color:var(--hard);margin:14px 0 6px;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;';ht.innerHTML='<i class="fa-solid fa-gear" style="margin-right:6px;"></i>Hard Skills';card.appendChild(ht);var hg=document.createElement('div');hg.className='chip-grid';HARD_SKILLS.forEach(function(sk){var active=memberSkills[i].hard[sk.id]?' active':'';var chip=document.createElement('span');chip.className='chip hard'+active;chip.textContent=sk.text;chip.dataset.mi=i;chip.dataset.st='hard';chip.dataset.si=sk.id;chip.onclick=function(){toggleSkill(this)};hg.appendChild(chip)});card.appendChild(hg);var hc=document.createElement('div');hc.className='skill-counter';hc.id='hc-'+i;hc.innerHTML='Selezionate: <span class="count">'+Object.keys(memberSkills[i].hard).length+'</span>';card.appendChild(hc);var hcl=document.createElement('div');hcl.style.cssText='font-size:0.88rem;color:var(--hard);margin-top:10px;font-weight:800;border-left:3px solid var(--hard);padding-left:10px;line-height:1.5;';hcl.innerHTML='<i class="fa-solid fa-plus" style="font-size:0.7rem;margin-right:6px;"></i>Altre Hard Skills (separate da virgola):';card.appendChild(hcl);var hci=document.createElement('input');hci.className='input';hci.style.cssText='margin-top:4px;font-size:0.88rem;padding:10px 14px;border-color:rgba(59,130,246,0.3);';hci.placeholder='Es. Patentino muletto...';hci.value=memberCustomSkills[i].hard;hci.oninput=function(){memberCustomSkills[i].hard=this.value};card.appendChild(hci);var hAvg=calcLevel(i,'hard');renderLevelButtons(card,'hard',i,hAvg);var st=document.createElement('div');st.style.cssText='font-weight:700;color:var(--soft);margin:18px 0 6px;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;';st.innerHTML='<i class="fa-solid fa-heart" style="margin-right:6px;"></i>Soft Skills';card.appendChild(st);var sg=document.createElement('div');sg.className='chip-grid';SOFT_SKILLS.forEach(function(sk){var active=memberSkills[i].soft[sk.id]?' active':'';var chip=document.createElement('span');chip.className='chip soft'+active;chip.textContent=sk.text;chip.dataset.mi=i;chip.dataset.st='soft';chip.dataset.si=sk.id;chip.onclick=function(){toggleSkill(this)};sg.appendChild(chip)});card.appendChild(sg);var sc=document.createElement('div');sc.className='skill-counter';sc.id='sc-'+i;sc.innerHTML='Selezionate: <span class="count">'+Object.keys(memberSkills[i].soft).length+'</span>';card.appendChild(sc);var scl=document.createElement('div');scl.style.cssText='font-size:0.88rem;color:var(--soft);margin-top:10px;font-weight:800;border-left:3px solid var(--soft);padding-left:10px;line-height:1.5;';scl.innerHTML='<i class="fa-solid fa-plus" style="font-size:0.7rem;margin-right:6px;"></i>Altre Soft Skills (separate da virgola):';card.appendChild(scl);var sci=document.createElement('input');sci.className='input';sci.style.cssText='margin-top:4px;font-size:0.88rem;padding:10px 14px;border-color:rgba(16,185,129,0.3);';sci.placeholder="Es. Public speaking...";sci.value=memberCustomSkills[i].soft;sci.oninput=function(){memberCustomSkills[i].soft=this.value};card.appendChild(sci);var sAvg=calcLevel(i,'soft');renderLevelButtons(card,'soft',i,sAvg);c.appendChild(card)})}
+
+  function toggleSkill(chipEl){var i=parseInt(chipEl.dataset.mi),type=chipEl.dataset.st,skillId=chipEl.dataset.si;var map=memberSkills[i][type];if(map[skillId]){delete map[skillId];chipEl.classList.remove('active')}else{map[skillId]=2;chipEl.classList.add('active')}refreshLevel(i,type)}
+  function setLevel(btnEl){var i=parseInt(btnEl.dataset.mi),type=btnEl.dataset.st,level=parseInt(btnEl.dataset.lv);var map=memberSkills[i][type],ids=Object.keys(map);if(ids.length===0){showToast('Seleziona almeno una competenza');return}ids.forEach(function(id){map[id]=level});refreshLevel(i,type)}
+  function calcLevel(mi,type){var map=memberSkills[mi]?memberSkills[mi][type]:{};var ids=Object.keys(map);if(ids.length===0)return 0;var sum=0;ids.forEach(function(id){sum+=map[id]});return Math.round(sum/ids.length)}
+  function refreshLevel(mi,type){var avg=calcLevel(mi,type);var groupId=type==='hard'?'hlb-'+mi:'slb-'+mi;var lblId=type==='hard'?'hlt-'+mi:'slt-'+mi;var group=document.getElementById(groupId);if(group){var btns=group.querySelectorAll('.level-btn');for(var b=0;b<btns.length;b++){btns[b].classList.toggle('active',parseInt(btns[b].dataset.lv)===avg)}}var lbl=document.getElementById(lblId);if(lbl){lbl.textContent=avg>0?'Livello medio: '+LEVEL_LABELS[avg]:'';lbl.classList.remove('active-hard','active-soft');if(avg>0)lbl.classList.add(type==='hard'?'active-hard':'active-soft')}var countId=type==='hard'?'hc-'+mi:'sc-'+mi;var countEl=document.getElementById(countId);if(countEl){var span=countEl.querySelector('.count');if(span)span.textContent=Object.keys(memberSkills[mi][type]).length}}
+
+  function renderRolesStep(){var c=$('#rolesContainer');c.innerHTML='';var grid=document.createElement('div');grid.className='role-grid';ROLES.forEach(function(role){var am=roleAssignments[role.id];var opt=document.createElement('div');opt.className='role-option'+(am!==undefined?' assigned':'');opt.onclick=function(){openRoleAssign(role.id)};opt.innerHTML='<div class="role-icon"><i class="fa-solid '+role.icon+'"></i></div><div class="role-title">'+role.title+'</div><div class="role-desc">'+role.desc+'</div>'+(am!==undefined?'<div class="assigned-name"><i class="fa-solid fa-user"></i> '+members[am].name+' '+members[am].surname+'</div>':'<div class="assigned-name" style="color:var(--text-muted);font-style:italic;">Non assegnato</div>');grid.appendChild(opt)});c.appendChild(grid)}
+
+  function openRoleAssign(roleId){selectedRoleForAssign=roleId;var role=ROLES.find(function(r){return r.id===roleId});var ex=document.getElementById('roleModal');if(ex)ex.remove();var modal=document.createElement('div');modal.id='roleModal';modal.className='modal-overlay';var box=document.createElement('div');box.className='modal-box';var h3=document.createElement('h3');h3.innerHTML='<i class="fa-solid '+role.icon+'" style="color:var(--accent);margin-right:8px;"></i>'+role.title;box.appendChild(h3);var desc=document.createElement('p');desc.style.cssText='color:var(--text-muted);font-size:0.9rem;margin-bottom:18px;';desc.textContent=role.desc;box.appendChild(desc);var lbl=document.createElement('label');lbl.textContent='A chi assegnare?';box.appendChild(lbl);var sel=document.createElement('select');sel.className='select';sel.id='roleAssignSelect';sel.style.marginBottom='8px';sel.innerHTML='<option value="">-- Non assegnato --</option>';members.forEach(function(m,idx){var o=document.createElement('option');o.value=String(idx);o.textContent=m.name+' '+m.surname;if(roleAssignments[roleId]===idx)o.selected=true;sel.appendChild(o)});box.appendChild(sel);var prev=document.createElement('div');prev.id='memberSkillPreview';prev.style.cssText='font-size:0.82rem;color:var(--text-muted);margin-bottom:18px;min-height:36px;line-height:1.6;';box.appendChild(prev);var br=document.createElement('div');br.style.cssText='display:flex;gap:10px;justify-content:flex-end;';var cb=document.createElement('button');cb.className='btn btn-secondary btn-sm';cb.textContent='Annulla';cb.onclick=closeModal;br.appendChild(cb);var fb=document.createElement('button');fb.className='btn btn-primary btn-sm';fb.textContent='Conferma';fb.onclick=confirmRoleAssign;br.appendChild(fb);box.appendChild(br);modal.appendChild(box);document.body.appendChild(modal);updateSkillPreview(sel.value);sel.onchange=function(){updateSkillPreview(this.value)};modal.onclick=function(e){if(e.target===modal)closeModal()}}
+
+  function updateSkillPreview(mi){var p=$('#memberSkillPreview');if(!p)return;if(mi===''||mi===undefined){p.innerHTML='';return}var i=parseInt(mi);if(!memberSkills[i]){p.innerHTML='';return}var hIds=Object.keys(memberSkills[i].hard),sIds=Object.keys(memberSkills[i].soft);var hNames=hIds.map(function(id){return getSkillText('hard',id)}).filter(Boolean);var sNames=sIds.map(function(id){return getSkillText('soft',id)}).filter(Boolean);var cH=(memberCustomSkills[i]&&memberCustomSkills[i].hard.trim())?memberCustomSkills[i].hard.trim().split(',').map(function(s){return s.trim()}).filter(Boolean):[];var cS=(memberCustomSkills[i]&&memberCustomSkills[i].soft.trim())?memberCustomSkills[i].soft.trim().split(',').map(function(s){return s.trim()}).filter(Boolean):[];var allH=hNames.concat(cH),allS=sNames.concat(cS);var html='';if(allH.length)html+='<span style="color:var(--hard);">H:</span> '+allH.slice(0,6).join(', ')+(allH.length>6?'...':'')+' ';if(allS.length)html+='<span style="color:var(--soft);">S:</span> '+allS.slice(0,6).join(', ')+(allS.length>6?'...':'');if(!html)html='<span style="color:var(--error);">Nessuna competenza</span>';p.innerHTML=html}
+
+  function confirmRoleAssign(){var sel=document.getElementById('roleAssignSelect');if(!sel)return;var val=sel.value;if(val==='')delete roleAssignments[selectedRoleForAssign];else roleAssignments[selectedRoleForAssign]=parseInt(val);closeModal();renderRolesStep()}
+  function closeModal(){var m=document.getElementById('roleModal');if(m)m.remove();selectedRoleForAssign=null}
+
+  function validateStep4(){if(!selectedOrgType){showToast('Selezionate il tipo di organizzazione');return false}var am={};Object.values(roleAssignments).forEach(function(mIdx){if(mIdx!==undefined)am[mIdx]=true});if(Object.keys(am).length===0){showToast('Assegnate almeno un ruolo');return false}for(var i=0;i<members.length;i++){if(!am[i]){showToast(members[i].name+' '+members[i].surname+' non ha un ruolo');return false}}return true}
+
+  function populateObjSelects(){$$('.obj-resp').forEach(function(sel){sel.innerHTML='<option value="">Seleziona...</option>';members.forEach(function(m,i){var o=document.createElement('option');o.value=String(i);o.textContent=m.name+' '+m.surname;sel.appendChild(o)})})}
+
+  function validateStep5(){var ds=$$('.obj-desc'),rs=$$('.obj-resp');for(var i=0;i<ds.length;i++){if(!ds[i].value.trim()){showToast('Compilate l\'obiettivo '+(i+1));return false}if(!rs[i].value){showToast('Scegliete il responsabile dell\'obiettivo '+(i+1));return false}}var swFields={s:'Strengths',w:'Weaknesses',o:'Opportunities',t:'Threats'};$$('.swot').forEach(function(t){var key=t.dataset.swot;if(!t.value.trim()){showToast('Compilate: '+swFields[key]+' nella SWOT');return false}});return true}
+
+  function countImgs(){var t=0;['logo','marchio','prodotto','altro'].forEach(function(c){t+=uploadedImages[c].length});return t}
+  function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+  function generateReport(){var gn=$('#groupName').value.trim(),gd=$('#groupDate').value,gc=$('#groupClass').value;var cn=$('#companyName').value.trim(),sv=$('#companySector').value;var cs=sv==='__altro__'?$('#companySectorOther').value.trim():sv;var ct=$('#companyType').value,cl=$('#companyLocation').value.trim();var cm=$('#companyMission').value.trim(),cd=$('#companyDesc').value.trim();var cc=$('#companyClients').value.trim();var slogan=$('#companySlogan').value.trim();var ic=countImgs();var r='';var line='────────────────────────────────────────';r+=line+'\n';r+='  REPORT DELLA SOCIETA\n';r+=line+'\n\n';r+='Gruppo: '+gn+'\nClasse: '+gc+'\nData: '+gd+'\nComponenti: '+members.length+'\n';if(ic>0)r+='Materiali grafici allegati: '+ic+'\n';r+='\n';r+=line+'\n';r+='  1. COMPONENTI\n';r+=line+'\n\n';members.forEach(function(m,i){r+=(i+1)+'. '+m.name.trim()+' '+m.surname.trim();if(m.email.trim())r+=' | '+m.email.trim();r+='\n'});r+='\n';r+=line+'\n';r+='  2. LA SOCIETA\n';r+=line+'\n\n';r+='Ragione Sociale: '+cn+'\nSettore: '+cs+'\nForma Giuridica: '+ct+'\nSede: '+cl+'\n\n';if(slogan)r+='Slogan: "'+slogan+'"\n\n';r+='Missione:\n  '+cm+'\n\nAttivita:\n  '+cd+'\n';if(cc)r+='\nClientela: '+cc+'\n';r+='\n';r+=line+'\n';r+='  3. IDENTITA VISIVA\n';r+=line+'\n\n';var catLabels={logo:'Logo',marchio:'Marchio / Trademark',prodotto:'Design Prodotto / Servizio',altro:'Materiale aggiuntivo'};['logo','marchio','prodotto','altro'].forEach(function(cat){var desc=getImgDesc(cat);var imgs=uploadedImages[cat];r+=catLabels[cat]+':\n';if(desc)r+='  Descrizione: '+desc+'\n';if(imgs.length>0)r+='  File: '+imgs.map(function(img){return img.name}).join(', ')+'\n';if(!desc&&imgs.length===0)r+='  -\n';r+='\n'});r+='\n';r+=line+'\n';r+='  4. COMPETENZE\n';r+=line+'\n\n';members.forEach(function(m,i){r+='['+(i+1)+'] '+m.name.trim()+' '+m.surname.trim()+'\n';if(!memberSkills[i])memberSkills[i]={hard:{},soft:{}};if(!memberCustomSkills[i])memberCustomSkills[i]={hard:'',soft:''};var hIds=Object.keys(memberSkills[i].hard),sIds=Object.keys(memberSkills[i].soft);var hN=hIds.map(function(id){return getSkillText('hard',id)}).filter(Boolean);var sN=sIds.map(function(id){return getSkillText('soft',id)}).filter(Boolean);var cH=memberCustomSkills[i].hard.trim()?memberCustomSkills[i].hard.trim().split(',').map(function(s){return s.trim()}).filter(Boolean):[];var cS=memberCustomSkills[i].soft.trim()?memberCustomSkills[i].soft.trim().split(',').map(function(s){return s.trim()}).filter(Boolean):[];var aH=hN.concat(cH),aS=sN.concat(cS);var hA=calcLevel(i,'hard'),sA=calcLevel(i,'soft');if(aH.length)r+='  Hard ['+LEVEL_LABELS[hA]+']: '+aH.join(', ')+'\n';else r+='  Hard: -\n';if(aS.length)r+='  Soft ['+LEVEL_LABELS[sA]+']: '+aS.join(', ')+'\n';else r+='  Soft: -\n';r+='\n'});r+=line+'\n';r+='  5. RUOLI\n';r+=line+'\n\n';r+='Tipo di organizzazione:\n  '+(ORG_TYPE_LABELS[selectedOrgType]||'-')+'\n\n';Object.entries(roleAssignments).forEach(function(e){var role=ROLES.find(function(r){return r.id===e[0]});var member=members[e[1]];r+=role.title+' --> '+member.name.trim()+' '+member.surname.trim()+'\n  ('+role.desc+')\n'});r+='\n';r+=line+'\n';r+='  6. PIANO STRATEGICO\n';r+=line+'\n\n';var tags=['BREVE TERMINE (0-6 mesi)','MEDIO TERMINE (6-18 mesi)','LUNGO TERMINE (18+ mesi)'];$$('.obj-card').forEach(function(card,i){var desc=card.querySelector('.obj-desc').value.trim();var respSel=card.querySelector('.obj-resp'),resIn=card.querySelector('.obj-res');var rn=respSel.value!==''?members[parseInt(respSel.value)].name+' '+members[parseInt(respSel.value)].surname:'-';var res=resIn?resIn.value.trim():'';r+='['+tags[i]+']\n  Obiettivo: '+desc+'\n  Responsabile: '+rn+'\n';if(res)r+='  Risorse: '+res+'\n';r+='\n'});r+=line+'\n';r+='  7. ANALISI SWOT\n';r+=line+'\n\n';var sw={};$$('.swot').forEach(function(t){sw[t.dataset.swot]=t.value.trim()});r+='S - Punti di forza:\n  '+(sw['s']||'-')+'\n\n';r+='W - Debolezze:\n  '+(sw['w']||'-')+'\n\n';r+='O - Opportunita:\n  '+(sw['o']||'-')+'\n\n';r+='T - Minacce:\n  '+(sw['t']||'-')+'\n\n';r+=line+'\n';r+='  Fine Report\n';r+=line+'\n';$('#reportOutput').innerText=r;var gal=$('#reportGallery'),gg=$('#reportGalleryGrid');if(ic>0){gal.style.display='block';gg.innerHTML='';var cn3={logo:'Logo',marchio:'Marchio',prodotto:'Prodotto',altro:'Altro'};['logo','marchio','prodotto','altro'].forEach(function(cat){uploadedImages[cat].forEach(function(img){var w=document.createElement('div');w.style.cssText='text-align:center;';w.innerHTML='<div style="width:100px;height:100px;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin:0 auto;"><img src="'+img.data+'" style="width:100%;height:100%;object-fit:cover;"></div><div style="font-size:0.72rem;color:var(--text-muted);margin-top:3px;">'+cn3[cat]+'</div>';gg.appendChild(w)})})}else{gal.style.display='none'}}
+
+  function buildHTMLPresentation(){
+    var gn=$('#groupName').value.trim(),gd=$('#groupDate').value,gc=$('#groupClass').value;
+    var cn=$('#companyName').value.trim(),sv=$('#companySector').value;
+    var cs=sv==='__altro__'?$('#companySectorOther').value.trim():sv;
+    var ct=$('#companyType').value,cl=$('#companyLocation').value.trim();
+    var cm=$('#companyMission').value.trim(),cd=$('#companyDesc').value.trim();
+    var cc=$('#companyClients').value.trim(),slogan=$('#companySlogan').value.trim();
+    var skillsArr=[];
+    members.forEach(function(m,i){
+      if(!memberSkills[i])memberSkills[i]={hard:{},soft:{}};if(!memberCustomSkills[i])memberCustomSkills[i]={hard:'',soft:''};
+      var hIds=Object.keys(memberSkills[i].hard),sIds=Object.keys(memberSkills[i].soft);
+      var hN=hIds.map(function(id){return getSkillText('hard',id)}).filter(Boolean);var sN=sIds.map(function(id){return getSkillText('soft',id)}).filter(Boolean);
+      var cH=memberCustomSkills[i].hard.trim()?memberCustomSkills[i].hard.trim().split(',').map(function(x){return x.trim()}).filter(Boolean):[];
+      var cS=memberCustomSkills[i].soft.trim()?memberCustomSkills[i].soft.trim().split(',').map(function(x){return x.trim()}).filter(Boolean):[];
+      skillsArr.push({hard:hN.concat(cH),soft:sN.concat(cS),hL:LEVEL_LABELS[calcLevel(i,'hard')]||'',sL:LEVEL_LABELS[calcLevel(i,'soft')]||''});
+    });
+    var sw={};$$('.swot').forEach(function(t){sw[t.dataset.swot]=t.value.trim()});
+    var catNames={logo:'Logo',marchio:'Marchio / Trademark',prodotto:'Design Prodotto / Servizio',altro:'Materiale aggiuntivo'};
+    var hasImgs=false;['logo','marchio','prodotto','altro'].forEach(function(cat){if(getImgDesc(cat)||uploadedImages[cat].length>0)hasImgs=true});
+    var h=[];
+    h.push('<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Presentazione - '+esc(cn)+'</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Space Grotesk",sans-serif;background:#f8fafc;color:#1e293b;line-height:1.7;font-size:15px}@page{size:A4;margin:18mm}@media print{.pb{page-break-before:always}}@media screen{body{background:#e2e8f0}}.pg{max-width:900px;margin:40px auto;background:#fff;border-radius:16px;box-shadow:0 4px 40px rgba(0,0,0,0.08);overflow:hidden}@media print{.pg{box-shadow:none;margin:0;border-radius:0;max-width:100%}}.cv{padding:60px 40px;text-align:center;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;position:relative}.cv h1{font-family:"Outfit",sans-serif;font-size:2.2rem;font-weight:900;margin-bottom:8px;line-height:1.2}.cv .cn{font-family:"Outfit",sans-serif;font-size:1.5rem;font-weight:700;color:#f59e0b;margin-bottom:24px}.cv .mt{color:#94a3b8;font-size:0.9rem}.cv .mt span{margin:0 10px}.cv::after{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#f59e0b,#10b981)}.ct{padding:40px}.sc{margin-bottom:36px}.sh{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e2e8f0}.sn{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;flex-shrink:0}.st{font-family:"Outfit",sans-serif;font-size:1.3rem;font-weight:800;color:#0f172a}.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ib{padding:14px 16px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px}.il{font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px}.iv{font-weight:700;color:#0f172a;font-size:0.95rem;margin-top:2px}.tx{color:#334155;font-size:0.95rem;line-height:1.8}.mr{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:8px}.mn{width:28px;height:28px;border-radius:50%;background:#f59e0b;color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;flex-shrink:0}.mnm{font-weight:700;color:#0f172a}.mel{color:#94a3b8;font-size:0.82rem;margin-left:auto}.ir{display:flex;flex-wrap:wrap;gap:16px;margin:12px 0}.ir img{max-width:300px;max-height:240px;border-radius:12px;border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,0.06);object-fit:contain;background:#fff}.ict{font-weight:700;font-size:0.95rem;color:#0f172a;margin:18px 0 6px;padding-bottom:6px;border-bottom:1px solid #e2e8f0}.ids{color:#475569;font-size:0.9rem;margin-bottom:10px}.skc{border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:12px;background:#fafbfc}.sch{display:flex;align-items:center;gap:10px;margin-bottom:12px}.scn{font-weight:700;color:#0f172a}.scp{display:flex;flex-wrap:wrap;gap:6px}.ch{padding:4px 12px;border-radius:14px;font-size:0.78rem;font-weight:600}.chh{background:#dbeafe;color:#1d4ed8}.chs{background:#d1fae5;color:#047857}.rr{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:8px}.rn{font-weight:700;color:#166534}.rd{color:#374151;font-size:0.85rem}.ob{padding:16px 20px;background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border:1px solid #bbf7d0;border-radius:12px;margin-bottom:18px}.obl{font-size:0.72rem;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px}.obv{font-weight:700;color:#166534;margin-top:2px}.oc{border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin-bottom:12px;background:#fafbfc}.ot{display:inline-block;padding:3px 12px;border-radius:14px;font-size:0.72rem;font-weight:700;margin-bottom:8px}.sg{display:grid;grid-template-columns:1fr 1fr;gap:12px}.swc{padding:16px;border-radius:12px;border:1px solid}.swl{font-weight:800;font-size:0.78rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}.swt{font-size:0.88rem;color:#374151;line-height:1.7}.ss{background:#f0fdf4;border-color:#bbf7d0}.ss .swl{color:#059669}.sw{background:#fef2f2;border-color:#fecaca}.sw .swl{color:#dc2626}.so{background:#eff6ff;border-color:#bfdbfe}.so .swl{color:#2563eb}.swt2{background:#fffbeb;border-color:#fde68a}.swt2 .swl{color:#d97706}.ft{text-align:center;padding:20px;color:#94a3b8;font-size:0.78rem;border-top:1px solid #e2e8f0;margin-top:32px}</style></head><body><div class="pg">');
+    h.push('<div class="cv"><h1>Presentazione della Societa</h1><div class="cn">'+esc(cn)+'</div><div class="mt"><span>Gruppo: '+esc(gn)+'</span><span>Classe: '+esc(gc)+'</span><span>Data: '+esc(gd)+'</span></div>');
+    if(slogan)h.push('<div style="margin-top:20px;font-size:1.1rem;font-style:italic;color:#fbbf24;padding:12px 24px;background:rgba(245,158,11,0.1);border-left:4px solid #f59e0b;display:inline-block;border-radius:0 8px 8px 0">\u201C'+esc(slogan)+'\u201D</div>');
+    h.push('</div><div class="ct">');
+    h.push('<div class="sc"><div class="sh"><div class="sn">1</div><div class="st">Componenti del Gruppo</div></div>');
+    members.forEach(function(m,i){h.push('<div class="mr"><div class="mn">'+(i+1)+'</div><div class="mnm">'+esc(m.name.trim()+' '+m.surname.trim())+'</div>');if(m.email.trim())h.push('<div class="mel">'+esc(m.email.trim())+'</div>');h.push('</div>')});
+    h.push('</div><div class="sc"><div class="sh"><div class="sn">2</div><div class="st">La Societa</div></div><div class="g2"><div class="ib"><div class="il">Ragione Sociale</div><div class="iv">'+esc(cn)+'</div></div><div class="ib"><div class="il">Settore</div><div class="iv">'+esc(cs)+'</div></div><div class="ib"><div class="il">Forma Giuridica</div><div class="iv">'+esc(ct)+'</div></div><div class="ib"><div class="il">Sede Legale</div><div class="iv">'+esc(cl)+'</div></div></div><div style="margin-top:16px"><div style="font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Missione</div><div class="tx">'+esc(cm)+'</div></div><div style="margin-top:12px"><div style="font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Attivita</div><div class="tx">'+esc(cd)+'</div></div>');
+    if(cc)h.push('<div style="margin-top:12px"><div style="font-size:0.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Clientela Target</div><div class="tx">'+esc(cc)+'</div></div>');
+    h.push('</div>');
+    var secNum=3;
+    if(hasImgs){h.push('<div class="sc pb"><div class="sh"><div class="sn">'+secNum+'</div><div class="st">Identita Visiva</div></div>');['logo','marchio','prodotto','altro'].forEach(function(cat){var desc=getImgDesc(cat);var imgs=uploadedImages[cat];if(!desc&&imgs.length===0)return;h.push('<div class="ict">'+esc(catNames[cat])+'</div>');if(desc)h.push('<div class="ids">'+esc(desc)+'</div>');if(imgs.length>0){h.push('<div class="ir">');imgs.forEach(function(img){h.push('<img src="'+img.data+'" alt="'+esc(img.name)+'">')});h.push('</div>')}});h.push('</div>');secNum++}
+    h.push('<div class="sc'+(secNum>3?' pb':'')+'"><div class="sh"><div class="sn">'+secNum+'</div><div class="st">Competenze del Gruppo</div></div>');
+    members.forEach(function(m,i){var sd=skillsArr[i];h.push('<div class="skc"><div class="sch"><div class="mn" style="width:28px;height:28px;border-radius:50%;background:#f59e0b;color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;flex-shrink:0">'+(i+1)+'</div><div class="scn">'+esc(m.name.trim()+' '+m.surname.trim())+'</div></div><div class="g2"><div><div style="font-size:0.72rem;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Hard Skills'+(sd.hL?' &mdash; '+esc(sd.hL):'')+'</div>');if(sd.hard.length){h.push('<div class="scp">');sd.hard.forEach(function(s){h.push('<span class="ch chh">'+esc(s)+'</span>')});h.push('</div>')}else h.push('<span style="color:#94a3b8">\u2014</span>');h.push('</div><div><div style="font-size:0.72rem;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Soft Skills'+(sd.sL?' &mdash; '+esc(sd.sL):'')+'</div>');if(sd.soft.length){h.push('<div class="scp">');sd.soft.forEach(function(s){h.push('<span class="ch chs">'+esc(s)+'</span>')});h.push('</div>')}else h.push('<span style="color:#94a3b8">\u2014</span>');h.push('</div></div></div>')});
+    h.push('</div>');secNum++;
+    h.push('<div class="sc pb"><div class="sh"><div class="sn">'+secNum+'</div><div class="st">Ruoli e Organizzazione</div></div><div class="ob"><div class="obl">Tipo di organizzazione</div><div class="obv">'+esc(ORG_TYPE_LABELS[selectedOrgType]||'-')+'</div></div>');
+    Object.entries(roleAssignments).forEach(function(e){var role=ROLES.find(function(r){return r.id===e[0]});var member=members[e[1]];h.push('<div class="rr"><div class="rn">'+esc(role.title)+'</div><div class="rd">'+esc(member.name.trim()+' '+member.surname.trim())+' \u2014 '+esc(role.desc)+'</div></div>')});
+    h.push('</div>');secNum++;
+    h.push('<div class="sc pb"><div class="sh"><div class="sn">'+secNum+'</div><div class="st">Piano Strategico</div></div>');
+    var oTags=['Breve termine (0-6 mesi)','Medio termine (6-18 mesi)','Lungo termine (18+ mesi)'];var oCol=[['#2563eb','#dbeafe'],['#d97706','#fef3c7'],['#059669','#d1fae5']];
+    $$('.obj-card').forEach(function(card,i){var desc=card.querySelector('.obj-desc').value.trim();var respSel=card.querySelector('.obj-resp'),resIn=card.querySelector('.obj-res');var rn=respSel.value!==''?members[parseInt(respSel.value)].name+' '+members[parseInt(respSel.value)].surname:'-';var res=resIn?resIn.value.trim():'';h.push('<div class="oc"><span class="ot" style="color:'+oCol[i][0]+';background:'+oCol[i][1]+'">'+oTags[i]+'</span><div class="tx" style="margin-bottom:6px">'+esc(desc)+'</div><div style="font-size:0.82rem;color:#6b7280"><strong>Responsabile:</strong> '+esc(rn)+(res?' &nbsp;|&nbsp; <strong>Risorse:</strong> '+esc(res):'')+'</div></div>')});
+    h.push('</div>');secNum++;
+    h.push('<div class="sc"><div class="sh"><div class="sn">'+secNum+'</div><div class="st">Analisi SWOT</div></div><div class="sg"><div class="swc ss"><div class="swl">Strengths</div><div class="swt">'+(esc(sw['s'])||'\u2014')+'</div></div><div class="swc sw"><div class="swl">Weaknesses</div><div class="swt">'+(esc(sw['w'])||'\u2014')+'</div></div><div class="swc so"><div class="swl">Opportunities</div><div class="swt">'+(esc(sw['o'])||'\u2014')+'</div></div><div class="swc swt2"><div class="swl">Threats</div><div class="swt">'+(esc(sw['t'])||'\u2014')+'</div></div></div></div>');
+    h.push('<div class="ft">Generato il '+new Date().toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})+' \u2014 Gruppo '+esc(gn)+' \u2014 Classe '+esc(gc)+'</div></div></div></body></html>');
+    return h.join('\n');
+  }
+
+  function copyHTMLToClipboard(){
+    cachedHTMLString=buildHTMLPresentation();
+    var fallback=function(){var ta=document.createElement('textarea');ta.value=cachedHTMLString;ta.style.cssText='position:fixed;left:-9999px;top:-9999px;opacity:0';document.body.appendChild(ta);ta.focus();ta.select();try{var ok=document.execCommand('copy');document.body.removeChild(ta);if(ok)showToast('Codice HTML copiato negli appunti','success');else showToast('Copia fallita, usa il metodo Blocco Note','error')}catch(e){document.body.removeChild(ta);showToast('Copia fallita, usa il metodo Blocco Note','error')}};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(cachedHTMLString).then(function(){showToast('Codice HTML copiato negli appunti','success')}).catch(fallback)}else{fallback()}
+  }
+
+  function openHTMLPresentation(){
+    var htmlString=buildHTMLPresentation();
+    var newWin=window.open('','_blank');
+    if(newWin){newWin.document.open();newWin.document.write(htmlString);newWin.document.close();showToast('Presentazione aperta nella nuova scheda','success')}else{showToast('Il browser ha bloccato l\'apertura','error')}
+  }
+
+  function showEmailModal(){
+    var existing=document.getElementById('emailModal');
+    if(existing)existing.remove();
+    var gn=$('#groupName').value.trim();
+    var gc=$('#groupClass').value;
+    var modal=document.createElement('div');
+    modal.id='emailModal';
+    modal.className='modal-overlay';
+    var box=document.createElement('div');
+    box.className='modal-box';
+    var h3=document.createElement('h3');
+    h3.innerHTML='<i class="fa-solid fa-paper-plane" style="color:var(--accent);margin-right:8px;"></i>Invia il Report per Email';
+    box.appendChild(h3);
+    var tabs=document.createElement('div');
+    tabs.className='method-tabs';
+    var tabA=document.createElement('div');
+    tabA.className='method-tab active';
+    tabA.textContent='Metodo A: Copia HTML';
+    tabA.onclick=function(){tabA.classList.add('active');tabB.classList.remove('active');panelA.classList.add('active');panelB.classList.remove('active')};
+    var tabB=document.createElement('div');
+    tabB.className='method-tab';
+    tabB.textContent='Metodo B: Nuova scheda';
+    tabB.onclick=function(){tabB.classList.add('active');tabA.classList.remove('active');panelB.classList.add('active');panelA.classList.remove('active')};
+    tabs.appendChild(tabA);
+    tabs.appendChild(tabB);
+    box.appendChild(tabs);
+    var panelA=document.createElement('div');
+    panelA.className='method-panel active';
+    var pA_intro=document.createElement('div');
+    pA_intro.style.cssText='color:var(--text-muted);font-size:0.9rem;margin-bottom:12px;';
+    pA_intro.innerHTML='Copia il codice HTML, incollalo nel <strong>Blocco Note</strong>, salva come file <strong>.html</strong> e allegalo all\'email.';
+    panelA.appendChild(pA_intro);
+    var np=document.createElement('div');
+    np.className='notepad-steps';
+    np.innerHTML='<div class="notepad-step"><div class="notepad-num">1</div><div class="notepad-text">Clicca <strong>"Copia codice HTML"</strong> qui sotto</div></div><div class="notepad-step"><div class="notepad-num">2</div><div class="notepad-text">Apri il <strong>Blocco Note</strong> (cerca "Blocco Note" nel menu Start)</div></div><div class="notepad-step"><div class="notepad-num">3</div><div class="notepad-text">Fai <kbd>Ctrl</kbd>+<kbd>V</kbd> per incollare il codice</div></div><div class="notepad-step"><div class="notepad-num">4</div><div class="notepad-text">Vai su <strong>File > Salva con nome</strong></div></div><div class="notepad-step"><div class="notepad-num">5</div><div class="notepad-text">Nel campo <strong>"Salva come"</strong> scegli <strong>"Tutti i file (*.*)"</strong></div></div><div class="notepad-step"><div class="notepad-num">6</div><div class="notepad-text">Chiama il file <strong>Report_'+esc(gn.replace(/[^a-zA-Z0-9\u00C0-\u024F]/g,'_'))+'.html</strong> e salvalo</div></div>';
+    panelA.appendChild(np);
+    var ca=document.createElement('div');
+    ca.className='copy-area';
+    var ta=document.createElement('textarea');
+    ta.id='htmlSourceArea';
+    ta.readOnly=true;
+    ta.value='Clicca il pulsante qui sotto per generare il codice...';
+    ca.appendChild(ta);
+    var cb=document.createElement('div');
+    cb.className='copy-bar';
+    var copyBtn=document.createElement('button');
+    copyBtn.className='btn btn-primary btn-sm';
+    copyBtn.innerHTML='<i class="fa-solid fa-copy"></i> Copia codice HTML';
+    copyBtn.onclick=function(){cachedHTMLString=buildHTMLPresentation();ta.value=cachedHTMLString;copyToClip(cachedHTMLString)};
+    cb.appendChild(copyBtn);
+    ca.appendChild(cb);
+    panelA.appendChild(ca);
+    box.appendChild(panelA);
+    var panelB=document.createElement('div');
+    panelB.className='method-panel';
+    var pB_intro=document.createElement('div');
+    pB_intro.style.cssText='color:var(--text-muted);font-size:0.9rem;margin-bottom:12px;';
+    pB_intro.innerHTML='Apri la presentazione in una nuova scheda, poi usa <strong>Ctrl+S</strong> per salvare il file.';
+    panelB.appendChild(pB_intro);
+    var np2=document.createElement('div');
+    np2.className='notepad-steps';
+    np2.innerHTML='<div class="notepad-step"><div class="notepad-num">1</div><div class="notepad-text">Clicca <strong>"Apri presentazione"</strong> qui sotto</div></div><div class="notepad-step"><div class="notepad-num">2</div><div class="notepad-text">Nella nuova scheda premi <kbd>Ctrl</kbd>+<kbd>S</kbd> per salvare</div></div><div class="notepad-step"><div class="notepad-num">3</div><div class="notepad-text">Nel campo nome file, scrivi <strong>Report_'+esc(gn.replace(/[^a-zA-Z0-9\u00C0-\u024F]/g,'_'))+'.html</strong></div></div><div class="notepad-step"><div class="notepad-num">4</div><div class="notepad-text">Assicurati che il tipo sia <strong>"Pagina Web, solo HTML (*.htm;*.html)"</strong></div></div><div class="notepad-step"><div class="notepad-num">5</div><div class="notepad-text">Scegli dove salvare (es. Desktop) e clicca <strong>Salva</strong></div></div>';
+    panelB.appendChild(np2);
+    var openBtn2=document.createElement('button');
+    openBtn2.className='btn btn-primary btn-sm';
+    openBtn2.style.cssText='margin-top:12px;background:#2563eb;';
+    openBtn2.innerHTML='<i class="fa-solid fa-up-right-from-square"></i> Apri presentazione';
+    openBtn2.onclick=function(){openHTMLPresentation()};
+    panelB.appendChild(openBtn2);
+    box.appendChild(panelB);
+    var sepDiv=document.createElement('div');
+    sepDiv.className='sep';
+    box.appendChild(sepDiv);
+    var destBox=document.createElement('div');
+    destBox.style.cssText='background:var(--accent-glow);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;';
+    destBox.innerHTML='<i class="fa-solid fa-envelope" style="color:var(--accent);font-size:1.1rem;flex-shrink:0;"></i><div><div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Destinatario</div><div class="email-highlight">'+DEST_EMAIL+'</div></div>';
+    box.appendChild(destBox);
+    var subjBox=document.createElement('div');
+    subjBox.style.cssText='background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;';
+    subjBox.innerHTML='<i class="fa-solid fa-tag" style="color:var(--hard);font-size:1rem;flex-shrink:0;"></i><div><div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Oggetto suggerito</div><div style="color:var(--text);font-size:0.92rem;font-weight:600;margin-top:2px;">Report Societa - '+esc(gn)+' ('+esc(gc)+')</div></div>';
+    box.appendChild(subjBox);
+    var btns=document.createElement('div');
+    btns.style.cssText='display:flex;gap:10px;justify-content:center;flex-wrap:wrap;';
+    var closeBtn=document.createElement('button');
+    closeBtn.className='btn btn-secondary btn-sm';
+    closeBtn.textContent='Chiudi';
+    closeBtn.onclick=function(){modal.remove()};
+    btns.appendChild(closeBtn);
+    var mailtoBtn=document.createElement('button');
+    mailtoBtn.className='btn btn-primary btn-sm';
+    mailtoBtn.innerHTML='<i class="fa-solid fa-envelope"></i> Apri email';
+    mailtoBtn.style.cssText='background:linear-gradient(135deg,#f59e0b,#d97706);padding:12px 28px;font-size:1rem;';
+    mailtoBtn.onclick=function(){
+      var subj=encodeURIComponent('Report Societa - '+gn+' ('+gc+')');
+      var body=encodeURIComponent('Buongiorno,\n\nin allegato invio il report della nostra societa in formato HTML.\n\nGruppo: '+gn+'\nClasse: '+gc+'\nComponenti: '+members.length+'\n\nPer visualizzarlo: salvare il file come .html e aprirlo con un browser (Chrome, Edge, ecc.).\n\nCordiali saluti.');
+      window.location.href='mailto:'+DEST_EMAIL+'?subject='+subj+'&body='+body;
+    };
+    btns.appendChild(mailtoBtn);
+    box.appendChild(btns);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+    modal.onclick=function(e){if(e.target===modal)modal.remove()};
+  }
+
+  function copyToClip(text){
+    var fb=function(){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px;opacity:0';document.body.appendChild(ta);ta.focus();ta.select();try{var ok=document.execCommand('copy');document.body.removeChild(ta);if(ok)showToast('Copiato negli appunti','success');else showToast('Copia fallita','error')}catch(e){document.body.removeChild(ta);showToast('Copia fallita','error')}};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){showToast('Copiato negli appunti','success')}).catch(fb)}else{fb()}
+  }
+
+  function initNavigation(){
+    $('#addMemberBtn').onclick=function(){if(members.length<MAX_MEMBERS){members.push({name:'',surname:'',email:''});renderMembers()}};
+    $('#toStep2').onclick=function(){if(validateStep1())goToStep(1)};
+    $('#toStep3').onclick=function(){if(validateStep2())goToStep(2)};
+    $('#toStep4').onclick=function(){if(validateStep3()){renderSkillsStep();goToStep(3)}};
+    $('#toStep5').onclick=function(){for(var i=0;i<members.length;i++){var hc=Object.keys(memberSkills[i]?memberSkills[i].hard:{}).length;var sc=Object.keys(memberSkills[i]?memberSkills[i].soft:{}).length;var cH=(memberCustomSkills[i]&&memberCustomSkills[i].hard.trim())?1:0;var cS=(memberCustomSkills[i]&&memberCustomSkills[i].soft.trim())?1:0;if(hc===0&&sc===0&&cH===0&&cS===0){showToast(members[i].name+' '+members[i].surname+': seleziona almeno una competenza');return}}renderRolesStep();goToStep(4)};
+    $('#toStep6').onclick=function(){if(validateStep4()){populateObjSelects();goToStep(5)}};
+    $('#toStep7').onclick=function(){if(validateStep5()){generateReport();goToStep(6)}};
+    $('#backStep1').onclick=function(){goToStep(0)};
+    $('#backStep2').onclick=function(){goToStep(1)};
+    $('#backStep3').onclick=function(){goToStep(2)};
+    $('#backStep4').onclick=function(){renderSkillsStep();goToStep(3)};
+    $('#backStep5').onclick=function(){populateObjSelects();goToStep(4)};
+    $('#backStep6').onclick=function(){goToStep(5)};
+    $('#copyReport').onclick=function(){var text=$('#reportOutput').innerText;copyToClip(text)};
+    $('#openHTMLBtn').onclick=function(){openHTMLPresentation()};
+    $('#copyHTMLBtn').onclick=function(){copyHTMLToClipboard()};
+    $('#emailReport').onclick=function(){showEmailModal()};
+  }
+
+  function init(){$('#groupDate').value=new Date().toISOString().split('T')[0];renderStepper();renderMembers();initNavigation()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+</body>
+</html>
