@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Check - Simula e Impara</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
+  
+  :root {
+    --primary: #818cf8;
+    --secondary: #34d399;
+    --hard: #60a5fa;
+    --soft: #4ade80;
+    --accent: #fbbf24;
+    --real-world: #f97316;
+    --task-color: #ef4444;
+    --bg: #1e293b;
+    --card-bg: #0f172a;
+    --text: #ffffff;
+    --text-light: #e2e8f0;
+    --border: rgba(255, 255, 255, 0.3);
+    --success: #22c55e;
+    --error: #f87171;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+  body { background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh; font-size: 19px; }
+  
+  .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(129,140,248,0.2) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(52,211,153,0.2) 0%, transparent 50%); }
+  .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+  .particle { position: absolute; width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; animation: float 30s infinite linear; }
+  @keyframes float { 0% { transform: translateY(100vh); } 100% { transform: translateY(-100vh); } }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+  .game-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; }
+  header { background: linear-gradient(135deg, rgba(129,140,248,0.3), rgba(52,211,153,0.2)); padding: 40px 30px; text-align: center; border-bottom: 1px solid var(--border); }
+  header h1 { font-size: 2.6rem; font-weight: 800; margin-bottom: 5px; }
+  header p { font-size: 1.3rem; color: var(--text-light); }
+  
+  .progress-container { background: rgba(0,0,0,0.3); padding: 20px 40px; }
+  .progress-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 700; }
+  .progress-bar { height: 10px; background: rgba(255,255,255,0.2); border-radius: 5px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 0.6s; }
+  
+  .screen { padding: 50px 40px; display: none; animation: fadeIn 0.5s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  h2 { font-size: 2.4rem; font-weight: 800; margin-bottom: 20px; color: var(--text); }
+  .subtitle { color: var(--text-light); margin-bottom: 35px; font-size: 1.2rem; }
+  .round-indicator { display: inline-block; background: rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 20px; font-weight: 700; margin-bottom: 30px; color: var(--primary); font-size: 1rem; border: 1px solid var(--primary); }
+  
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 18px 40px; border: none; border-radius: 12px; cursor: pointer; font-size: 1.2rem; font-weight: 700; transition: all 0.2s; border: 2px solid transparent; font-family: 'Outfit', sans-serif; text-decoration: none; }
+  .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+  .btn.primary { background: var(--primary); color: #000; }
+  .btn.secondary { background: transparent; color: var(--text); border-color: var(--text-light); }
+  .btn.success { background: var(--secondary); color: #000; }
+  .btn.danger { background: var(--error); color: #fff; }
+  .btn.real-world { background: var(--real-world); color: #fff; font-size: 1rem; padding: 10px 20px; }
+  .btn.small { font-size: 0.85rem; padding: 8px 12px; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-group { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 50px; }
+  
+  .intro-container { position: relative; width: 100%; min-height: 550px; }
+  .intro-slide { position: absolute; top: 0; left: 0; width: 100%; opacity: 0; visibility: hidden; transition: opacity 0.5s; display: flex; flex-direction: column; justify-content: center; }
+  .intro-slide.active { position: relative; opacity: 1; visibility: visible; height: auto; }
+  .demo-box { background: rgba(30, 41, 59, 0.8); border-radius: 20px; padding: 40px; border: 2px solid var(--border); max-width: 900px; margin: 0 auto; }
+  .demo-box.hard { border-color: var(--hard); }
+  .demo-box.soft { border-color: var(--soft); }
+  .demo-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
+  .demo-icon { font-size: 3rem; font-weight: 800; width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .demo-icon.hard { background: rgba(96, 165, 250, 0.2); color: var(--hard); }
+  .demo-icon.soft { background: rgba(74, 222, 128, 0.2); color: var(--soft); }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  @media (max-width: 768px) { .demo-grid { grid-template-columns: 1fr; } }
+  .demo-list { list-style: none; }
+  .demo-list li { padding: 8px 0; padding-left: 30px; position: relative; color: var(--text-light); font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .demo-list li::before { content: '→'; position: absolute; left: 0; color: var(--primary); font-weight: 700; }
+  .comparison-table { width: 100%; border-collapse: collapse; margin: 30px 0; font-size: 1.1rem; background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden; }
+  .comparison-table th { padding: 20px; text-align: center; font-weight: 700; font-size: 1.2rem; }
+  .comparison-table th.hard { color: var(--hard); }
+  .comparison-table th.soft { color: var(--soft); }
+  .comparison-table td { padding: 18px; border-top: 1px solid var(--border); text-align: center; color: var(--text-light); }
+  .info-card { background: rgba(255,255,255,0.08); padding: 25px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid; }
+  .intro-nav { display: flex; justify-content: center; gap: 15px; margin-top: 50px; }
+  .intro-dot { width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s; }
+  .intro-dot.active { background: var(--primary); transform: scale(1.3); }
+
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; margin: 30px 0; }
+  .skill-card { background: rgba(255,255,255,0.08); padding: 20px; border-radius: 12px; cursor: pointer; border: 2px solid var(--border); transition: all 0.2s; text-align: center; font-weight: 600; font-size: 1.1rem; position: relative; }
+  .skill-card:hover { border-color: var(--primary); background: rgba(129,140,248,0.2); }
+  .skill-card.selected { border-color: var(--primary); background: rgba(129,140,248,0.3); }
+  .skill-card.correct { background: rgba(34,197,94,0.6); border-color: var(--success); color: #fff; pointer-events: none; font-weight: 800; }
+  .skill-card.wrong { background: rgba(248,113,113,0.6); border-color: var(--error); color: #fff; pointer-events: none; text-decoration: line-through; }
+  
+  .choice-buttons { display: flex; gap: 20px; justify-content: center; margin: 30px 0; }
+  .choice-btn { padding: 16px 40px; border-radius: 10px; font-size: 1.2rem; font-weight: 700; cursor: pointer; transition: all 0.2s; border: 2px solid; background: transparent; }
+  .choice-btn.hard { color: var(--hard); border-color: var(--hard); }
+  .choice-btn.hard:hover { background: var(--hard); color: #000; }
+  .choice-btn.soft { color: var(--soft); border-color: var(--soft); }
+  .choice-btn.soft:hover { background: var(--soft); color: #000; }
+  
+  .feedback { margin: 25px 0; padding: 20px; border-radius: 10px; font-size: 1.1rem; display: none; border-left: 5px solid; color: #fff; }
+  .feedback.show { display: block; }
+  .feedback.correct { border-color: var(--success); background: rgba(34,197,94,0.2); }
+  .feedback.wrong { border-color: var(--error); background: rgba(248,113,113,0.2); }
+  .feedback.info { border-color: var(--accent); background: rgba(251, 191, 36, 0.2); color: var(--text-light); }
+  
+  .job-card { background: rgba(30, 41, 59, 0.8); border-radius: 16px; padding: 30px; border: 1px solid var(--border); margin-bottom: 20px; }
+  .job-title { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+  .job-desc { color: var(--secondary); margin-bottom: 5px; font-size: 1.1rem; font-weight: 600; }
+  .job-detail { font-size: 0.95rem; color: var(--text-light); margin-top: 10px; line-height: 1.5; font-style: italic; }
+  
+  .skill-cloud { display: flex; flex-wrap: wrap; gap: 12px; padding: 25px; background: rgba(0,0,0,0.2); border-radius: 16px; min-height: 150px; align-content: flex-start; }
+  .cloud-skill { padding: 10px 20px; border-radius: 25px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 2px solid var(--border); color: var(--text-light); position: relative; }
+  .cloud-skill.hard { border-color: var(--hard); }
+  .cloud-skill.soft { border-color: var(--soft); }
+  .cloud-skill.selected { color: #000; border-color: transparent; }
+  .cloud-skill.hard.selected { background: var(--hard); }
+  .cloud-skill.soft.selected { background: var(--soft); }
+  .cloud-skill.auto-solved { box-shadow: 0 0 15px var(--success); border-style: dashed; border-width: 2px; animation: pulse 1s infinite; }
+  
+  .budget-display { font-size: 2rem; font-weight: 800; color: var(--accent); margin-bottom: 20px; text-align: center; }
+  .budget-display span { color: var(--text); font-size: 1rem; font-weight: 400; }
+  .budget-bar { height: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 10px 0 30px 0; overflow: hidden; position: relative; }
+  .budget-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+  .budget-skill { position: relative; }
+  .skill-cost { position: absolute; top: -8px; right: -8px; background: var(--accent); color: #000; width: 24px; height: 24px; border-radius: 50%; font-size: 0.8rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .budget-results { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-top: 20px; text-align: center; }
+  .match-score { font-size: 3rem; font-weight: 800; color: var(--success); }
+  .budget-final-report { margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid var(--primary); }
+  
+  .role-details { background: rgba(129, 140, 248, 0.1); border-left: 4px solid var(--primary); padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0; }
+  .role-details h4 { color: var(--primary); font-size: 1rem; margin-bottom: 5px; }
+  .role-details p { font-size: 0.95rem; color: var(--text-light); }
+
+  .experience-card { background: rgba(30, 41, 59, 0.9); border-radius: 16px; padding: 30px; border: 2px solid var(--accent); margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  .experience-text { font-size: 1.4rem; font-weight: 600; color: var(--accent); margin-bottom: 10px; text-align: center; }
+  .experience-role { text-align: center; color: var(--soft); font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; background: rgba(74, 222, 128, 0.15); display: inline-block; padding: 6px 18px; border-radius: 20px; border: 1px solid rgba(74, 222, 128, 0.4); }
+  .experience-role-wrapper { text-align: center; margin-bottom: 20px; }
+  .experience-instruction { text-align: center; color: var(--text-light); margin-bottom: 20px; font-size: 1rem; }
+  
+  .radar-container { display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; align-items: center; margin-bottom: 30px; }
+  .radar-canvas-wrapper { position: relative; width: 350px; height: 350px; }
+  #radarCanvas { width: 100%; height: 100%; filter: drop-shadow(0 0 15px rgba(129, 140, 248, 0.2)); }
+  
+  .sliders-panel { flex: 1; min-width: 300px; display: grid; gap: 20px; }
+  .slider-group { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; }
+  .slider-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; }
+  .slider-value { color: var(--primary); font-size: 1.2rem; font-weight: 800; }
+  input[type=range] { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; outline: none; -webkit-appearance: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--primary); border-radius: 50%; cursor: pointer; transition: transform 0.1s; }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  .archetype-result { background: linear-gradient(135deg, rgba(129,140,248,0.2), rgba(52,211,153,0.1)); border: 2px solid var(--primary); padding: 30px; border-radius: 16px; text-align: center; margin-top: 30px; animation: fadeIn 0.5s ease; }
+  .archetype-title { font-size: 1.8rem; font-weight: 800; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .archetype-desc { color: var(--text-light); font-size: 1.1rem; line-height: 1.6; }
+
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+  
+  .stats-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0; text-align: center; }
+  .stat-box { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+  .stat-number { font-size: 3rem; font-weight: 800; color: var(--primary); }
+  .stat-label { color: var(--text-light); font-size: 0.9rem; text-transform: uppercase; }
+  
+  .reflection-box { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); padding: 30px; border-radius: 16px; margin: 30px 0; text-align: left; }
+  
+  .interview-option { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; cursor: pointer; border: 2px solid var(--border); transition: all 0.2s; margin-bottom: 15px; }
+  .interview-option:hover { border-color: var(--primary); }
+  .interview-option.selected { border-color: var(--accent); background: rgba(251, 191, 36, 0.2); }
+  .interview-result { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+  .report-box { background: rgba(155, 89, 182, 0.1); border: 2px solid var(--primary); padding: 30px; border-radius: 16px; text-align: center; margin-top: 30px; }
+  .report-box h3 { color: var(--primary); margin-bottom: 15px; }
+  .report-textarea { width: 100%; height: 150px; background: #000; color: var(--secondary); border: 1px solid var(--border); padding: 15px; border-radius: 8px; font-family: monospace; font-size: 1rem; resize: none; }
+  .custom-input-area { margin-top: 25px; padding-top: 25px; border-top: 1px solid var(--border); text-align: left; }
+  .custom-input-area label { font-weight: 600; display: block; margin-bottom: 10px; color: var(--text-light); }
+  
+  .hidden { display: none !important; }
+  .role-progress-status { text-align: center; font-size: 1.1rem; color: var(--text-light); margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; }
+  .role-progress-status strong { color: var(--primary); font-size: 1.3rem; }
+
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+  .shake-anim { animation: shake 0.3s; border-color: var(--error) !important; }
+  
+  .skill-type-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-weight: 700; vertical-align: middle; }
+  .skill-type-badge.hard { background: rgba(96, 165, 250, 0.3); color: var(--hard); }
+  .skill-type-badge.soft { background: rgba(74, 222, 128, 0.3); color: var(--soft); }
+  
+  .match-section { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+  .match-percentage { font-weight: 700; font-size: 1.1rem; }
+  .match-links { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  #exit-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeIn 0.3s ease;
+  }
+  #exit-overlay .exit-box {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  }
+  #exit-overlay .exit-box h3 {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    color: var(--text);
+  }
+  #exit-overlay .exit-box p {
+    color: var(--text-light);
+    margin-bottom: 25px;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  #exit-overlay .exit-box .exit-icon {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-animation"></div>
+<div class="particles" id="particles"></div>
+
+<div class="container">
+  <div class="game-card">
+    <header>
+      <h1>Skill Check</h1>
+      <p>Simula e Impara</p>
+    </header>
+    
+    <div class="progress-container">
+      <div class="progress-header">
+        <span id="round-name">Introduzione</span>
+        <span id="progress-text">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-bar"></div></div>
+    </div>
+
+    <div id="screen-intro" class="screen active">
+      <div class="intro-container">
+        <div class="intro-slide active" id="slide-1"><h2 class="intro-title">Benvenuto nel mondo del lavoro</h2><div style="text-align: center; max-width: 800px; margin: 0 auto;"><p class="subtitle" style="font-size: 1.3rem; margin-bottom: 30px;">Due mondi, un unico obiettivo: il tuo successo professionale.</p><div style="font-size: 5rem; margin: 30px 0;">🧠 💼</div><h3 style="color: var(--accent); margin-bottom: 15px; font-size: 1.5rem;">Percorso Formativo</h3><p style="color: var(--text-light); max-width: 600px; margin: 0 auto; line-height: 1.8;">Attraverso 12 step interattivi scoprirai la differenza tra Hard e Soft Skills.</p></div></div>
+        <div class="intro-slide" id="slide-2"><h2 class="intro-title">Hard Skills: Il "Saper Fare"</h2><div class="demo-box hard"><div class="demo-header"><div class="demo-icon hard">H</div><div><div class="demo-title">Competenze Tecniche</div></div></div><div class="demo-grid"><div><ul class="demo-list"><li>Contabilità e Bilancio</li><li>Excel Avanzato</li><li>Lingue Straniere</li></ul></div><div><ul class="demo-list"><li>Commercio Estero</li><li>Statistica</li><li>Fatturazione Elettronica</li></ul></div></div></div></div>
+        <div class="intro-slide" id="slide-3"><h2 class="intro-title">Soft Skills: Il "Saber Essere"</h2><div class="demo-box soft"><div class="demo-header"><div class="demo-icon soft">S</div><div><div class="demo-title">Competenze Trasversali</div></div></div><div class="demo-grid"><div><ul class="demo-list"><li>Teamwork</li><li>Comunicazione</li><li>Problem Solving</li></ul></div><div><ul class="demo-list"><li>Leadership</li><li>Gestione del Tempo</li><li>Empatia</li></ul></div></div></div></div>
+        <div class="intro-slide" id="slide-4"><h2 class="intro-title">La regola del 50/50</h2><div style="max-width: 900px; margin: 0 auto;"><table class="comparison-table"><thead><tr><th style="width: 20%;">Confronto</th><th class="hard">Hard Skills</th><th class="soft">Soft Skills</th></tr></thead><tbody><tr><td><strong>Fonte</strong></td><td>Scuola, Libri, Corsi</td><td>Esperienza, Vita</td></tr><tr><td><strong>Obiettivo</strong></td><td>Farti assumere</td><td>Farti fare carriera</td></tr></tbody></table></div></div>
+        <div class="intro-slide" id="slide-5"><h2 class="intro-title">Mettiti alla prova</h2><div style="display: grid; gap: 15px; text-align: left; margin-top: 30px; max-width: 600px; margin-left:auto; margin-right:auto;"><div class="info-card hard"><h4>Round 1-6</h4><p>Identificazione e Strategia</p></div><div class="info-card soft"><h4>Round 7-11</h4><p>Profilo, Colloquio e Mercato</p></div><div class="info-card" style="border-color: var(--accent);"><h4>Round 12</h4><p>Sintesi Finale</p></div></div></div>
+      </div>
+      <div class="intro-nav" id="intro-nav"></div>
+      <div class="btn-group">
+        <button class="btn secondary hidden" id="btn-prev">Indietro</button>
+        <button class="btn primary" id="btn-next">Avanti</button>
+        <button class="btn success hidden" id="btn-start">Inizia</button>
+      </div>
+    </div>
+
+    <div id="screen-start" class="screen"><div style="text-align: center;"><div style="font-size: 5rem; margin-bottom: 20px;">🎯</div><h2 style="justify-content: center;">Preparati</h2><button class="btn success" id="btn-go" style="font-size: 1.4rem; padding: 20px 60px; margin-top: 20px;">INIZIA</button></div></div>
+
+    <div id="screen-r1" class="screen"><div class="round-indicator">Round 1/12 - Classificazione</div><h2>Hard o Soft?</h2><div class="skills-grid" id="grid-r1"></div><div class="choice-buttons hidden" id="choices-r1"><button class="choice-btn hard" id="pick-hard">Hard</button><button class="choice-btn soft" id="pick-soft">Soft</button></div><div class="feedback" id="fb-r1"></div><div class="btn-group"><button class="btn secondary hidden" id="next-r1">Prossimo</button></div></div>
+
+    <div id="screen-r2" class="screen"><div class="round-indicator">Round 2/12 - Scenari</div><h2>Situazioni Reali</h2><div id="cont-r2"></div><div class="feedback" id="fb-r2"></div><div class="btn-group"><button class="btn secondary hidden" id="next-r2">Prossimo</button></div></div>
+
+    <div id="screen-r3" class="screen"><div class="round-indicator">Round 3/12 - Role Builder</div><h2>Costruisci il Profilo</h2><div id="role-status" class="role-progress-status">Ruolo <strong>1</strong> di <strong>5</strong></div><div id="cont-r3"></div><div class="feedback" id="fb-r3"></div><div class="btn-group">
+      <button class="btn primary hidden" id="check-r3" disabled>Verifica</button>
+      <button class="btn secondary hidden" id="next-r3">Prossimo</button>
+    </div></div>
+    
+    <div id="screen-r4" class="screen">
+      <div class="round-indicator">Round 4/12 - Budget Skill</div>
+      <h2>🧩 L'Insieme Vincente</h2>
+      <div id="budget-container"></div>
+      <div class="btn-group">
+        <button class="btn success" id="confirm-budget" disabled>Conferma Selezione</button>
+        <button class="btn secondary hidden" id="next-r4">Prossimo</button>
+      </div>
+    </div>
+    
+    <div id="screen-r5" class="screen"><div class="round-indicator">Round 5/12 - Priorità</div><h2>Top 5 Soft Skills</h2><div id="cont-r5"></div><div class="feedback" id="fb-r5"></div><div class="btn-group"><button class="btn secondary" id="next-r5" disabled>Verifica (0/5)</button></div></div>
+    
+    <div id="screen-r6" class="screen"><div class="round-indicator">Round 6/12 - Traduttore</div><h2>🔄 Traduci la tua Esperienza</h2><p class="subtitle">Ogni esperienza nasconde skill. Trova le 3 corrette tra Hard e Soft!</p><div id="cont-r6"></div><div class="feedback" id="fb-r6"></div><div class="btn-group"><button class="btn secondary hidden" id="next-r6">Prossimo</button></div></div>
+    
+    <div id="screen-r7" class="screen"><div class="round-indicator">Round 7/12 - Speed</div><h2>Speed Challenge</h2><div id="cont-r7"></div><div class="btn-group"><button class="btn secondary hidden" id="next-r7">Prossimo</button></div></div>
+    
+    <div id="screen-r8" class="screen"><div class="round-indicator">Round 8/12 - Preparazione</div><h2>Analisi Gap</h2><div id="cont-r8"></div><div class="btn-group"><button class="btn secondary hidden" id="next-r8">Prossimo</button></div></div>
+
+    <div id="screen-r9" class="screen">
+      <div class="round-indicator">Round 9/12 - Skill Radar</div>
+      <h2>🕸️ Il tuo Profilo Professionale</h2>
+      <p class="subtitle">Muovi gli slider per riflettere le tue reali capacità attuali.</p>
+      <div class="radar-container">
+        <div class="radar-canvas-wrapper"><canvas id="radarCanvas" width="350" height="350"></canvas></div>
+        <div class="sliders-panel" id="sliders-container"></div>
+      </div>
+      <div id="archetype-container" class="hidden"></div>
+      <div class="btn-group">
+        <button class="btn primary" id="calc-radar">Genera Archetipo</button>
+        <button class="btn success hidden" id="next-r9">Prossimo</button>
+      </div>
+    </div>
+
+    <div id="screen-r10" class="screen"><div class="round-indicator">Round 10/12 - Colloquio</div><h2>Simulazione Colloquio</h2><p class="subtitle">Rispondi alle domande del <strong>Selezionatore</strong>:</p><div id="cont-r10"></div><div class="feedback" id="fb-r10"></div><div class="btn-group"><button class="btn primary hidden" id="next-r10" disabled>Prossima Domanda</button></div></div>
+
+    <div id="screen-r11" class="screen">
+      <div class="round-indicator">Round 11/12 - Mercato</div>
+      <h2>Job Market</h2>
+      <div id="jobs"></div>
+      <div id="resources-r11"></div>
+      <div class="btn-group"><button class="btn success" id="btn-r11next">Continua</button></div>
+    </div>
+
+    <div id="screen-r12" class="screen">
+      <div class="round-indicator">Round 12/12 - Sintesi</div>
+      <h2>Il tuo Biglietto da Visita</h2>
+      <p class="subtitle">Scegli le skill che vuoi mostrare (seleziona quante ne vuoi):</p>
+      <div id="cont-r12"></div>
+      <div class="custom-input-area">
+        <label for="custom-skills-input">Altre competenze non in elenco:</label>
+        <textarea id="custom-skills-input" class="report-textarea" style="height: 80px;" placeholder="Es: Patentino Carrello Elevatore..."></textarea>
+      </div>
+      <div class="btn-group"><button class="btn success" id="finish-game">Genera Report</button></div>
+    </div>
+
+    <div id="screen-res" class="screen">
+      <div style="text-align: center;">
+        <h2>Punteggio Completato</h2>
+        <div style="width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(var(--success) 0%, rgba(255,255,255,0.1) 0%); margin: 40px auto; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: 800; position: relative;">
+          <div style="position: absolute; width: 160px; height: 160px; background: var(--bg); border-radius: 50%;"></div>
+          <span id="final-pct" style="position: relative; z-index: 1;">0%</span>
+        </div>
+        <div class="reflection-box" style="text-align: left; margin-top: 20px; border-color: var(--primary);"><h3>📊 Valutazione del Percorso</h3><div id="final-evaluation"></div></div>
+        <div class="reflection-box" style="text-align: left; margin-top: 20px; border-color: var(--secondary);"><h3>💡 Consigli per il Futuro</h3><div id="final-advice"></div></div>
+        <div class="report-box"><h3>📋 Report per Nearpod</h3><p style="color:var(--text-light); margin-bottom:15px;">Copia il testo e incollalo su Nearpod:</p><textarea class="report-textarea" id="report-textarea" readonly></textarea><button class="btn primary small" style="margin-top:10px;" onclick="var t=document.getElementById('report-textarea');t.select();document.execCommand('copy');alert('Copiato!');">Copia Report</button></div>
+        <div id="external-links-container"></div>
+        <div class="reflection-box" style="text-align: left; margin-top: 20px;"><h3>Gap da colmare</h3><div id="gap-filling-container"></div></div>
+        <button class="btn danger" id="btn-exit" style="margin-top: 40px;">Esci dall'applicazione</button>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+(function() {
+  const $ = id => document.getElementById(id);
+  const hide = id => $(id).classList.add('hidden');
+  const show = id => $(id).classList.remove('hidden');
+  const html = (id, c) => $(id).innerHTML = c;
+
+  const SKILLS = [
+    {id:'h1', text:'Partita Doppia', type:'hard'},{id:'h2', text:'Fatturazione', type:'hard'},{id:'h3', text:'Bilancio', type:'hard'},{id:'h4', text:'Calcolo IVA', type:'hard'},
+    {id:'h5', text:'Excel Base', type:'hard'},{id:'h6', text:'Excel Avanzato', type:'hard'},{id:'h7', text:'Inglese B2', type:'hard'},{id:'h8', text:'PowerPoint', type:'hard'},
+    {id:'h9', text:'GDPR Privacy', type:'hard'},{id:'h10', text:'Sicurezza Lavoro', type:'hard'},{id:'h11', text:'Gestionale', type:'hard'},{id:'h12', text:'Buste Paga', type:'hard'},
+    {id:'h13', text:'Business Plan', type:'hard'},{id:'h14', text:'Marketing Base', type:'hard'},{id:'h15', text:'Statistica', type:'hard'},{id:'h16', text:'Francese', type:'hard'},
+    {id:'h17', text:'Canva', type:'hard'},{id:'h18', text:'Trello/Project Mgmt', type:'hard'},
+    {id:'s1', text:'Teamwork', type:'soft'},{id:'s2', text:'Comunicazione', type:'soft'},{id:'s3', text:'Problem Solving', type:'soft'},{id:'s4', text:'Gestione Tempo', type:'soft'},
+    {id:'s5', text:'Leadership', type:'soft'},{id:'s6', text:'Pianificazione', type:'soft'},{id:'s7', text:'Adattabilità', type:'soft'},{id:'s8', text:'Precisione', type:'soft'},
+    {id:'s9', text:'Affidabilità', type:'soft'},{id:'s10', text:'Creatività', type:'soft'},{id:'s11', text:'Ascolto Attivo', type:'soft'},{id:'s12', text:'Motivazione', type:'soft'},
+    {id:'s13', text:'Empatia', type:'soft'},{id:'s14', text:'Gestione Stress', type:'soft'},{id:'s15', text:'Pensiero Critico', type:'soft'}, {id:'s16', text:'Negoziazione', type:'soft'},
+    {id:'s17', text:'Resilienza', type:'soft'}, {id:'s18', text:'Proattività', type:'soft'}, {id:'s19', text:'Public Speaking', type:'soft'}
+  ];
+
+  const GOLDEN_SOFT_IDS = ['s1', 's2', 's3', 's8', 's9'];
+  
+  const BUDGET_ROLES = [
+    { title: 'Assistente Commerciale Export', sector: 'Commercio Estero', role_desc: 'Gestione ordini estero.', required: ['h7', 'h8', 's1', 's2', 's4'], budget: 100, skills: [ {id: 'h7', text: 'Inglese C1', cost: 25}, {id: 'h16', text: 'Francese B1', cost: 20}, {id: 'h8', text: 'PowerPoint', cost: 10}, {id: 'h5', text: 'Excel Base', cost: 10}, {id: 'h4', text: 'IVA & Fiscale', cost: 15}, {id: 's1', text: 'Teamwork', cost: 15}, {id: 's2', text: 'Comunicazione', cost: 15}, {id: 's4', text: 'Gestione Tempo', cost: 10}, {id: 's8', text: 'Precisione', cost: 10}, {id: 's5', text: 'Leadership', cost: 20}, {id: 's7', text: 'Adattabilità', cost: 5}, {id: 's14', text: 'Gestione Stress', cost: 5} ] },
+    { title: 'Addetto Contabilità', sector: 'Amministrazione', role_desc: 'Prima nota e fatture.', required: ['h1', 'h5', 's8', 's9', 'h2'], budget: 100, skills: [ {id: 'h1', text: 'Partita Doppia', cost: 25}, {id: 'h2', text: 'Fatturazione', cost: 15}, {id: 'h5', text: 'Excel Base', cost: 10}, {id: 'h3', text: 'Bilancio', cost: 25}, {id: 'h12', text: 'Buste Paga', cost: 20}, {id: 's8', text: 'Precisione', cost: 15}, {id: 's9', text: 'Affidabilità', cost: 15}, {id: 's4', text: 'Gestione Tempo', cost: 10}, {id: 's14', text: 'Gestione Stress', cost: 5}, {id: 'h6', text: 'Excel Avanzato', cost: 15} ] },
+    { title: 'HR Assistant', sector: 'Risorse Umane', role_desc: 'Reclutamento e personale.', required: ['s13', 's1', 's2', 'h5', 's11'], budget: 100, skills: [ {id: 's13', text: 'Empatia', cost: 20}, {id: 's1', text: 'Teamwork', cost: 15}, {id: 's2', text: 'Comunicazione', cost: 15}, {id: 's11', text: 'Ascolto Attivo', cost: 15}, {id: 'h5', text: 'Excel Base', cost: 10}, {id: 'h12', text: 'Buste Paga', cost: 25}, {id: 'h9', text: 'GDPR Privacy', cost: 15}, {id: 's16', text: 'Negoziazione', cost: 20}, {id: 's19', text: 'Public Speaking', cost: 15}, {id: 'h8', text: 'PowerPoint', cost: 10} ] },
+    { title: 'Social Media Manager', sector: 'Marketing', role_desc: 'Social e contenuti.', required: ['h14', 'h17', 's10', 's2', 'h7'], budget: 100, skills: [ {id: 'h17', text: 'Canva', cost: 15}, {id: 'h14', text: 'Marketing Base', cost: 20}, {id: 'h7', text: 'Inglese B2', cost: 20}, {id: 's10', text: 'Creatività', cost: 20}, {id: 's2', text: 'Comunicazione', cost: 15}, {id: 'h5', text: 'Excel Base', cost: 10}, {id: 's7', text: 'Adattabilità', cost: 5}, {id: 's3', text: 'Problem Solving', cost: 10}, {id: 'h8', text: 'PowerPoint', cost: 10}, {id: 'h11', text: 'Gestionale', cost: 15} ] },
+    { title: 'Impiegato Logistica', sector: 'Magazzino', role_desc: 'Giacenze e ordini.', required: ['h5', 's8', 's4', 'h11', 's9'], budget: 100, skills: [ {id: 'h11', text: 'Gestionale', cost: 20}, {id: 'h5', text: 'Excel Base', cost: 10}, {id: 'h15', text: 'Statistica', cost: 20}, {id: 's8', text: 'Precisione', cost: 15}, {id: 's4', text: 'Gestione Tempo', cost: 10}, {id: 's9', text: 'Affidabilità', cost: 15}, {id: 's1', text: 'Teamwork', cost: 15}, {id: 'h10', text: 'Sicurezza Lavoro', cost: 10}, {id: 's7', text: 'Adattabilità', cost: 5}, {id: 's5', text: 'Leadership', cost: 20} ] }
+  ];
+
+  const RADAR_AXES = [
+    { id: 'tech', label: '📊 Tecnica', color: '#60a5fa' }, { id: 'comm', label: '🗣️ Comunicazione', color: '#f472b6' },
+    { id: 'prob', label: '🧩 Problem Solving', color: '#a78bfa' }, { id: 'org', label: '📅 Organizzazione', color: '#fbbf24' },
+    { id: 'team', label: '🤝 Teamwork', color: '#34d399' }, { id: 'res', label: '💪 Resilienza', color: '#f87171' }
+  ];
+
+  const ARCHETYPES = [
+    { id: 'organizer', name: "L'Organizzatore", desc: 'La tua mente è un orologio svizzero. Eccelli nel pianificare, gestire tempi e risorse. Il caos è il tuo nemico.', check: (r) => r.org >= 8 },
+    { id: 'tech', name: 'Il Tecnico Silenzioso', desc: 'Parli poco, ma fai molto. Le tue competenze tecniche sono solide e risolvi problemi complessi con metodo.', check: (r) => r.tech >= 8 },
+    { id: 'mediator', name: 'Il Mediatore', desc: 'Diplomazia ed empatia sono i tuoi punti forte. Sai gestire i conflitti e creare sinergie nel team.', check: (r) => r.comm >= 8 },
+    { id: 'fighter', name: 'Il Problem Solver Instancabile', desc: 'Non molla mai. La tua resilienza e la tua capacità di trovare soluzioni ti rendono un asset prezioso in situazioni di crisi.', check: (r) => r.res >= 9 },
+    { id: 'leader', name: 'Il Leader Nascente', desc: 'Possiedi una spiccata capacità di guidare e motivare gli altri. La tua comunicazione efficace ti rende adatto a ruoli di responsabilità.', check: (r) => r.team >= 8 },
+    { id: 'balanced', name: 'Il Tuttologo Equilibrato', desc: 'Sai fare un po\' di tutto. Hai un profilo versatile che si adatta a molti contesti.', check: (r) => true }
+  ];
+
+  const EXPERIENCES = [
+    { text: "Hai corretto un errore nel foglio ore dei dipendenti", correct: ['h5', 's8'], pool: ['h5', 's8', 'h6', 's9', 'h1', 's1'], feedback: "Excel (Hard) per il foglio + Precisione (Soft) per non sbagliare.", role: "Addetto Paghe / HR" },
+    { text: "Hai tradotto un manuale tecnico dall'inglese", correct: ['h7', 's8'], pool: ['h7', 's8', 'h16', 's2', 'h8', 's9'], feedback: "Inglese (Hard) per tradurre + Precisione (Soft) per la qualità.", role: "Traduttore Tecnico" },
+    { text: "Hai registrato le fatture del mese in contabilità", correct: ['h1', 's8'], pool: ['h1', 's8', 'h2', 'h5', 's4', 's9'], feedback: "Partita Doppia (Hard) per la registrazione + Precisione (Soft).", role: "Contabile" },
+    { text: "Hai organizzato la raccolta fondi per la gita di classe", correct: ['s5', 's6', 'h8'], pool: ['s5', 's6', 'h8', 'h17', 's3', 's2'], feedback: "Leadership e Pianificazione (Soft) + PowerPoint (Hard) per la presentazione.", role: "Event Manager / PR" },
+    { text: "Hai fatto il rilevatore alle partite di calcetto", correct: ['s8', 's9', 'h5'], pool: ['s8', 's9', 'h5', 'h15', 's14', 's1'], feedback: "Precisione e Affidabilità (Soft) + Excel (Hard) per le statistiche.", role: "Data Entry / Statistico" },
+    { text: "Hai aiutato un compagno in difficoltà con la tesina", correct: ['s11', 's13', 'h8'], pool: ['s11', 's13', 'h8', 'h5', 's1', 's2'], feedback: "Ascolto Attivo ed Empatia (Soft) + PowerPoint (Hard) per il supporto.", role: "Tutor / Formatore" },
+    { text: "Hai gestito il conflitto sul gruppo WhatsApp", correct: ['s16', 's2', 'h9'], pool: ['s16', 's2', 'h9', 's13', 'h5', 's3'], feedback: "Negoziazione e Comunicazione (Soft) + GDPR (Hard) per la privacy del gruppo.", role: "Community Manager" },
+    { text: "Hai studiato un argomento da solo per un'interrogazione", correct: ['s7', 's12', 'h5'], pool: ['s7', 's12', 'h5', 'h6', 's9', 's17'], feedback: "Adattabilità e Motivazione (Soft) + Ricerca online (Hard) per schemi.", role: "Ricercatore / Analista" }
+  ];
+
+  const JOBS = [
+    {title: 'Contabile', company: 'Studio', salary: '€1.200/m', req: ['h1','h2','h5','s8','s12','s7'], desc: 'Contabilità', location: 'Bari'},
+    {title: 'Back-Office', company: 'Azienda', salary: '€1.100/m', req: ['h5','h8','h11','s4','s6','s8'], desc: 'Ufficio', location: 'Taranto'},
+    {title: 'Commerciale', company: 'Export', salary: '€1.250/m', req: ['h7','h8','s1','s2','s9'], desc: 'Vendite', location: 'Lecce'},
+    {title: 'Marketing Jr', company: 'Web', salary: '€1.000/m', req: ['h4','h14','s10','s2','s1'], desc: 'Marketing', location: 'Bari'}
+  ];
+
+  const SCENARIOS = [
+    {text: 'Registrare fatture', detail: 'Inserimento dati nel libro giornale e verifica della corrispondenza tra fattura e bolla di accompagnamento.', correct: 'hard'}, 
+    {text: 'Risolvere conflitti', detail: 'Mediare tra due colleghi che non si parlano più per un malinteso sul lavoro di squadra.', correct: 'soft'}, 
+    {text: 'Email in inglese', detail: 'Scrivere una risposta formale a un fornitore estero per chiarire una discrepanza nella spedizione.', correct: 'hard'}, 
+    {text: 'Rispettare scadenze', detail: 'Riuscire a consegnare un report importante entro la sera nonostante imprevisti personali.', correct: 'soft'},
+    {text: 'Setup Excel budget', detail: 'Creare una tabella pivot collegando i fogli entrate/uscite per il report trimestrale.', correct: 'hard'}, 
+    {text: 'Adattamento software', detail: 'Imparare a usare il nuovo gestionale aziendale dopo un breve corso senza perdere la calma.', correct: 'soft'}, 
+    {text: 'Verifica conformità', detail: 'Controllare che i documenti GDPR siano correttamente archiviati secondo la legge sulla privacy.', correct: 'hard'}, 
+    {text: 'Motivare team', detail: 'Tirare su il morale dei colleghi dopo una settimana particolarmente stressante.', correct: 'soft'},
+    {text: 'Calcolo stipendi', detail: 'Elaborare il cedolino paga considerando ore straordinarie e trattenute fiscali.', correct: 'hard'}, 
+    {text: 'Gestire cliente arrabbiato', detail: 'Rimanere calmi ed empatici mentre un cliente urla al telefono per un ritardo.', correct: 'soft'}, 
+    {text: 'Modulo IVA', detail: 'Compilare correttamente il modello per la liquidazione IVA mensile.', correct: 'hard'}, 
+    {text: 'Presentazione progetto', detail: 'Parlare in pubblico esponendo le idee chiare e convincenti durante una riunione.', correct: 'soft'},
+    {text: 'Errore bilancio', detail: 'Individuare la voce non quadrata nel bilancio di verifica tramite riscontro incrociato.', correct: 'hard'}, 
+    {text: 'Collaborazione difficile', detail: 'Trovare un punto d\'intesa con un collega che ha un carattere molto diverso dal tuo.', correct: 'soft'}, 
+    {text: 'Archiviazione documenti', detail: 'Classificare le fatture cartacee in ordine cronologico e alfabetico per anno fiscale.', correct: 'hard'}
+  ];
+
+  const ROLES = [
+    {title: 'Contabile', desc: 'Gestione prima nota.', sector: 'Amministrazione', role_info: 'Responsabile delle scritture contabili e della gestione documentale.', hard: ['h1','h2','h5'], soft: ['s8','s12','s7'], pool: ['h1','h2','h3','h4','h5','h6','h9','h10','h12','h13','s7','s8','s12','s5','s6','s9','s4','s14']},
+    {title: 'Clienti', desc: 'Supporto clienti.', sector: 'Customer Care', role_info: 'Primo punto di contatto per i clienti, gestisce ordini e reclami.', hard: ['h7','h8','h11'], soft: ['s1','s4','s9'], pool: ['h4','h7','h8','h11','h14','h15','h16','s1','s4','s9','s3','s2','s10','s13','s16','s14','s11','h5','s6']},
+    {title: 'Amministrativo', desc: 'Segreteria.', sector: 'Segreteria', role_info: 'Supporto operativo a uffici direzionali e gestione protocollo.', hard: ['h9','h5','h10'], soft: ['s5','s6','s8'], pool: ['h5','h6','h9','h10','h11','h15','h4','s5','s6','s8','s4','s7','s11','s12','h1','h2','s1','s2']},
+    {title: 'Marketing', desc: 'Comunicazione.', sector: 'Ufficio Marketing', role_info: 'Sviluppa campagne promozionali e cura l\'immagine aziendale.', hard: ['h4','h8','h14'], soft: ['s10','s2','s1'], pool: ['h4','h8','h14','h7','h5','h15','s10','s2','s1','s9','s3','s16','s13','s6','h2','s5','s7','h11']},
+    {title: 'HR Assistant', desc: 'Risorse Umane.', sector: 'Risorse Umane', role_info: 'Supporta la gestione del personale e i processi formativi.', hard: ['h12','h5','h1'], soft: ['s13','s1','s16'], pool: ['h12','h5','h1','h9','h10','h6','s13','s1','s16','s14','s5','s6','s7','s11','h3','h2','s3','s4']}
+  ];
+
+  const INTERVIEW_QUESTIONS = [
+    { q: "Selezionatore: 'Mi parli di un momento in cui ha dovuto gestire un conflitto in team.'", opts: [ {text: "Ho ignorato il collega", score: 0}, {text: "Ho organizzato un confronto", score: 2}, {text: "Ho chiesto al capo", score: 1}, {text: "Ho lasciato perdere", score: 0} ] },
+    { q: "Selezionatore: 'Qual è il suo punto debole?'", opts: [ {text: "Sono troppo perfezionista", score: 0}, {text: "A volte faccio fatica a dire di no", score: 2}, {text: "Non ne ho", score: 0}, {text: "Non so", score: 0} ] },
+    { q: "Selezionatore: 'Come gestisce una scadenza imminente?'", opts: [ {text: "Mi prendo un giorno libero", score: 0}, {text: "Faccio gli straordinari", score: 2}, {text: "Chiedo proroga", score: 0}, {text: "Consegno incompleto", score: 0} ] },
+    { q: "Selezionatore: 'Perché vuole lavorare qui?'", opts: [ {text: "Pagate bene", score: 0}, {text: "Mi piace la vostra missione", score: 2}, {text: "È vicino a casa", score: 1}, {text: "Non ho trovato altro", score: 0} ] },
+    { q: "Selezionatore: 'Dove si vede tra 5 anni?'", opts: [ {text: "Al suo posto", score: 0}, {text: "Non lo so", score: 0}, {text: "Voglio crescere", score: 2}, {text: "In pensione", score: 0} ] },
+    { q: "Selezionatore: 'Come reagisce alle critiche?'", opts: [ {text: "Mi offendo", score: 0}, {text: "Le accetto", score: 2}, {text: "Le ignoro", score: 0}, {text: "Controbatto", score: 0} ] },
+    { q: "Selezionatore: 'Ha domande per noi?'", opts: [ {text: "No", score: 0}, {text: "Quali opportunità?", score: 2}, {text: "Quanto mi pagate?", score: 0}, {text: "Telefono?", score: 0} ] },
+    { q: "Selezionatore: 'Descriva un errore.'", opts: [ {text: "Non sbaglio", score: 0}, {text: "Ho imparato dai miei errori", score: 2}, {text: "Ho dato la colpa ad altri", score: 0}, {text: "Non ricordo", score: 0} ] },
+    { q: "Selezionatore: 'Solo o in team?'", opts: [ {text: "Solo", score: 0}, {text: "Solo in team", score: 0}, {text: "Mi adatto", score: 2}, {text: "Non mi importa", score: 0} ] },
+    { q: "Selezionatore: 'Stipendio?'", opts: [ {text: "Lavoro gratis", score: 0}, {text: "Secondo esperienza", score: 2}, {text: "Tanto", score: 0}, {text: "Non so", score: 0} ] }
+  ];
+
+  let S = { 
+    r:0, score:0, max:0, mySkills: [], 
+    r1:{done:[], curr:null}, 
+    r2:0, 
+    r3:{idx:0, sel:{hard:[], soft:[]}, tries:0}, 
+    r4:{idx:0, sel:[], cost:0, scores:[]}, 
+    r5:[], 
+    r6:{idx:0, sel:[], score:0, ready:false}, 
+    r7:{timer:null, t:30, idx:0, sc:0, data:[], history:[]},
+    r9:{ radar: {}, archetypeName: '' }, 
+    r10:{idx:0, score:0, max:0, history:[]}, 
+    r12:[] 
+  };
+  
+  let currIntro = 0; const totalIntro = 5;
+  const R3_TOTAL = 5;
+
+  function updateIntroUI() { 
+    for(let i=1; i<=totalIntro; i++) $('slide-'+i).classList.toggle('active', i-1 === currIntro);
+    if($('intro-nav').children.length === 0) { for(let i=0; i<totalIntro; i++) { let d = document.createElement('div'); d.className='intro-dot'; d.onclick = () => { currIntro = i; updateIntroUI(); }; $('intro-nav').appendChild(d); } } 
+    Array.from($('intro-nav').children).forEach((d, i) => d.classList.toggle('active', i === currIntro));
+    if(currIntro > 0) $('btn-prev').classList.remove('hidden'); else $('btn-prev').classList.add('hidden');
+    if(currIntro < totalIntro - 1) { $('btn-next').classList.remove('hidden'); $('btn-start').classList.add('hidden'); } else { $('btn-next').classList.add('hidden'); $('btn-start').classList.remove('hidden'); }
+    let introPct = ((currIntro + 1) / totalIntro) * 5; 
+    prog('Introduzione', introPct);
+  }
+  function nextIntro() { if(currIntro < totalIntro - 1) { currIntro++; updateIntroUI(); } }
+  function prevIntro() { if(currIntro > 0) { currIntro--; updateIntroUI(); } }
+  function shuffle(a) { for(let i=a.length-1; i>0; i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; }
+  function getSkill(id) { return SKILLS.find(s=>s.id===id) || null; }
+  function prog(name, pct) { $('round-name').textContent=name; $('progress-text').textContent=Math.round(pct)+'%'; $('progress-bar').style.width=pct+'%'; }
+  function screen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); window.scrollTo(0,0); }
+  function startGame() { S.r=1; S.score=0; S.max=0; startR1(); screen('screen-r1'); prog('Round 1/12', 5); }
+
+  function startR1() { 
+    S.r1.done = []; S.r1.curr = null; 
+    let hardPool = shuffle(SKILLS.filter(s => s.type === 'hard')).slice(0, 5); 
+    let softPool = shuffle(SKILLS.filter(s => s.type === 'soft')).slice(0, 5); 
+    let data = shuffle([...hardPool, ...softPool]); 
+    html('grid-r1', data.map(s => `<div class="skill-card" data-id="${s.id}">${s.text}</div>`).join('')); 
+    hide('choices-r1'); hide('next-r1'); $('fb-r1').className = 'feedback'; 
+    document.querySelectorAll('#grid-r1 .skill-card').forEach(c => { 
+      c.onclick = () => { 
+        if(S.r1.done.includes(c.dataset.id)) return; 
+        document.querySelectorAll('#grid-r1 .skill-card').forEach(x=>x.classList.remove('selected')); 
+        c.classList.add('selected'); 
+        S.r1.curr = getSkill(c.dataset.id); 
+        show('choices-r1'); 
+      }; 
+    }); 
+  }
+  function ansR1(type) { 
+    let s = S.r1.curr; if(!s) return; 
+    let ok = s.type === type; 
+    let card = document.querySelector(`#grid-r1 .skill-card[data-id="${s.id}"]`); 
+    card.classList.remove('selected'); 
+    card.classList.add(ok?'correct':'wrong'); 
+    $('fb-r1').className = 'feedback show ' + (ok?'correct':'wrong'); 
+    $('fb-r1').innerHTML = ok ? `<strong>Corretto!</strong>` : `<strong>In realtà era una ${s.type.toUpperCase()} Skill.</strong>`; 
+    if(ok) S.score++; S.max++; S.r1.done.push(s.id); 
+    hide('choices-r1'); 
+    if(S.r1.done.length >= 10) show('next-r1'); 
+    prog('Round 1/12', 5 + (S.r1.done.length/10)*5); 
+  }
+
+  function startR2() { S.r2=0; renderR2(); }
+  function renderR2() { 
+      if(S.r2 >= SCENARIOS.length) { html('cont-r2', `<div class="job-card"><h3 style="color:var(--success); text-align:center;">Round Completato!</h3></div>`); show('next-r2'); return; } 
+      let s = SCENARIOS[S.r2]; 
+      html('cont-r2', `
+        <div class="job-card">
+            <div class="job-title">${s.text}</div>
+            <div class="job-detail">${s.detail}</div>
+            <div class="choice-buttons" style="margin-top:20px">
+                <button class="choice-btn hard" id="r2h">Hard Skill</button>
+                <button class="choice-btn soft" id="r2s">Soft Skill</button>
+            </div>
+        </div>`); 
+      $('r2h').onclick = () => ansR2('hard'); 
+      $('r2s').onclick = () => ansR2('soft'); 
+      $('fb-r2').className = 'feedback'; 
+      $('fb-r2').textContent = ''; 
+  }
+  function ansR2(type) { let s = SCENARIOS[S.r2]; let ok = s.correct === type; $('fb-r2').className = 'feedback show ' + (ok?'correct':'wrong'); $('fb-r2').textContent = ok ? 'Corretto!' : `In realtà era una ${s.correct.toUpperCase()} skill.`; if(ok) S.score++; S.max++; S.r2++; setTimeout(()=>{ renderR2(); prog('Round 2/12', 10 + (S.r2/SCENARIOS.length)*5); }, 2500); }
+
+  function startR3() { S.r3.idx = 0; S.r3.sel = {hard:[], soft:[]}; S.r3.tries = 0; loadRole(); }
+  function loadRole() { $('fb-r3').className = 'feedback'; hide('next-r3'); hide('check-r3'); 
+    if(S.r3.idx >= R3_TOTAL) { html('cont-r3', '<div class="job-card" style="text-align:center"><h3 style="color:var(--success)">Profili completati!</h3></div>'); $('role-status').innerHTML = 'Completato'; show('next-r3'); return; } 
+    $('role-status').innerHTML = `Ruolo <strong>${S.r3.idx + 1}</strong> di <strong>${R3_TOTAL}</strong>`; let r = ROLES[S.r3.idx];
+    let detailsHtml = `<div class="role-details"><h4>Settore: ${r.sector}</h4><p><strong>Ruolo:</strong> ${r.role_info}</p></div>`;
+    let poolHTML = r.pool.map(id => { let s = getSkill(id); if(!s) return ''; let isSelected = S.r3.sel[s.type].includes(id); return `<span class="cloud-skill ${s.type}${isSelected?' selected':''}" data-id="${id}" data-t="${s.type}">${s.text}</span>`; }).join(''); 
+    html('cont-r3', `<div class="job-card"><div class="job-title">${r.title}</div><div class="job-desc">${r.desc}</div>${detailsHtml}<p class="subtitle" style="margin-top:15px;">Seleziona 3 Hard e 3 Soft:</p><div class="skill-cloud" id="role-pool">${poolHTML}</div><div style="margin-top:15px; display:flex; gap:20px;"><div>Hard: <strong style="color:var(--hard)" id="count-h-r3">${S.r3.sel.hard.length}/3</strong></div><div>Soft: <strong style="color:var(--soft)" id="count-s-r3">${S.r3.sel.soft.length}/3</strong></div></div></div>`); 
+    document.querySelectorAll('#role-pool .cloud-skill').forEach(el => { el.onclick = function() { document.querySelectorAll('#role-pool .cloud-skill').forEach(x => x.classList.remove('auto-solved')); let type = this.dataset.t; let id = this.dataset.id; let arr = S.r3.sel[type]; let idx = arr.indexOf(id); if(idx > -1) { arr.splice(idx, 1); this.classList.remove('selected'); } else if(arr.length < 3) { arr.push(id); this.classList.add('selected'); } $('count-h-r3').textContent = S.r3.sel.hard.length + '/3'; $('count-s-r3').textContent = S.r3.sel.soft.length + '/3'; let checkBtn = $('check-r3'); if(S.r3.sel.hard.length === 3 && S.r3.sel.soft.length === 3) { show('check-r3'); checkBtn.disabled = false; } else { hide('check-r3'); } }; }); }
+  function checkR3() { let r = ROLES[S.r3.idx]; let correctHard = S.r3.sel.hard.filter(id => r.hard.includes(id)).length; let correctSoft = S.r3.sel.soft.filter(id => r.soft.includes(id)).length;
+    if (correctHard === 3 && correctSoft === 3) { $('fb-r3').className = 'feedback show correct'; $('fb-r3').innerHTML = `Perfetto!`; S.score += 6; S.max += 6; S.r3.idx++; S.r3.tries = 0; S.r3.sel = {hard:[], soft:[]}; setTimeout(()=>{ loadRole(); prog('Round 3/12', 15 + (S.r3.idx/R3_TOTAL)*10); }, 2000); } else {
+        S.r3.tries++; $('fb-r3').className = 'feedback show wrong'; $('fb-r3').innerHTML = `Analizza meglio. Tentativo ${S.r3.tries}/3.`;
+        if (S.r3.tries >= 3) {
+            $('fb-r3').className = 'feedback show info'; S.r3.sel = {hard:[], soft:[]}; document.querySelectorAll('#role-pool .cloud-skill').forEach(x => { x.classList.remove('selected'); x.classList.remove('auto-solved'); }); let hardNames = []; let softNames = [];
+            r.hard.slice(0, 3).forEach(id => { S.r3.sel.hard.push(id); let el = document.querySelector(`#role-pool .cloud-skill[data-id="${id}"]`); if(el) { el.classList.add('selected', 'auto-solved'); } hardNames.push(getSkill(id).text); });
+            r.soft.slice(0, 3).forEach(id => { S.r3.sel.soft.push(id); let el = document.querySelector(`#role-pool .cloud-skill[data-id="${id}"]`); if(el) { el.classList.add('selected', 'auto-solved'); } softNames.push(getSkill(id).text); });
+            $('count-h-r3').textContent = S.r3.sel.hard.length + '/3'; $('count-s-r3').textContent = S.r3.sel.soft.length + '/3'; hide('check-r3');
+            $('fb-r3').innerHTML = `<strong>Soluzione automatica:</strong><br>Per il ruolo <strong>${r.title}</strong> servono:<br><span style="color:var(--hard)">Hard: ${hardNames.join(', ')}</span><br><span style="color:var(--soft)">Soft: ${softNames.join(', ')}</span>.`;
+            setTimeout(() => { S.r3.idx++; S.r3.tries = 0; S.r3.sel = {hard:[], soft:[]}; loadRole(); prog('Round 3/12', 15 + (S.r3.idx/R3_TOTAL)*10); }, 5000);
+        }
+    } 
+  }
+
+  function startR4() { S.r4 = {idx: 0, sel: [], cost: 0, scores: []}; loadBudgetRole(); }
+  function loadBudgetRole() {
+    if(S.r4.idx >= BUDGET_ROLES.length) { showFinalBudgetReport(); return; }
+    let role = BUDGET_ROLES[S.r4.idx]; S.r4.sel = []; S.r4.cost = 0;
+    html('budget-container', `
+      <div class="job-card" style="border-color: var(--accent); margin-bottom: 30px;">
+        <div class="job-title">${role.title}</div>
+        <div class="job-desc">${role.desc}</div>
+        <p style="margin-top:10px; color:var(--text-light); font-size:0.9rem;"><strong>Settore:</strong> ${role.sector}<br><strong>Obiettivo:</strong> Massimizza il match. Le skill rare costano di più.</p>
+      </div>
+      <div class="budget-display">Budget: <span id="budget-left">${role.budget}</span> pt</div>
+      <div class="budget-bar"><div class="budget-fill" id="budget-fill" style="width: 100%;"></div></div>
+      <div id="budget-skills-container" class="skills-grid"></div>
+      <div id="budget-results" class="budget-results hidden"></div>
+    `);
+    let skillsHtml = role.skills.map(s => `<div class="skill-card budget-skill" data-id="${s.id}" data-cost="${s.cost}">${s.text}<div class="skill-cost">${s.cost}</div></div>`).join('');
+    html('budget-skills-container', skillsHtml);
+    document.querySelectorAll('.budget-skill').forEach(el => {
+      el.onclick = function() {
+        let cost = parseInt(el.dataset.cost); let id = el.dataset.id; let idx = S.r4.sel.indexOf(id);
+        if(idx > -1) { S.r4.sel.splice(idx, 1); S.r4.cost -= cost; el.classList.remove('selected'); } 
+        else { if(S.r4.cost + cost <= role.budget) { S.r4.sel.push(id); S.r4.cost += cost; el.classList.add('selected'); } else { el.classList.add('shake-anim'); setTimeout(() => el.classList.remove('shake-anim'), 300); } }
+        updateBudgetUI(role.budget);
+      };
+    });
+    show('confirm-budget'); hide('next-r4'); prog('Round 4/12', 35 + (S.r4.idx / BUDGET_ROLES.length) * 10);
+  }
+  function updateBudgetUI(totalBudget) {
+    let remaining = totalBudget - S.r4.cost;
+    if($('budget-left')) $('budget-left').textContent = remaining;
+    if($('budget-fill')) $('budget-fill').style.width = (remaining / totalBudget * 100) + '%';
+    $('confirm-budget').disabled = S.r4.sel.length === 0;
+    if(S.r4.sel.length > 0) $('confirm-budget').textContent = `Conferma (${S.r4.sel.length} skill)`; else $('confirm-budget').textContent = "Seleziona Skill";
+  }
+  function confirmBudget() {
+    let role = BUDGET_ROLES[S.r4.idx]; let matchCount = S.r4.sel.filter(id => role.required.includes(id)).length; let matchPct = Math.round((matchCount / role.required.length) * 100);
+    S.r4.scores.push(matchPct);
+    $('budget-results').classList.remove('hidden');
+    $('budget-results').innerHTML = `<div class="match-score">${matchPct}%</div><p style="color:var(--text-light);">Match con il ruolo</p>`;
+    S.score += matchCount * 2; S.max += role.required.length * 2;
+    hide('confirm-budget'); document.querySelectorAll('.budget-skill').forEach(el => el.style.pointerEvents = 'none');
+    setTimeout(() => { S.r4.idx++; loadBudgetRole(); }, 2500);
+  }
+  function showFinalBudgetReport() {
+    let avgScore = S.r4.scores.reduce((a, b) => a + b, 0) / S.r4.scores.length;
+    let judgment = avgScore >= 80 ? "Eccellente stratega! Sai ottimizzare le risorse e puntare al risultato." : (avgScore >= 50 ? "Buon approccio pragmatico. Hai bilanciato bene risorse e obiettivi." : "Da migliorare. Allenati a valutare il rapporto costo-benefici delle competenze.");
+    html('budget-container', `<div class="budget-final-report"><h3 style="color:var(--accent); margin-bottom:15px;">🏁 Bilancio Competenze</h3><div style="font-size:2.5rem; font-weight:800; color:var(--success)">${Math.round(avgScore)}% Media</div><p style="color:var(--text-light); margin:20px 0;">Hai completato i ${BUDGET_ROLES.length} profili.</p><p style="color:var(--text)">${judgment}</p></div>`);
+    show('next-r4'); prog('Round 4/12', 45);
+  }
+
+  function startR5() { S.r5 = []; let data = shuffle(SKILLS.filter(s=>s.type==='soft')).slice(0, 15); html('cont-r5', `<p class="subtitle">Seleziona le 5 Soft Skills più richieste.</p><div class="skills-grid" id="grid-r5">${data.map(s=>`<div class="skill-card" data-id="${s.id}">${s.text}</div>`).join('')}</div>`); $('next-r5').disabled = true; $('next-r5').textContent = "Verifica (0/5)"; $('fb-r5').className = 'feedback'; document.querySelectorAll('#grid-r5 .skill-card').forEach(c => { c.onclick = () => { c.classList.toggle('selected'); S.r5 = Array.from(document.querySelectorAll('#grid-r5 .skill-card.selected')).map(x=>x.dataset.id); if(S.r5.length === 5) { $('next-r5').disabled = false; $('next-r5').textContent = "Verifica"; } else { $('next-r5').disabled = true; $('next-r5').textContent = "Verifica ("+S.r5.length+"/5)"; } }; }); show('next-r5'); }
+  function nextR5() { 
+    if(S.r5.length !== 5) return; 
+    let correct = S.r5.filter(id => GOLDEN_SOFT_IDS.includes(id)); let wrong = S.r5.filter(id => !GOLDEN_SOFT_IDS.includes(id)); 
+    let msg = `<strong>Risultato: ${correct.length}/5 Corrette.</strong><br>`; 
+    if(correct.length > 0) msg += `<span style="color:var(--success)">✅ Corrette: ${correct.map(id => getSkill(id).text).join(', ')}.</span><br>`; 
+    if(wrong.length > 0) { msg += `<span style="color:var(--error)">❌ Non in Top 5: ${wrong.map(id => getSkill(id).text).join(', ')}.</span><br>`; msg += `<span style="color:var(--text-light)">Le Top 5 sono: Teamwork, Comunicazione, Problem Solving, Precisione, Affidabilità.</span>`; } 
+    S.score += correct.length * 2; S.max += 10; 
+    $('fb-r5').className = 'feedback show ' + (correct.length >= 3 ? 'correct' : 'info'); $('fb-r5').innerHTML = msg; 
+    $('next-r5').textContent = "Prossimo"; $('next-r5').onclick = nextRound; $('next-r5').disabled = false;
+  }
+  
+  function startR6() { S.r6 = {idx: 0, score: 0, ready: false}; renderExperience(); }
+  function renderExperience() {
+    if(S.r6.idx >= EXPERIENCES.length) {
+      let maxPoints = EXPERIENCES.length * 3; 
+      let ratio = S.r6.score / maxPoints;
+      let resultMsg = ratio >= 0.8 ? "Eccellente capacità di analisi!" : (ratio >= 0.5 ? "Buon intuito, continua così." : "Allenati a vedere oltre le apparenze.");
+      $('fb-r6').className = 'feedback';
+      html('cont-r6', `<div class="job-card" style="text-align:center; border-color:var(--success)"><h3 style="color:var(--success)">Round Completato!</h3><p style="color:var(--text-light); margin-top:10px;">Punti totali: ${S.r6.score}/${maxPoints}</p><p style="color:var(--accent); margin-top:20px;">${resultMsg}</p></div>`);
+      show('next-r6'); prog('Round 6/12', 55); return;
+    }
+    let exp = EXPERIENCES[S.r6.idx]; 
+    S.r6.sel = []; S.r6.ready = false;
+    
+    let validPool = exp.pool.filter(id => getSkill(id) !== null);
+    let hardInPool = validPool.filter(id => getSkill(id).type === 'hard');
+    let softInPool = validPool.filter(id => getSkill(id).type === 'soft');
+    if(hardInPool.length < 2) { let extraHard = ['h5', 'h6', 'h7', 'h8', 'h11'].filter(h => !validPool.includes(h)); hardInPool = hardInPool.concat(extraHard.slice(0, 2 - hardInPool.length)); }
+    if(softInPool.length < 2) { let extraSoft = ['s1', 's2', 's3', 's8', 's9'].filter(s => !validPool.includes(s)); softInPool = softInPool.concat(extraSoft.slice(0, 2 - softInPool.length)); }
+    let poolIds = shuffle([...hardInPool, ...softInPool]).slice(0, 6);
+    
+    let poolHtml = poolIds.map(id => { 
+      let s = getSkill(id); if(!s) return ''; 
+      let typeLabel = s.type === 'hard' ? 'HARD' : 'SOFT';
+      return `<span class="cloud-skill ${s.type}" data-id="${id}">${s.text} <span class="skill-type-badge ${s.type}">${typeLabel}</span></span>`; 
+    }).join('');
+    
+    let roleName = exp.role || "Professionista";
+    
+    html('cont-r6', `
+      <div class="experience-card">
+        <div class="experience-text">"${exp.text}"</div>
+        <div class="experience-role-wrapper"><span class="experience-role">💼 Figura: ${roleName}</span></div>
+        <p class="experience-instruction">Quali skill hai dimostrato? (Seleziona 3 - attenzione al mix Hard/Soft!)</p>
+        <div class="skill-cloud" id="exp-pool">${poolHtml}</div>
+        <div style="text-align:center; margin-top:20px; font-weight:700; color:var(--text-light);" id="exp-count">Selezionate: 0/3</div>
+      </div>`);
+    $('fb-r6').className = 'feedback'; hide('next-r6'); S.r6.ready = true;
+    document.querySelectorAll('#exp-pool .cloud-skill').forEach(el => {
+      el.onclick = function() {
+        if(!S.r6.ready) return; let id = this.dataset.id; let idx = S.r6.sel.indexOf(id);
+        if(idx > -1) { S.r6.sel.splice(idx, 1); this.classList.remove('selected'); } else if(S.r6.sel.length < 3) { S.r6.sel.push(id); this.classList.add('selected'); }
+        $('exp-count').textContent = `Selezionate: ${S.r6.sel.length}/3`; 
+        if(S.r6.sel.length === 3) checkExperience(exp);
+      };
+    });
+  }
+  function checkExperience(exp) {
+    S.r6.ready = false; 
+    document.querySelectorAll('#exp-pool .cloud-skill').forEach(x => x.style.pointerEvents = 'none'); 
+    let correctCount = 0; let correctNames = []; let correctTypes = [];
+    S.r6.sel.forEach(id => {
+      let isCorrect = exp.correct.includes(id); 
+      let el = document.querySelector(`#exp-pool .cloud-skill[data-id="${id}"]`);
+      let skill = getSkill(id);
+      if(skill && isCorrect) { correctCount++; correctNames.push(skill.text); correctTypes.push(skill.type); el.style.background = "var(--success)"; el.style.color = "#fff"; el.style.borderColor = "var(--success)"; }
+      else { el.style.background = "var(--error)"; el.style.color = "#fff"; el.style.borderColor = "var(--error)"; el.style.textDecoration = "line-through"; }
+    });
+    exp.correct.forEach(id => { if(!S.r6.sel.includes(id)) { let el = document.querySelector(`#exp-pool .cloud-skill[data-id="${id}"]`); if(el) { el.style.borderStyle = "dashed"; el.style.borderColor = "var(--success)"; el.style.borderWidth = "3px"; } } });
+    S.r6.score += correctCount; S.score += correctCount; S.max += 3;
+    $('fb-r6').className = 'feedback show ' + (correctCount === 3 ? 'correct' : 'wrong');
+    
+    let roleName = exp.role || "Generico";
+    let title = correctCount === 3 ? `Perfetto per il ruolo: ${roleName}` : (correctCount > 0 ? `Parzialmente corretto per: ${roleName}` : `Riprova! Il ruolo era: ${roleName}`);
+    
+    let details = correctNames.map((n, i) => `<span style="color:${correctTypes[i] === 'hard' ? 'var(--hard)' : 'var(--soft)'}">${n} (${correctTypes[i].toUpperCase()})</span>`).join(', ');
+    $('fb-r6').innerHTML = `<strong>${title}</strong><br><em>${exp.feedback}</em>${correctCount > 0 ? `<br><br>Trovate: ${details}` : ''}`;
+    setTimeout(() => { S.r6.idx++; renderExperience(); }, 4000);
+  }
+
+  function startR7() { 
+    S.r7 = { timer: null, t: 30, idx: 0, data: shuffle([...SKILLS]), sc: 0, history: [] };
+    html('cont-r7', `<div style="text-align:center; margin-bottom:20px; color:var(--text-light);"><p><strong>Istruzioni:</strong> Hai 30 secondi. Clicca Hard o Soft.</p></div><div style="text-align:center"><h1 id="st" style="font-size:5rem;color:var(--primary)">${S.r7.t}</h1><div id="ss" style="font-size:2rem;margin:20px;">Premi Start</div><button class="btn success" id="sst">START</button><div class="choice-buttons hidden" id="sb"><button class="choice-btn hard" id="sh">Hard</button><button class="choice-btn soft" id="ssb">Soft</button></div></div>`); 
+    $('sst').onclick = function() { $('sst').classList.add('hidden'); $('sb').classList.remove('hidden'); if(S.r7.timer) clearInterval(S.r7.timer); S.r7.timer = setInterval(function() { S.r7.t--; $('st').textContent = S.r7.t; if(S.r7.t <= 0) endR7(); }, 1000); nextSkillR7(); };
+    $('sh').onclick = function() { ansSkillR7('hard'); }; $('ssb').onclick = function() { ansSkillR7('soft'); };
+    hide('next-r7');
+  }
+  function nextSkillR7() { if (S.r7.idx >= S.r7.data.length) return; $('ss').textContent = S.r7.data[S.r7.idx].text; }
+  function ansSkillR7(type) { if (S.r7.t <= 0) return; let s = S.r7.data[S.r7.idx]; let isCorrect = s.type === type; if(isCorrect) S.r7.sc++; S.r7.history.push({ text: s.text, correct: s.type, picked: type, isCorrect: isCorrect }); S.r7.idx++; if(S.r7.idx >= 20) { endR7(); } else { nextSkillR7(); } }
+  function endR7() { 
+    clearInterval(S.r7.timer); S.score += S.r7.sc; S.max += S.r7.idx; 
+    let reportHtml = `<div style="text-align:center"><h1 style="color:var(--success)">${S.r7.sc} Punti</h1></div><div style="margin-top:20px; max-height:200px; overflow-y:auto; text-align:left; font-size:0.9rem;"><h4 style="color:var(--primary); margin-bottom:10px;">Report Risposte:</h4>${S.r7.history.map(h => `<div style="margin-bottom:5px; padding:5px; background:rgba(0,0,0,0.2); border-radius:5px; border-left:3px solid ${h.isCorrect ? 'var(--success)' : 'var(--error)'};"><strong>${h.text}</strong> (${h.correct.toUpperCase()}) - Hai detto: <span style="color:${h.isCorrect ? 'var(--success)' : 'var(--error)'}">${h.picked.toUpperCase()}</span></div>`).join('')}</div>`;
+    html('cont-r7', reportHtml); show('next-r7'); prog('Round 7/12', 60); 
+  }
+  
+  function startR8() { 
+    S.mySkills = ['h5', 's1', 's2', 's8']; 
+    html('cont-r8', `<div class="job-card"><h3>Preparazione all'Autovalutazione</h3><p>È il confronto tra ciò che <i>hai</i> e ciò che il mercato <i>chiede</i>.</p><p style="margin-top:15px; color:var(--accent);">Hai acquisito competenze base: Excel, Teamwork, Comunicazione, Precisione.</p></div>`); 
+    show('next-r8'); prog('Round 8/12', 70); 
+  }
+  
+  function startR9() {
+    S.r9.radar = { tech: 5, comm: 5, prob: 5, org: 5, team: 5, res: 5 };
+    S.r9.archetypeName = '';
+    let slidersHtml = RADAR_AXES.map(axis => `<div class="slider-group"><div class="slider-header"><span>${axis.label}</span><span class="slider-value" id="val-${axis.id}">5</span></div><input type="range" min="1" max="10" value="5" id="sl-${axis.id}" data-axis="${axis.id}"></div>`).join('');
+    html('sliders-container', slidersHtml);
+    RADAR_AXES.forEach(axis => { $('sl-'+axis.id).oninput = function() { S.r9.radar[axis.id] = parseInt(this.value); $('val-'+axis.id).textContent = this.value; drawRadar(); }; });
+    hide('archetype-container'); show('calc-radar'); hide('next-r9'); drawRadar(); prog('Round 9/12', 75);
+  }
+  function drawRadar() {
+    let canvas = $('radarCanvas'); let ctx = canvas.getContext('2d'); let w = canvas.width; let h = canvas.height; let cx = w / 2; let cy = h / 2; let radius = 140;
+    ctx.clearRect(0, 0, w, h); ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1;
+    for(let i=1; i<=5; i++) { ctx.beginPath(); ctx.arc(cx, cy, radius * (i/5), 0, 2 * Math.PI); ctx.stroke(); }
+    let numAxes = RADAR_AXES.length; let angleStep = (Math.PI * 2) / numAxes; ctx.font = '14px Outfit'; ctx.fillStyle = '#e2e8f0'; ctx.textAlign = 'center';
+    for(let i=0; i<numAxes; i++) {
+      let angle = i * angleStep - (Math.PI / 2); let x = cx + Math.cos(angle) * radius; let y = cy + Math.sin(angle) * radius;
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y); ctx.stroke();
+      let labelX = cx + Math.cos(angle) * (radius + 25); let labelY = cy + Math.sin(angle) * (radius + 25);
+      if(angle > 1 && angle < 2) ctx.textAlign = 'left'; else if(angle > 4 && angle < 5) ctx.textAlign = 'right'; else ctx.textAlign = 'center';
+      ctx.fillText(RADAR_AXES[i].label.split(' ')[1], labelX, labelY + 5);
+    }
+    ctx.beginPath(); let dataPoints = [];
+    for(let i=0; i<numAxes; i++) {
+      let axisId = RADAR_AXES[i].id; let value = S.r9.radar[axisId] / 10; let angle = i * angleStep - (Math.PI / 2);
+      let x = cx + Math.cos(angle) * (radius * value); let y = cy + Math.sin(angle) * (radius * value);
+      if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y); dataPoints.push({x, y});
+    }
+    ctx.closePath(); ctx.fillStyle = 'rgba(129, 140, 248, 0.3)'; ctx.fill(); ctx.strokeStyle = '#818cf8'; ctx.lineWidth = 3; ctx.stroke();
+    dataPoints.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 2*Math.PI); ctx.fillStyle = '#ffffff'; ctx.fill(); });
+  }
+  function calculateArchetype() {
+    let r = S.r9.radar; let maxVal = 0; let dominant = 'balanced';
+    for (let key in r) { if (r[key] > maxVal) maxVal = r[key]; }
+    if (r.tech >= maxVal && r.tech > 5) dominant = 'tech';
+    else if (r.org >= maxVal && r.org > 5) dominant = 'organizer';
+    else if (r.res >= maxVal && r.res > 5) dominant = 'fighter';
+    else if (r.comm >= maxVal && r.comm > 5) dominant = 'mediator';
+    else if (r.team >= maxVal && r.team > 5) dominant = 'leader';
+    else dominant = 'balanced';
+    let result = ARCHETYPES.find(a => a.id === dominant);
+    if (result && result.name) {
+      S.r9.archetypeName = result.name;
+      html('archetype-container', `<div class="archetype-result"><div class="archetype-title">${result.name}</div><div class="archetype-desc">${result.desc}</div></div>`);
+    } else {
+      S.r9.archetypeName = 'Il Tuttologo Equilibrato';
+      html('archetype-container', `<div class="archetype-result"><div class="archetype-title">Il Tuttologo Equilibrato</div><div class="archetype-desc">Sai fare un po\' di tutto. Hai un profilo versatile che si adatta a molti contesti.</div></div>`);
+    }
+    show('archetype-container'); hide('calc-radar'); show('next-r9');
+  }
+
+  function startR10() { S.r10 = {idx: 0, score: 0, max: 0, history: []}; renderInterview(); }
+  function renderInterview() {
+    if(S.r10.idx >= INTERVIEW_QUESTIONS.length) { 
+        let resultHTML = ""; let correctCount = 0; 
+        S.r10.history.forEach((item, index) => { correctCount += item.isCorrect ? 1 : 0; resultHTML += `<div class="interview-result"><strong style="color:var(--text)">Domanda ${index+1}:</strong> <span style="font-size:0.9em">${item.q.substring(0,60)}...</span> <span style="color:${item.isCorrect ? 'var(--success)' : 'var(--error)'}; float:right;">${item.isCorrect ? '✓' : '✗'}</span></div>`; }); 
+        let feedbackText = correctCount >= 7 ? "Ottimo colloquio!" : (correctCount >= 4 ? "Buon colloquio." : "Da migliorare."); 
+        $('fb-r10').className = 'feedback show ' + (correctCount >= 5 ? 'correct' : 'wrong'); 
+        $('fb-r10').innerHTML = `<strong>Colloquio Terminato!</strong><br>Hai risposto correttamente a ${correctCount} su ${INTERVIEW_QUESTIONS.length} domande.<br><br><div style="max-height:200px; overflow-y:auto; text-align:left; font-size:0.9rem;">${resultHTML}</div><br><em>${feedbackText}</em>`; 
+        show('next-r10'); $('next-r10').disabled = false; prog('Round 10/12', 80); return; 
+    }
+    hide('next-r10'); let q = INTERVIEW_QUESTIONS[S.r10.idx]; let optsHtml = q.opts.map(o => `<div class="interview-option" data-score="${o.score}">${o.text}</div>`).join(''); html('cont-r10', `<h3>${q.q}</h3><div id="opts-r10">${optsHtml}</div>`); document.querySelectorAll('#opts-r10 .interview-option').forEach(el => { el.onclick = function() { let sc = parseInt(this.dataset.score); S.r10.score += sc; S.r10.max += 2; S.r10.history.push({ q: q.q, isCorrect: sc === 2 }); this.classList.add('selected'); if(sc === 2) this.style.borderColor = 'var(--success)'; else this.style.borderColor = 'var(--error)'; document.querySelectorAll('#opts-r10 .interview-option').forEach(x => x.style.pointerEvents = 'none'); setTimeout(() => { S.r10.idx++; renderInterview(); }, 1000); }; });
+  }
+
+  function startR11() { 
+    screen('screen-r11'); prog('Round 11/12', 90); let htmlJobs = ''; 
+    JOBS.forEach(job => { 
+        let match = job.req.filter(id => S.mySkills.includes(id)).length; let pct = Math.round((match/job.req.length)*100); 
+        let indeedUrl = `https://it.indeed.com/jobs?q=${encodeURIComponent(job.title)}&l=${encodeURIComponent(job.location || 'Puglia')}`; 
+        
+        let linksHtml = '';
+        if(pct > 0) {
+           linksHtml = `
+            <div style="margin-top:15px; display:flex; gap:8px; flex-wrap:wrap;">
+                <a href="${indeedUrl}" target="_blank" class="btn real-world small">Indeed</a>
+            </div>`;
+        } else {
+           linksHtml = `<div style="margin-top:15px; color:var(--error); font-size:0.9rem;">⚠️ Profilo non idoneo. Coltiva le skill richieste prima di candidarti.</div>`;
+        }
+        
+        htmlJobs += `
+          <div class="job-card">
+            <div class="job-title">${job.title}</div>
+            <div class="job-desc">${job.desc} - ${job.company}</div>
+            <div class="job-detail">📍 ${job.location} | 💰 ${job.salary}</div>
+            <div class="match-section">
+              <div class="match-percentage" style="color:${pct>=60?'var(--success)':'var(--error)'};">Match: ${pct}%</div>
+            </div>
+            ${linksHtml}
+          </div>`; 
+    }); 
+    html('jobs', htmlJobs); 
+    
+    let resourcesHtml = `<div class="reflection-box" style="border-color: var(--real-world); background: rgba(249, 115, 22, 0.1); text-align: center; margin-top: 30px;"><h3 style="color:var(--real-world);">🔎 Risorse per la Ricerca Attiva</h3><p style="margin-bottom:15px; color:var(--text-light);">Usa questi portali per trovare lavoro:</p><div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;"><a href="https://it.indeed.com/" target="_blank" class="btn real-world small">Indeed Italia</a><a href="https://lavoroperte.regione.puglia.it/offerte-lavoro/" target="_blank" class="btn real-world small">Lavoro Perte - Puglia</a><a href="https://public.tableau.com/app/profile/unioncamere.anpal/viz/DashboardExcelsior/Home" target="_blank" class="btn real-world small">Excelsior - Professioni</a></div></div>`;
+    html('resources-r11', resourcesHtml);
+  }
+
+  function startR12() { 
+    prog('Round 12/12', 95);
+    S.r12 = []; let validUserSkills = S.mySkills.filter(id => typeof id === 'string' && !id.includes('_'));
+    let poolData = shuffle([...validUserSkills, ...shuffle(SKILLS).map(s=>s.id)]); let uniquePool = [...new Set(poolData)].slice(0, 15);
+    let cloudHtml = uniquePool.map(id => { let s = getSkill(id); if(!s) return ''; return `<span class="cloud-skill ${s.type}" data-id="${id}">${s.text}</span>`; }).join('');
+    html('cont-r12', `<p class="subtitle">Scegli le skill che vuoi mostrare:</p><div class="skill-cloud" id="final-cloud">${cloudHtml}</div>`);
+    document.querySelectorAll('#final-cloud .cloud-skill').forEach(el => { el.onclick = function() { this.classList.toggle('selected'); }; }); 
+  }
+
+  function showResults() {
+    screen('screen-res');
+    prog('Completato', 100);
+    
+    let finalSelected = Array.from(document.querySelectorAll('#final-cloud .cloud-skill.selected')).map(x=>x.dataset.id);
+    S.mySkills = [...new Set([...S.mySkills, ...finalSelected])];
+    let pct = S.max > 0 ? Math.round((S.score/S.max)*100) : 0;
+    $('final-pct').textContent = pct+'%';
+    $('final-pct').parentElement.style.background = `conic-gradient(var(--success) ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+    let evalHtml = pct >= 80 ? `<p style="color:var(--success)">Eccellente!</p>` : (pct >= 50 ? `<p style="color:var(--accent)">Buon lavoro!</p>` : `<p style="color:var(--error)">Da migliorare.</p>`);
+    html('final-evaluation', evalHtml);
+    
+    let adviceHtml = `<ul class="demo-list" style="border:0;"><li>Crea o aggiorna il tuo Curriculum Vitae.</li><li>Colma i gap con corsi.</li><li>Impegnati a studiare di più.</li></ul>`;
+    html('final-advice', adviceHtml);
+    
+    let report = `--- ESITO SKILL CHECK ---\n`; report += `Punteggio: ${pct}%\n`; 
+    if (S.r9.archetypeName && S.r9.archetypeName.length > 0) {
+      report += `Archetipo: ${S.r9.archetypeName}\n`; 
+    }
+    report += `----------------------------\n`; report += `Selezione Biglietto da Visita:\n`; 
+    let selected = document.querySelectorAll('#final-cloud .cloud-skill.selected'); 
+    if(selected.length > 0) { selected.forEach(el => { let text = el.textContent.trim(); if(text && text.length > 0) report += `- ${text}\n`; }); } else { report += `(Nessuna skill selezionata)\n`; }
+    let customSkills = $('custom-skills-input') ? $('custom-skills-input').value.trim() : ""; if(customSkills && customSkills.length > 0) { report += `Altre competenze:\n${customSkills}\n`; }
+    
+    report = report.replace(/undefined/gi, '');
+    $('report-textarea').value = report;
+    
+    html('external-links-container', '');
+    
+    let missing = SKILLS.filter(s => !S.mySkills.includes(s.id)); let gaps = missing.slice(0, 5); 
+    let gapHtml = '';
+    if (gaps.length > 0) {
+      gapHtml = gaps.map(g => { let isHard = g.type === 'hard'; return `<div class="gap-item" style="margin-bottom:8px; padding:8px; background:rgba(255,255,255,0.05); border-radius:6px;"><span style="color:var(--text)">${g.text}</span> <span style="font-size:0.8em; padding:2px 6px; border-radius:4px; background:${isHard ? 'rgba(96,165,250,0.2)' : 'rgba(74,222,128,0.2)'}; color:${isHard ? 'var(--hard)' : 'var(--soft)'}; margin-left:5px;">${isHard ? 'Hard' : 'Soft'}</span></div>`; }).join('');
+    } else {
+      gapHtml = `<p style="color:var(--success);">Complimenti! Hai coperto tutte le competenze principali.</p>`;
+    }
+    
+    let guideHtml = `
+      <div style="margin-top: 25px; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; border-left: 4px solid var(--accent);">
+        <h4 style="color:var(--accent); margin-bottom:15px;">💡 Guida pratica per colmare i gap</h4>
+        
+        <div style="margin-bottom:20px;">
+          <h5 style="color:var(--hard); margin-bottom:8px;">📊 Per le Hard Skills:</h5>
+          <ul style="list-style: disc; padding-left: 20px; color: var(--text-light); font-size: 0.95rem; line-height: 1.8;">
+            <li><strong>YouTube gratuito:</strong> Canali come "EPICTETO" per Excel, "Carlo Pellizzari" per contabilità.</li>
+            <li><strong>Piattaforme online:</strong> Coursera, Udemy, edX offrono corsi certificati a basso costo.</li>
+            <li><strong>Pratica:</strong> Crea fogli Excel per gestire spese personali, simula fatture, esercitati con casi reali.</li>
+            <li><strong>Certificazioni:</strong> ECDL per l'informatica di base, certificazioni linguistiche (IELTS, DELF).</li>
+          </ul>
+        </div>
+        
+        <div style="margin-bottom:20px;">
+          <h5 style="color:var(--soft); margin-bottom:8px;">🤝 Per le Soft Skills:</h5>
+          <ul style="list-style: disc; padding-left: 20px; color: var(--text-light); font-size: 0.95rem; line-height: 1.8;">
+            <li><strong>Volontariato:</strong> Associazioni locali (CSV, Croce Rossa) per sviluppare teamwork ed empatia.</li>
+            <li><strong>Sport di squadra:</strong> Calcetto, basket, pallavolo insegnano leadership e gestione conflitti.</li>
+            <li><strong>Public Speaking:</strong> Partecipa a dibattiti, presentazioni in classe, o club come Toastmasters.</li>
+            <li><strong>Feedback:</strong> Chiedi a insegnanti e colleghi di valutare le tue soft skills.</li>
+          </ul>
+        </div>
+        
+        <div style="padding:15px; background:rgba(129,140,248,0.1); border-radius:8px; border:1px solid rgba(129,140,248,0.3);">
+          <h5 style="color:var(--primary); margin-bottom:8px;">📅 Piano d'azione settimanale consigliato:</h5>
+          <ul style="list-style: none; padding-left: 0; color: var(--text-light); font-size: 0.95rem; line-height: 1.8;">
+            <li>📅 <strong>Lunedì</strong> - 30 min video corso Hard Skill</li>
+            <li>📅 <strong>Mercoledì</strong> - 30 min esercitazione pratica</li>
+            <li>📅 <strong>Venerdì</strong> - Attività di gruppo o sport</li>
+            <li>📅 <strong>Domenica</strong> - Autovalutazione e note su progressi</li>
+          </ul>
+        </div>
+        
+        <p style="margin-top:15px; color:var(--text-light); font-style:italic; font-size:0.9rem;">💡 Ricorda: La costanza batte l'intensità. Meglio 30 minuti al giorno per 3 mesi che 10 ore in un weekend.</p>
+      </div>`;
+      
+    html('gap-filling-container', gapHtml + guideHtml);
+  }
+
+  function nextRound() { 
+    S.r++; 
+    if(S.r===2) { screen('screen-r2'); startR2(); }
+    else if(S.r===3) { screen('screen-r3'); startR3(); }
+    else if(S.r===4) { screen('screen-r4'); startR4(); }
+    else if(S.r===5) { screen('screen-r5'); startR5(); }
+    else if(S.r===6) { screen('screen-r6'); startR6(); }
+    else if(S.r===7) { screen('screen-r7'); startR7(); }
+    else if(S.r===8) { screen('screen-r8'); startR8(); }
+    else if(S.r===9) { screen('screen-r9'); startR9(); }
+    else if(S.r===10) { screen('screen-r10'); startR10(); }
+    else if(S.r===11) { startR11(); }
+    else if(S.r===12) { screen('screen-r12'); startR12(); }
+  }
+
+  function closeApp() {
+    // Metodo 1: reindirizza a about:blank poi chiudi (funziona in alcuni browser)
+    try {
+      window.open('about:blank', '_self');
+    } catch(e) {}
+    // Metodo 2: tentativo diretto
+    try {
+      window.close();
+    } catch(e) {}
+    // Se dopo 500ms la pagina è ancora aperta, mostra l'overlay
+    setTimeout(function() {
+      if (!document.hidden && document.visibilityState === 'visible') {
+        var overlay = document.createElement('div');
+        overlay.id = 'exit-overlay';
+        overlay.innerHTML = `
+          <div class="exit-box">
+            <div class="exit-icon">🔒</div>
+            <h3>Chiusura bloccata dal browser</h3>
+            <p>Per motivi di sicurezza, il browser non permette a una pagina web di chiudersi autonomamente. Per uscire:</p>
+            <p style="font-size:0.95rem; line-height:1.8; text-align:left;">
+              <strong>✅ Desktop:</strong> Premi <kbd style="background:rgba(255,255,255,0.15); padding:3px 8px; border-radius:4px; font-family:monospace;">Ctrl+W</kbd> (Windows) o <kbd style="background:rgba(255,255,255,0.15); padding:3px 8px; border-radius:4px; font-family:monospace;">Cmd+W</kbd> (Mac)<br><br>
+              <strong>📱 Smartphone/Tablet:</strong> Chiudi la scheda dal gestore schede del browser
+            </p>
+            <button class="btn danger small" onclick="this.closest('#exit-overlay').remove();" style="margin-top:10px;">Ho capito</button>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+      }
+    }, 500);
+  }
+
+  for(let i=0; i<15; i++) { let p=document.createElement('div'); p.className='particle'; p.style.left=Math.random()*100+'%'; p.style.animationDelay=Math.random()*20+'s'; $('particles').appendChild(p); }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateIntroUI();
+    $('btn-next').onclick = nextIntro;
+    $('btn-prev').onclick = prevIntro;
+    $('btn-start').onclick = () => { screen('screen-start'); };
+    $('btn-go').onclick = startGame;
+    $('pick-hard').onclick = () => ansR1('hard');
+    $('pick-soft').onclick = () => ansR1('soft');
+    $('next-r1').onclick = nextRound;
+    $('next-r2').onclick = nextRound;
+    $('check-r3').onclick = checkR3;
+    $('next-r3').onclick = nextRound;
+    $('confirm-budget').onclick = confirmBudget; 
+    $('next-r4').onclick = nextRound; 
+    $('next-r5').onclick = nextR5;
+    $('next-r6').onclick = nextRound;
+    $('next-r7').onclick = nextRound;
+    $('next-r8').onclick = nextRound;
+    $('calc-radar').onclick = calculateArchetype; 
+    $('next-r9').onclick = nextRound;
+    $('next-r10').onclick = nextRound;
+    $('btn-r11next').onclick = nextRound;
+    $('finish-game').onclick = showResults;
+    $('btn-exit').onclick = closeApp;
+  });
+
+})();
+</script>
+</body>
+</html>
