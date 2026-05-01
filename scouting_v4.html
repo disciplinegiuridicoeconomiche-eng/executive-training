@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scouting Puglia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0d4f3c; --primary-light: #e8f5ee;
+            --accent: #c8553d; --bg: #f4f1ec; --card: #ffffff;
+            --text: #1a1a1a; --muted: #6b7280; --border: #e0dcd6;
+            --radius: 10px; --shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; }
+        .app-container { display: grid; grid-template-columns: 520px 1fr; height: 100vh; overflow: hidden; }
+
+        .sidebar { background: var(--card); display: flex; flex-direction: column; height: 100vh; box-shadow: 2px 0 20px rgba(0,0,0,0.06); z-index: 10; border-right: 1px solid var(--border); }
+        .header-box { padding: 24px 28px 20px; background: linear-gradient(135deg, var(--primary) 0%, #1a7a5a 100%); color: white; position: relative; overflow: hidden; }
+        .header-box::after { content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.08); }
+        .header-box h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.35em; font-weight: 700; margin-bottom: 14px; position: relative; }
+        .header-box h2 i { margin-right: 8px; opacity: 0.85; }
+        .header-form { display: flex; gap: 10px; }
+        .header-form input { flex: 1; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; background: rgba(255,255,255,0.12); color: white; font-size: 0.92em; font-family: inherit; }
+        .header-form input::placeholder { color: rgba(255,255,255,0.55); }
+        .header-form input:focus { outline: none; border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.18); }
+        .header-form .input-classe { flex: 0 0 80px; text-align: center; }
+
+        .form-scroll { flex: 1; overflow-y: auto; padding: 16px; }
+        .form-scroll::-webkit-scrollbar { width: 5px; }
+        .form-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+        .section-block { margin-bottom: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+        .section-head { padding: 12px 18px; font-weight: 700; font-size: 0.88em; cursor: pointer; color: white; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: filter 0.2s; }
+        .section-head:hover { filter: brightness(1.08); }
+        .section-head .chevron { transition: transform 0.25s ease; font-size: 0.8em; opacity: 0.7; }
+        .section-head.open .chevron { transform: rotate(180deg); }
+        .section-body { padding: 0 18px; max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; }
+        .section-body.open { padding: 18px; max-height: 2000px; }
+        .sec-identita .section-head { background: #2c3e50; }
+        .sec-piano .section-head { background: #1d6fa5; }
+        .sec-durata .section-head { background: #6b4c9a; }
+        .sec-titoli .section-head { background: #2d6a4f; }
+        .sec-economica .section-head { background: #b5342a; }
+        .sec-accesso .section-head { background: #00707a; }
+        .sec-performance .section-head { background: #c47a20; }
+        .sec-hidden { display: none !important; }
+
+        label { display: block; font-size: 0.82em; font-weight: 600; color: var(--muted); margin-top: 18px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+        label:first-child { margin-top: 0; }
+        input, select, textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.95em; font-family: inherit; background: #fafaf8; color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,79,60,0.1); background: white; }
+        textarea { resize: vertical; min-height: 60px; }
+        .form-row { display: flex; gap: 12px; margin-top: 18px; }
+        .form-row > div { flex: 1; }
+        .form-row > div label { margin-top: 0; }
+        .hidden-field { display: none !important; }
+        .visible-field { display: block; }
+
+        .sub-divider { border: none; border-top: 1.5px dashed var(--border); margin: 18px 0 0; }
+        .sub-label { font-size: 0.78em; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-top: 14px; display: flex; align-items: center; gap: 6px; }
+        .sub-label i { font-size: 0.85em; }
+        .finanziamento-box { background: linear-gradient(135deg, #f0fdf8, #dcfce7); border: 1.5px solid #86efac; border-radius: 8px; padding: 12px 14px; margin-bottom: 4px; }
+        .finanziamento-box .fin-icon { color: #15803d; font-size: 1.1em; margin-bottom: 6px; }
+        .finanziamento-box .fin-text { font-size: 0.78em; color: #166534; line-height: 1.5; }
+        .formazione-box { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #93c5fd; border-radius: 8px; padding: 12px 14px; margin-bottom: 4px; }
+        .formazione-box .form-icon { color: #1d4ed8; font-size: 1.1em; margin-bottom: 6px; }
+        .formazione-box .form-text { font-size: 0.78em; color: #1e3a5f; line-height: 1.5; }
+
+        .external-link-box { border-radius: 10px; padding: 18px; margin-top: 14px; text-align: center; }
+        .external-link-box .link-icon { font-size: 2em; margin-bottom: 8px; }
+        .external-link-box p { font-size: 0.85em; margin-bottom: 12px; line-height: 1.6; }
+        .external-link-box p strong { display: block; margin-bottom: 2px; }
+        .btn-external { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.9em; cursor: pointer; text-decoration: none; font-family: inherit; transition: all 0.2s; }
+        .btn-external:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .input-note { margin-top: 12px; padding: 9px 12px; background: rgba(255,255,255,0.7); border-radius: 6px; font-size: 0.8em; text-align: left; }
+        .input-note i { margin-right: 4px; }
+
+        .link-unisalento { background: linear-gradient(135deg, #eef4ff, #dce8ff); border: 2px solid #b8ccee; }
+        .link-unisalento .link-icon { color: #1a56a8; } .link-unisalento p { color: #2a3a5a; } .link-unisalento p strong { color: #1a2a4a; } .link-unisalento .input-note { color: #2a3a5a; } .link-unisalento .input-note i { color: #1a56a8; }
+        .btn-unisalento { background: #1a56a8; box-shadow: 0 4px 12px rgba(26,86,168,0.3); }
+        .link-its { background: linear-gradient(135deg, #fef3f0, #fde8e2); border: 2px solid #f0c4b8; }
+        .link-its .link-icon { color: var(--accent); } .link-its p { color: #7a4a3a; } .link-its p strong { color: #5a2a1a; } .link-its .input-note { color: #7a4a3a; } .link-its .input-note i { color: var(--accent); }
+        .btn-its { background: var(--accent); box-shadow: 0 4px 12px rgba(200,85,61,0.3); }
+        .link-isufi { background: linear-gradient(135deg, #f5f0ff, #ebe0ff); border: 2px solid #c8b8ee; }
+        .link-isufi .link-icon { color: #6d28d9; } .link-isufi p { color: #3a2a5a; } .link-isufi p strong { color: #2a1a4a; } .link-isufi .input-note { color: #3a2a5a; } .link-isufi .input-note i { color: #6d28d9; }
+        .btn-isufi { background: #6d28d9; box-shadow: 0 4px 12px rgba(109,40,217,0.3); }
+        .link-afam { background: linear-gradient(135deg, #fff4ee, #ffe8d4); border: 2px solid #eec8a0; }
+        .link-afam .link-icon { color: #b45309; } .link-afam p { color: #5a3a1a; } .link-afam p strong { color: #3a2a0a; } .link-afam .input-note { color: #5a3a1a; } .link-afam .input-note i { color: #b45309; }
+        .btn-afam { background: #b45309; box-shadow: 0 4px 12px rgba(180,83,9,0.3); }
+        .link-altro { background: linear-gradient(135deg, #f5f8f0, #e8efd8); border: 2px solid #b8cca0; }
+        .link-altro .link-icon { color: #4d7c0f; } .link-altro p { color: #2a3a1a; } .link-altro p strong { color: #1a2a0a; } .link-altro .input-note { color: #2a3a1a; } .link-altro .input-note i { color: #4d7c0f; }
+        .link-atenei { background: linear-gradient(135deg, #eef0f5, #dde2f0); border: 2px solid #b0b8d0; }
+        .link-atenei .link-icon { color: #334155; } .link-atenei p { color: #2a3040; } .link-atenei p strong { color: #1a2030; } .link-atenei .input-note { color: #2a3040; } .link-atenei .input-note i { color: #334155; }
+        .btn-atenei { background: #334155; box-shadow: 0 4px 12px rgba(51,65,85,0.3); }
+        .link-galattica { background: linear-gradient(135deg, #edfcf8, #d4f5ec); border: 2px solid #8edcc4; }
+        .link-galattica .link-icon { color: #0e7490; } .link-galattica p { color: #1a4a5a; } .link-galattica p strong { color: #0e3a4a; } .link-galattica .input-note { color: #1a4a5a; } .link-galattica .input-note i { color: #0e7490; }
+        .btn-galattica { background: #0e7490; box-shadow: 0 4px 12px rgba(14,116,144,0.3); }
+        .link-eurodesk { background: linear-gradient(135deg, #eef0ff, #dde0f8); border: 2px solid #a8a8e8; }
+        .link-eurodesk .link-icon { color: #4338ca; } .link-eurodesk p { color: #2a2a5a; } .link-eurodesk p strong { color: #1a1a4a; } .link-eurodesk .input-note { color: #2a2a5a; } .link-eurodesk .input-note i { color: #4338ca; }
+        .btn-eurodesk { background: #4338ca; box-shadow: 0 4px 12px rgba(67,56,202,0.3); }
+
+        .btn-save { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent), #a94435); color: white; border: none; font-weight: 700; cursor: pointer; font-size: 1em; border-radius: var(--radius); margin-top: 8px; font-family: inherit; transition: transform 0.15s, box-shadow 0.2s; }
+        .btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,85,61,0.3); }
+
+        .results-area { border-top: 1px solid var(--border); background: var(--card); display: flex; flex-direction: column; max-height: 28vh; flex-shrink: 0; }
+        .results-header { padding: 10px 20px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.88em; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+        .results-header span { color: var(--primary); font-size: 1.2em; font-weight: 800; }
+        .results-list { flex: 1; overflow-y: auto; padding: 8px 12px; }
+        .results-list::-webkit-scrollbar { width: 4px; } .results-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+        .card-item { background: #fafaf8; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border); padding: 12px 14px; transition: all 0.2s; position: relative; }
+        .card-item:hover { background: var(--primary-light); border-color: var(--primary); transform: translateX(3px); }
+        .card-title { font-weight: 700; color: var(--primary); font-size: 0.92em; margin: 0 0 2px; }
+        .card-sub { font-size: 0.82em; color: var(--muted); }
+        .tag { font-size: 0.68em; padding: 2px 8px; border-radius: 20px; font-weight: 600; display: inline-block; margin-top: 6px; margin-right: 4px; }
+        .tag-its { background: #fde8e8; color: #b5342a; } .tag-unisalento { background: #e3f0ff; color: #1a56a8; } .tag-atenei { background: #e8ebf5; color: #334155; }
+        .tag-isufi { background: #f3e8ff; color: #6d28d9; } .tag-afam { background: #fff0e0; color: #b45309; } .tag-altro { background: #eef5e0; color: #4d7c0f; }
+        .tag-galattica { background: #d4f5ec; color: #0e7490; } .tag-eurodesk { background: #dde0f8; color: #4338ca; }
+        .tag-finanziamento { background: #dcfce7; color: #15803d; }
+        .card-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.85em; padding: 4px; transition: color 0.2s; }
+        .card-delete:hover { color: var(--accent); }
+        .footer-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 12px 16px; background: white; border-top: 1px solid var(--border); }
+        .btn-action { padding: 10px 8px; border-radius: 8px; font-weight: 700; cursor: pointer; text-align: center; border: none; font-size: 0.82em; font-family: inherit; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-action:hover { transform: translateY(-1px); }
+        .btn-pdf { background: #fde8e8; color: #b5342a; } .btn-copy { background: #e3f0ff; color: #1a56a8; } .btn-email { background: var(--primary-light); color: var(--primary); }
+
+        #board-container { padding: 24px 28px; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; gap: 20px; }
+        #board-container::-webkit-scrollbar { width: 6px; } #board-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        .board-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+        .board-header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.5em; font-weight: 700; }
+        .board-header p { color: var(--muted); font-size: 0.9em; margin-top: 2px; }
+        .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-weight: 600; font-size: 0.82em; cursor: pointer; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter-btn .filter-count { background: rgba(0,0,0,0.1); padding: 1px 7px; border-radius: 10px; font-size: 0.85em; }
+        .filter-btn.active .filter-count { background: rgba(255,255,255,0.25); }
+
+        .podium-section { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+        .podium-section h3 { font-family: 'Space Grotesk', sans-serif; font-size: 0.95em; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .podium-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .podium-card { border-radius: 10px; padding: 16px; text-align: center; position: relative; transition: transform 0.2s; }
+        .podium-card:hover { transform: translateY(-3px); }
+        .podium-card .podium-rank { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px; border-radius: 50%; color: white; font-weight: 800; font-size: 0.8em; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .podium-card .podium-name { font-weight: 700; font-size: 0.88em; margin-top: 6px; }
+        .podium-card .podium-corso { font-size: 0.78em; color: var(--muted); margin-top: 2px; }
+        .podium-card .podium-score { font-family: 'Space Grotesk', sans-serif; font-size: 1.5em; font-weight: 800; margin-top: 6px; }
+        .podium-card .podium-label { font-size: 0.72em; color: var(--muted); text-transform: uppercase; }
+        .podium-1 { background: linear-gradient(135deg, #fff9e6, #fff3cc); border: 2px solid #f0d060; } .podium-1 .podium-rank { background: #d4a017; } .podium-1 .podium-score { color: #b8860b; }
+        .podium-2 { background: linear-gradient(135deg, #f8f8f8, #eee); border: 2px solid #c0c0c0; } .podium-2 .podium-rank { background: #8a8a8a; } .podium-2 .podium-score { color: #666; }
+        .podium-3 { background: linear-gradient(135deg, #fdf5ee, #f8e8d4); border: 2px solid #d4a574; } .podium-3 .podium-rank { background: #a0724a; } .podium-3 .podium-score { color: #8b5e3c; }
+
+        .board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
+        .board-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; transition: all 0.25s; position: relative; }
+        .board-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); transform: translateY(-3px); }
+        .board-card.is-pref { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(200,85,61,0.15); }
+        .board-card-header { padding: 14px 16px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .board-card-type { display: flex; gap: 6px; flex-wrap: wrap; }
+        .board-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .board-card-actions button { background: none; border: none; cursor: pointer; font-size: 1.05em; padding: 4px; border-radius: 6px; transition: all 0.2s; color: #ccc; }
+        .board-card-actions .btn-pref:hover, .board-card-actions .btn-pref.active { color: var(--accent); } .board-card-actions .btn-del:hover { color: #999; }
+        .board-card-body { padding: 0 16px 14px; }
+        .board-card-name { font-weight: 800; font-size: 1em; color: var(--text); margin-bottom: 2px; line-height: 1.3; }
+        .board-card-corso { font-size: 0.85em; color: var(--muted); margin-bottom: 12px; }
+        .board-detail-section { border-left: 3px solid var(--border); padding: 6px 0 6px 12px; margin-bottom: 8px; }
+        .board-detail-title { font-size: 0.68em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+        .board-detail-title i { font-size: 0.85em; }
+        .board-detail-row { font-size: 0.82em; color: var(--text); line-height: 1.55; }
+        .board-detail-row .dl { color: var(--muted); font-weight: 500; }
+        .strength-inline { display: inline-block; font-size: 0.78em; background: #fff6e0; color: #92400e; padding: 2px 8px; border-radius: 4px; margin: 1px 4px 2px 0; font-weight: 600; }
+        .strength-inline i { margin-right: 3px; font-size: 0.75em; }
+        .fin-badge { display: inline-block; font-size: 0.78em; background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 4px; margin: 1px 4px 2px 0; font-weight: 600; }
+        .fin-badge i { margin-right: 3px; font-size: 0.75em; }
+        .board-card-stars { padding: 10px 16px 14px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+        .stars-label { font-size: 0.72em; color: var(--muted); text-transform: uppercase; flex-shrink: 0; }
+        .stars-interactive { display: flex; gap: 2px; }
+        .stars-interactive i { cursor: pointer; font-size: 0.95em; transition: color 0.15s, transform 0.15s; color: #ddd; }
+        .stars-interactive i.lit { color: var(--accent); }
+        .stars-interactive i:hover { transform: scale(1.25); }
+        .stars-score { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 0.9em; color: var(--accent); min-width: 24px; text-align: right; }
+        .board-empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; }
+        .board-empty i { font-size: 3em; color: #ddd; margin-bottom: 14px; display: block; }
+        .board-empty p { color: var(--muted); font-size: 0.95em; }
+
+        #print-area { display: none; }
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast { padding: 14px 22px; border-radius: 8px; color: white; font-weight: 600; font-size: 0.9em; box-shadow: 0 8px 25px rgba(0,0,0,0.15); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards; display: flex; align-items: center; gap: 10px; }
+        .toast-success { background: var(--primary); } .toast-error { background: var(--accent); } .toast-info { background: #1a56a8; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+            .app-container { display: block !important; height: auto !important; overflow: visible !important; }
+            .sidebar, .results-area, .footer-btns, .toast-container, .filter-bar, .board-header, .podium-section, .board-grid { display: none !important; }
+            #board-container { padding: 0 !important; background: white !important; overflow: visible !important; }
+            #print-area { display: block !important; padding: 20px 30px; }
+            .pr-header { text-align: center; padding: 24px 0 18px; border-bottom: 4px solid #0d4f3c; margin-bottom: 28px; }
+            .pr-header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 28px; color: #0d4f3c; margin: 0 0 4px; }
+            .pr-header p { margin: 4px 0; font-size: 13px; color: #6b7280; }
+            .pr-header .pr-subtitle { font-size: 15px; color: #1a1a1a; margin-top: 8px; }
+            .pr-prefs { background: #fffbeb; border: 2px solid #f0d060; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
+            .pr-prefs h2 { font-family: 'Space Grotesk', sans-serif; font-size: 14px; color: #b8860b; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+            .pr-prefs-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; color: #1a1a1a; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+            .pr-option { border: 2px solid #e0dcd6; border-radius: 10px; margin-bottom: 16px; break-inside: avoid; overflow: hidden; }
+            .pr-option.pref-opt { border-color: #c8553d; }
+            .pr-opt-header { padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
+            .pr-opt-header.green { background: #0d4f3c; color: white; }
+            .pr-opt-header.gray { background: #f4f1ec; color: #1a1a1a; }
+            .pr-opt-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; }
+            .pr-opt-type { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; background: rgba(0,0,0,0.08); }
+            .pr-opt-body { padding: 14px 16px; }
+            .pr-section { border-left: 4px solid #e0dcd6; padding: 6px 0 6px 14px; margin-bottom: 10px; }
+            .pr-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+            .pr-section-row { font-size: 12px; line-height: 1.6; }
+            .pr-section-row .lb { font-weight: 600; color: #6b7280; }
+            .pr-stars { text-align: right; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 14px; color: #c8553d; margin-top: 6px; }
+        }
+        @media (max-width: 1100px) { .app-container { grid-template-columns: 1fr; } .sidebar { height: auto; max-height: 100vh; } #board-container { min-height: 60vh; } }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="sidebar">
+        <div class="header-box">
+            <h2><i class="fas fa-binoculars"></i> Scheda di Scouting</h2>
+            <div class="header-form">
+                <input type="text" id="s_nome" placeholder="Nome Studente">
+                <input type="text" id="s_classe" class="input-classe" placeholder="Classe">
+            </div>
+        </div>
+        <div class="form-scroll">
+            <form id="mainForm" onsubmit="return false;">
+                <div class="section-block sec-identita">
+                    <div class="section-head open" onclick="toggleSection(this)"><span><i class="fas fa-school" style="margin-right:8px; opacity:0.7;"></i>1. Istruzione e Politiche Giovanili</span><i class="fas fa-chevron-down chevron"></i></div>
+                    <div class="section-body open">
+                        <label>Area tematica</label>
+                        <select id="f_tipo" onchange="toggleSubMenus(this.value)">
+                            <option value="">-- Seleziona --</option>
+                            <option value="Unisalento">Unisalento</option>
+                            <option value="ISUFI">ISUFI (Alta Formazione Unisalento)</option>
+                            <option value="Atenei Italia">Atenei Italia</option>
+                            <option value="ITS">ITS Academy</option>
+                            <option value="AFAM">AFAM (Arti, Musica, Spettacolo)</option>
+                            <option value="Galattica">Galattica (Regione Puglia)</option>
+                            <option value="Eurodesk">Portale dei Giovani (Eurodesk)</option>
+                            <option value="Altro">Altro (IFTS, Tirocini, Estero...)</option>
+                        </select>
+
+                        <div id="box_unisalento" class="hidden-field">
+                            <div class="external-link-box link-unisalento"><div class="link-icon"><i class="fas fa-graduation-cap"></i></div><p><strong>Consulta l'offerta formativa</strong> dell'Università del Salento</p><a href="https://www.unisalento.it/didattica/cosa-studiare/percorsi/-/dettaglio/offerta/tipologia" target="_blank" rel="noopener noreferrer" class="btn-external btn-unisalento"><i class="fas fa-globe"></i> Apri unisalento.it</a><div class="input-note"><i class="fas fa-pencil-alt"></i> Inserisci Dipartimento e Corso di Laurea dopo la verifica.</div></div>
+                            <label>Dipartimento</label><input type="text" id="f_dipartimento" placeholder="es. Ingegneria dell'Innovazione">
+                            <label>Corso di Laurea</label><input type="text" id="f_corso_unisalento" placeholder="es. Ingegneria Informatica (L-8)">
+                        </div>
+                        <div id="box_isufi" class="hidden-field">
+                            <div class="external-link-box link-isufi"><div class="link-icon"><i class="fas fa-user-graduate"></i></div><p><strong>Consulta i percorsi ISUFI</strong> dell'Università del Salento</p><a href="https://www.care.unisalento.it/isufi" target="_blank" rel="noopener noreferrer" class="btn-external btn-isufi"><i class="fas fa-globe"></i> Apri care.unisalento.it/isufi</a><div class="input-note"><i class="fas fa-pencil-alt"></i> Inserisci il percorso ISUFI dopo la verifica.</div></div>
+                            <label>Nome Percorso ISUFI</label><input type="text" id="f_corso_isufi" placeholder="es. Master in Data Science">
+                            <label>Tipologia</label><select id="f_tipologia_isufi"><option value="">-- Seleziona --</option><option value="Master I livello">Master I livello</option><option value="Master II livello">Master II livello</option><option value="Alta Formazione">Alta Formazione</option><option value="Perfezionamento">Perfezionamento</option><option value="Summer School">Summer School</option></select>
+                        </div>
+                        <div id="box_atenei" class="hidden-field">
+                            <div class="external-link-box link-atenei"><div class="link-icon"><i class="fas fa-map-marked-alt"></i></div><p><strong>Consulta il portale Universitaly</strong> per atenei e corsi in tutta Italia</p><a href="https://www.universitaly.it/" target="_blank" rel="noopener noreferrer" class="btn-external btn-atenei"><i class="fas fa-globe"></i> Apri universitaly.it</a><div class="input-note"><i class="fas fa-pencil-alt"></i> Inserisci i dati dopo la verifica.</div></div>
+                            <label>Nome Ateneo</label><input type="text" id="f_nome_ateneo" placeholder="es. Politecnico di Milano">
+                            <label>Città / Sede</label><input type="text" id="f_citta_ateneo" placeholder="es. Milano">
+                            <label>Corso di Laurea</label><input type="text" id="f_corso_atenei" placeholder="es. Ingegneria Biomedica (L-9)">
+                        </div>
+                        <div id="box_its" class="hidden-field">
+                            <div class="external-link-box link-its"><div class="link-icon"><i class="fas fa-external-link-alt"></i></div><p><strong>Consulta l'elenco ufficiale</strong> delle Fondazioni ITS Academy sul <strong>Sistema ITS Puglia</strong></p><a href="https://www.sistemaitspuglia.it/sistema-its-puglia/" target="_blank" rel="noopener noreferrer" class="btn-external btn-its"><i class="fas fa-globe"></i> Apri sistemaitspuglia.it</a><div class="input-note"><i class="fas fa-pencil-alt"></i> Inserisci i dati dopo la verifica.</div></div>
+                            <label>Nome Fondazione ITS</label><input type="text" id="f_sub_its" placeholder="es. ITS Academy Tekne Hub">
+                            <label>Area Tecnologica</label><input type="text" id="f_area_tecnologica" placeholder="es. Trasporti e Logistica">
+                        </div>
+                        <div id="box_afam" class="hidden-field">
+                            <div class="external-link-box link-afam"><div class="link-icon"><i class="fas fa-palette"></i></div><p><strong>Consulta il sistema AFAM</strong> sul sito del MUR</p><a href="https://www.mur.gov.it/it/aree-tematiche/afam" target="_blank" rel="noopener noreferrer" class="btn-external btn-afam"><i class="fas fa-globe"></i> Apri mur.gov.it/afam</a><div class="input-note"><i class="fas fa-pencil-alt"></i> Inserisci i dati dopo la verifica.</div></div>
+                            <label>Istituzione AFAM</label><select id="f_istituzione_afam"><option value="">-- Seleziona --</option><option value="Accademia di Belle Arti di Lecce">Accademia di Belle Arti di Lecce</option><option value="Conservatorio Tito Schipa (Lecce)">Conservatorio "Tito Schipa" (Lecce)</option><option value="Conservatorio G. Paisiello (Taranto)">Conservatorio "G. Paisiello" (Taranto)</option></select>
+                            <label>Corso / Strumento</label><input type="text" id="f_corso_afam" placeholder="es. Pittura, Canto, Pianoforte...">
+                            <label>Livello</label><select id="f_livello_afam"><option value="">-- Seleziona --</option><option value="Triennale">Triennale (I livello)</option><option value="Biennale">Biennale (II livello)</option><option value="Ciclo unico">Ciclo Unico</option></select>
+                        </div>
+
+                        <!-- GALATTICA con formazione + finanziamento -->
+                        <div id="box_galattica" class="hidden-field">
+                            <div class="external-link-box link-galattica">
+                                <div class="link-icon"><i class="fas fa-rocket"></i></div>
+                                <p><strong>Consulta Galattica</strong> — il portale della Regione Puglia per le politiche giovanili: opportunità formative, misure di finanziamento, bandi e iniziative</p>
+                                <a href="https://galattica.regione.puglia.it/opportunita/misure-regionali/go-generazione-in-orbita" target="_blank" rel="noopener noreferrer" class="btn-external btn-galattica"><i class="fas fa-globe"></i> Apri galattica.regione.puglia.it</a>
+                                <div class="input-note"><i class="fas fa-pencil-alt"></i> Scegli la natura dell'opportunità e compila i campi dedicati.</div>
+                            </div>
+                            <label>Natura dell'opportunità</label>
+                            <select id="f_natura_galattica" onchange="toggleGalatticaFields(this.value)">
+                                <option value="">-- Seleziona --</option>
+                                <option value="formazione">Opportunità formativa (corso, tirocinio, servizio civile...)</option>
+                                <option value="finanziamento">Misura di finanziamento / Incentivo economico (Go!, contributi, voucher...)</option>
+                            </select>
+
+                            <!-- Campi formazione -->
+                            <div id="gal_formazione" class="hidden-field">
+                                <div class="formazione-box">
+                                    <div class="form-icon"><i class="fas fa-graduation-cap"></i></div>
+                                    <div class="form-text">Compila i campi relativi all'opportunità formativa (corsi, tirocini, stage, servizio civile, ecc.)</div>
+                                </div>
+                                <label>Nome iniziativa / Bando</label><input type="text" id="f_iniziativa_galattica" placeholder="es. Bando Servizio Civile, Garanzia Giovani...">
+                                <label>Tipologia</label>
+                                <select id="f_tipologia_galattica"><option value="">-- Seleziona --</option><option value="Servizio Civile">Servizio Civile</option><option value="Garanzia Giovani">Garanzia Giovani</option><option value="Tirocinio formativo">Tirocinio formativo</option><option value="Stage curricolare">Stage curricolare</option><option value="Volontariato">Volontariato</option><option value="Altro formativo">Altro formativo</option></select>
+                                <label>Descrizione breve</label><textarea id="f_desc_galattica" rows="2" placeholder="Descrivi sinteticamente l'opportunità"></textarea>
+                            </div>
+
+                            <!-- Campi finanziamento -->
+                            <div id="gal_finanziamento" class="hidden-field">
+                                <div class="finanziamento-box">
+                                    <div class="fin-icon"><i class="fas fa-coins"></i></div>
+                                    <div class="fin-text">Compila i campi relativi alla misura di finanziamento o incentivo economico (es. Go! Generazione in Orbita, contributi a fondo perduto, voucher, ecc.)</div>
+                                </div>
+                                <label>Nome misura / Bando</label><input type="text" id="f_misura_galattica" placeholder="es. Go! Generazione in Orbita, Contributo under 35, Voucher digitale...">
+                                <label>Tipologia finanziamento</label>
+                                <select id="f_tipologia_fin"><option value="">-- Seleziona --</option><option value="Contributo a fondo perduto">Contributo a fondo perduto</option><option value="Voucher">Voucher / Buono</option><option value="Incentivo economico">Incentivo economico</option><option value="Microcredito">Microcredito / Prestito agevolato</option><option value="Bando regionale">Bando regionale</option><option value="Finanziamento europeo">Finanziamento europeo</option><option value="Altro finanziamento">Altro finanziamento</option></select>
+                                <div class="form-row">
+                                    <div><label>Importo previsto</label><input type="text" id="f_importo_fin" placeholder="es. 6.000 €, fino a 10.000 €"></div>
+                                    <div><label>Destinatari</label><input type="text" id="f_destinatari_fin" placeholder="es. 18-35 anni, NEET, under 30"></div>
+                                </div>
+                                <label>Requisiti di accesso</label><textarea id="f_requisiti_fin" rows="2" placeholder="es. Residenza in Puglia, ISEE sotto soglia, non occupato..."></textarea>
+                                <label>Modalità di richiesta</label><textarea id="f_modalita_fin" rows="2" placeholder="es. Domanda online su Galattica, SPID obbligatorio, sportello dedicato..."></textarea>
+                                <label>Descrizione / Finalità</label><textarea id="f_desc_fin" rows="2" placeholder="Descrivi sinteticamente la misura e la sua finalità"></textarea>
+                            </div>
+                        </div>
+
+                        <div id="box_eurodesk" class="hidden-field">
+                            <div class="external-link-box link-eurodesk"><div class="link-icon"><i class="fas fa-globe-europe"></i></div><p><strong>Consulta il Portale dei Giovani (Eurodesk)</strong> per opportunità europee</p><a href="https://www.portaledeigiovani.it/" target="_blank" rel="noopener noreferrer" class="btn-external btn-eurodesk"><i class="fas fa-globe"></i> Apri portaledeigiovani.it</a><div class="input-note"><i class="fas fa-pencil-alt"></i> Inserisci i dettagli dopo la verifica.</div></div>
+                            <label>Programma / Iniziativa</label><input type="text" id="f_programma_eurodesk" placeholder="es. Erasmus+ Giovani">
+                            <label>Tipologia</label><select id="f_tipologia_eurodesk"><option value="">-- Seleziona --</option><option value="Erasmus+">Erasmus+</option><option value="European Solidarity Corps">European Solidarity Corps</option><option value="Scambio giovanile">Scambio giovanile</option><option value="Workcamp">Workcamp</option><option value="Stage all'estero">Stage all'estero</option><option value="Altro">Altro programma</option></select>
+                            <label>Paese / Destinazione</label><input type="text" id="f_destinazione_eurodesk" placeholder="es. Spagna, Germania">
+                            <label>Descrizione breve</label><textarea id="f_desc_eurodesk" rows="2" placeholder="Descrivi sinteticamente l'opportunità"></textarea>
+                        </div>
+                        <div id="box_altro" class="hidden-field">
+                            <div class="external-link-box link-altro"><div class="link-icon"><i class="fas fa-route"></i></div><p><strong>Percorsi alternativi</strong> non riconducibili alle tipologie precedenti</p><div class="input-note"><i class="fas fa-pencil-alt"></i> Compila i campi qui sotto.</div></div>
+                            <label>Tipo specifico</label><input type="text" id="f_tipo_altro" placeholder="es. IFTS, Tirocinio">
+                            <label>Ente promotore</label><input type="text" id="f_ente_altro" placeholder="es. Regione Puglia">
+                            <label>Descrizione breve</label><textarea id="f_desc_altro" rows="2" placeholder="Descrivi sinteticamente"></textarea>
+                        </div>
+
+                        <!-- Campo sempre visibile (usato anche per misure di finanziamento) -->
+                        <label>Nome Corso / Percorso</label><input type="text" id="f_corso" placeholder="Titolo specifico o nome misura">
+
+                        <!-- Campi sede: nascosti per i finanziamenti Galattica -->
+                        <div id="campi-sede-group">
+                            <label>Nome Istituto / Sede</label><input type="text" id="f_nome" placeholder="es. Polo Didattico Brindisi">
+                            <label>Indirizzo Sede</label><input type="text" id="f_indirizzo" placeholder="Via, Comune">
+                            <div class="form-row"><div><label>Provincia</label><input type="text" id="f_prov" placeholder="LE" maxlength="2"></div><div><label>Raggiungibilità</label><input type="text" id="f_trasporti" placeholder="Bus/Treno"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sezioni 2-7 con id per visibilità condizionale -->
+                <div class="section-block sec-piano" id="sec-piano-block"><div class="section-head" onclick="toggleSection(this)"><span><i class="fas fa-book-open" style="margin-right:8px; opacity:0.7;"></i>2. Piano di Studi</span><i class="fas fa-chevron-down chevron"></i></div><div class="section-body"><label>Indirizzi / Curriculum</label><input type="text" id="f_indirizzi" placeholder="es. Informatica, Gestione del Software"><label>Materie caratterizzanti principali</label><textarea id="f_materie" rows="3" placeholder="es. Programmazione, Database, Reti"></textarea><label>Note sul piano studi</label><textarea id="f_note_piano" rows="2" placeholder="es. Stage obbligatorio 800 ore"></textarea></div></div>
+                <div class="section-block sec-durata" id="sec-durata-block"><div class="section-head" onclick="toggleSection(this)"><span><i class="fas fa-hourglass-half" style="margin-right:8px; opacity:0.7;"></i>3. Durata</span><i class="fas fa-chevron-down chevron"></i></div><div class="section-body"><div class="form-row"><div><label>Durata (anni)</label><input type="number" id="f_durata" min="1" max="6" placeholder="es. 3"></div><div><label>Monte Ore totale</label><input type="text" id="f_monte_ore" placeholder="es. 2000 ore"></div></div></div></div>
+                <div class="section-block sec-titoli" id="sec-titoli-block"><div class="section-head" onclick="toggleSection(this)"><span><i class="fas fa-award" style="margin-right:8px; opacity:0.7;"></i>4. Titoli</span><i class="fas fa-chevron-down chevron"></i></div><div class="section-body"><div class="form-row"><div><label>Livello EQF</label><input type="text" id="f_eqf" placeholder="es. 6"></div><div><label>CFU / CFP</label><input type="text" id="f_cfu" placeholder="es. 180"></div></div></div></div>
+                <div class="section-block sec-economica" id="sec-economica-block"><div class="section-head" onclick="toggleSection(this)"><span><i class="fas fa-euro-sign" style="margin-right:8px; opacity:0.7;"></i>5. Costi</span><i class="fas fa-chevron-down chevron"></i></div><div class="section-body"><label>Costo annuo (EUR)</label><input type="number" id="f_costo" min="0" placeholder="0 se gratuito"><label>Borse di studio</label><select id="f_borse"><option value="No">No</option><option value="Regionali">Regionali</option><option value="Ente/Regione">Ente + Regione</option><option value="Meritocrazia">Meritocrazia</option></select><div class="form-row"><div><label>Alloggio gratuito in college</label><select id="f_alloggio"><option value="No">No</option><option value="Si">Sì</option></select></div><div><label>Altro (mensa, materiali...)</label><input type="text" id="f_costi_altro" placeholder="es. Mensa gratuita, kit incluso"></div></div></div></div>
+                <div class="section-block sec-accesso" id="sec-accesso-block"><div class="section-head" onclick="toggleSection(this)"><span><i class="fas fa-door-open" style="margin-right:8px; opacity:0.7;"></i>6. Accesso</span><i class="fas fa-chevron-down chevron"></i></div><div class="section-body"><div class="form-row"><div><label>Test d'ingresso</label><select id="f_test"><option value="No">No</option><option value="Si">Sì</option><option value="Valutazione titoli">Valutazione titoli + colloquio</option></select></div><div><label>Scadenza</label><input type="text" id="f_scadenza" placeholder="es. 30/09/2025"></div></div></div></div>
+                <div class="section-block sec-performance" id="sec-performance-block"><div class="section-head" onclick="toggleSection(this)"><span><i class="fas fa-chart-line" style="margin-right:8px; opacity:0.7;"></i>7. Performance</span><i class="fas fa-chevron-down chevron"></i></div><div class="section-body"><div class="form-row"><div><label>Tasso occupazione %</label><input type="number" id="f_occupazione" min="0" max="100" placeholder="es. 85"></div><div><label>Interesse (1-10)</label><input type="number" id="f_interesse" min="1" max="10" placeholder="es. 8"></div></div><label>Punti di forza / Valore</label><textarea id="f_punti_forza" rows="2" placeholder="es. Assunzione immediata, stage all'estero, certificazione inclusa..."></textarea></div></div>
+                <button type="button" class="btn-save" onclick="salvaDati()"><i class="fas fa-plus" style="margin-right:8px;"></i>AGGIUNGI ALLA BOARD</button>
+            </form>
+        </div>
+        <div class="results-area">
+            <div class="results-header">Schede inserite: <span id="cont">0</span></div>
+            <div class="results-list" id="lista"><div class="empty-state" style="padding:20px;"><i class="fas fa-inbox"></i><p>Nessuna scheda</p></div></div>
+            <div class="footer-btns">
+                <button class="btn-action btn-pdf" onclick="stampaReport()"><i class="fas fa-file-pdf"></i> PDF</button>
+                <button class="btn-action btn-copy" onclick="copiaReport()"><i class="fas fa-copy"></i> COPIA</button>
+                <button class="btn-action btn-email" onclick="inviaEmail()"><i class="fas fa-envelope"></i> EMAIL</button>
+            </div>
+        </div>
+    </div>
+    <div id="board-container">
+        <div class="board-header"><div><h1>Scouting Board</h1><p>Valuta, confronta e classifica le opzioni</p></div></div>
+        <div class="filter-bar" id="filter-bar"></div>
+        <div class="podium-section" id="podium-section" style="display:none;"><h3><i class="fas fa-trophy" style="margin-right:6px; color:#d4a017;"></i> Top 3 preferite</h3><div class="podium-row" id="podium-row"></div></div>
+        <div class="board-grid" id="board-grid"><div class="board-empty"><i class="fas fa-search"></i><p>Aggiungi opzioni dalla scheda a sinistra per iniziare lo scouting</p></div></div>
+        <div id="print-area"></div>
+    </div>
+</div>
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+var database = [], activeFilter = 'tutti';
+var TAG_MAP = { 'Unisalento':'tag-unisalento','Atenei Italia':'tag-atenei','ITS':'tag-its','ISUFI':'tag-isufi','AFAM':'tag-afam','Galattica':'tag-galattica','Eurodesk':'tag-eurodesk','Altro':'tag-altro' };
+var FILTER_ICONS = { 'tutti':'fa-th','pref':'fa-heart','Unisalento':'fa-graduation-cap','ISUFI':'fa-user-graduate','Atenei Italia':'fa-map-marked-alt','ITS':'fa-cogs','AFAM':'fa-palette','Galattica':'fa-rocket','Eurodesk':'fa-globe-europe','Altro':'fa-route' };
+var ALL_BOXES = ['box_unisalento','box_isufi','box_atenei','box_its','box_afam','box_galattica','box_eurodesk','box_altro'];
+var SEC_IDS = ['sec-piano-block','sec-durata-block','sec-titoli-block','sec-economica-block','sec-accesso-block','sec-performance-block'];
+var SC = { istr:'#2c3e50', piano:'#1d6fa5', dur:'#6b4c9a', titoli:'#2d6a4f', costi:'#b5342a', accesso:'#00707a', perf:'#c47a20', fin:'#15803d' };
+var SI = { istr:'fa-school', piano:'fa-book-open', dur:'fa-hourglass-half', titoli:'fa-award', costi:'fa-euro-sign', accesso:'fa-door-open', perf:'fa-chart-line', fin:'fa-coins' };
+var SN = { istr:'Istruzione e Politiche Giovanili', piano:'Piano di Studi', dur:'Durata', titoli:'Titoli', costi:'Costi', accesso:'Accesso', perf:'Performance', fin:'Finanziamento / Incentivo' };
+
+function showToast(m, t) { var c = document.getElementById('toast-container'), d = document.createElement('div'); d.className = 'toast toast-' + (t||'success'); d.innerHTML = '<i class="fas ' + (t==='error'?'fa-exclamation-circle':t==='info'?'fa-info-circle':'fa-check-circle') + '"></i> ' + m; c.appendChild(d); setTimeout(function() { if (d.parentNode) d.parentNode.removeChild(d); }, 2600); }
+function toggleSection(h) { var b = h.nextElementSibling, o = h.classList.contains('open'); h.classList.toggle('open', !o); b.classList.toggle('open', !o); }
+
+function aggiornaSezioniVisibili(tipo, sottotipo) {
+    var vis = {};
+    SEC_IDS.forEach(function(id) { vis[id] = true; });
+
+    if (tipo === 'Eurodesk') {
+        vis['sec-piano-block'] = false;
+        vis['sec-titoli-block'] = false;
+        vis['sec-economica-block'] = false;
+    }
+
+    if (tipo === 'Galattica') {
+        vis['sec-piano-block'] = false;
+        vis['sec-durata-block'] = false;
+        vis['sec-titoli-block'] = false;
+        vis['sec-economica-block'] = false;
+        vis['sec-accesso-block'] = false;
+
+        if (sottotipo === 'formazione') {
+            vis['sec-durata-block'] = true;
+            vis['sec-accesso-block'] = true;
+        }
+    }
+
+    SEC_IDS.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            if (vis[id]) el.classList.remove('sec-hidden');
+            else el.classList.add('sec-hidden');
+        }
+    });
+
+    /* Campi sede: nascondi solo per Galattica finanziamento */
+    var sedeEl = document.getElementById('campi-sede-group');
+    if (sedeEl) {
+        if (tipo === 'Galattica' && sottotipo === 'finanziamento') sedeEl.classList.add('sec-hidden');
+        else sedeEl.classList.remove('sec-hidden');
+    }
+}
+
+function toggleSubMenus(v) {
+    ALL_BOXES.forEach(function(id) { document.getElementById(id).className = 'hidden-field'; });
+    var map = { 'Unisalento':'box_unisalento','ISUFI':'box_isufi','Atenei Italia':'box_atenei','ITS':'box_its','AFAM':'box_afam','Galattica':'box_galattica','Eurodesk':'box_eurodesk','Altro':'box_altro' };
+    if (map[v]) document.getElementById(map[v]).className = 'visible-field';
+    aggiornaSezioniVisibili(v, '');
+}
+function toggleGalatticaFields(v) {
+    document.getElementById('gal_formazione').className = v === 'formazione' ? 'visible-field' : 'hidden-field';
+    document.getElementById('gal_finanziamento').className = v === 'finanziamento' ? 'visible-field' : 'hidden-field';
+    aggiornaSezioniVisibili('Galattica', v);
+}
+
+function mkSec(key, rows) { var f = rows.filter(function(r) { return r; }); if (!f.length) return ''; var h = '<div class="board-detail-section" style="border-left-color:' + SC[key] + '">'; h += '<div class="board-detail-title"><i class="fas ' + SI[key] + '" style="color:' + SC[key] + '"></i> ' + SN[key] + '</div>'; f.forEach(function(r) { h += '<div class="board-detail-row">' + r + '</div>'; }); return h + '</div>'; }
+function ps(color, icon, title, rows) { var f = rows.filter(function(r) { return r; }); if (!f.length) return ''; var s = '<div class="pr-section" style="border-left-color:' + color + '">'; s += '<div class="pr-section-title" style="color:' + color + '"><i class="fas ' + icon + '" style="margin-right:4px;"></i>' + title + '</div>'; f.forEach(function(r) { s += '<div class="pr-section-row">' + r + '</div>'; }); return s + '</div>'; }
+function ts(key, it) {
+    var lb = '<span class="lb">';
+    if (key === 'istr') return [it.spec ? lb + 'Dettagli:</span> ' + esc(it.spec) : '', it.indirizzo ? lb + 'Sede:</span> ' + esc(it.indirizzo) + (it.prov ? ' (' + esc(it.prov) + ')' : '') : '', it.trasporti ? lb + 'Trasporti:</span> ' + esc(it.trasporti) : ''];
+    if (key === 'piano') return [it.indirizzi ? lb + 'Indirizzi:</span> ' + esc(it.indirizzi) : '', it.materie ? lb + 'Materie:</span> ' + esc(it.materie) : '', it.note_piano ? lb + 'Note:</span> ' + esc(it.note_piano) : ''];
+    if (key === 'dur') return [it.durata ? lb + 'Durata:</span> ' + it.durata + ' anni' : '', it.monte_ore ? lb + 'Monte ore:</span> ' + esc(it.monte_ore) : ''];
+    if (key === 'titoli') return [it.eqf ? lb + 'EQF:</span> ' + esc(it.eqf) : '', it.cfu ? lb + 'CFU/CFP:</span> ' + esc(it.cfu) : ''];
+    if (key === 'costi') { var r = [lb + 'Costo annuo:</span> ' + (it.costo === 0 ? '<strong style="color:#1a7a3c;">Gratuito</strong>' : it.costo + ' €'), lb + 'Borse:</span> ' + esc(it.borse)]; if (it.alloggio === 'Si') r.push(lb + 'College:</span> <strong style="color:#1a7a3c;">Sì</strong>'); if (it.costi_altro) r.push(lb + 'Altro:</span> ' + esc(it.costi_altro)); return r; }
+    if (key === 'accesso') return [lb + 'Test ingresso:</span> ' + esc(it.test), it.scadenza ? lb + 'Scadenza:</span> ' + esc(it.scadenza) : ''];
+    if (key === 'perf') { var r = [lb + 'Occupazione:</span> ' + it.occupazione + '%']; if (it.punti_forza) r.push(lb + 'Punti di forza:</span> ' + esc(it.punti_forza)); return r; }
+    if (key === 'fin') { var r = []; if (it.fin_tipologia) r.push(lb + 'Tipologia:</span> ' + esc(it.fin_tipologia)); if (it.fin_importo) r.push(lb + 'Importo:</span> <strong style="color:#15803d;">' + esc(it.fin_importo) + '</strong>'); if (it.fin_destinatari) r.push(lb + 'Destinatari:</span> ' + esc(it.fin_destinatari)); if (it.fin_requisiti) r.push(lb + 'Requisiti:</span> ' + esc(it.fin_requisiti)); if (it.fin_modalita) r.push(lb + 'Modalità:</span> ' + esc(it.fin_modalita)); if (it.fin_desc) r.push(lb + 'Descrizione:</span> ' + esc(it.fin_desc)); return r; }
+    return [];
+}
+function bs(key, it) {
+    var dl = '<span class="dl">';
+    if (key === 'istr') return [it.spec ? dl + 'Dettagli:</span> ' + esc(it.spec) : '', it.indirizzo ? dl + 'Sede:</span> ' + esc(it.indirizzo) + (it.prov ? ' (' + esc(it.prov) + ')' : '') : '', it.trasporti ? dl + 'Trasporti:</span> ' + esc(it.trasporti) : ''];
+    if (key === 'piano') return [it.indirizzi ? dl + 'Indirizzi:</span> ' + esc(it.indirizzi) : '', it.materie ? dl + 'Materie:</span> ' + esc(it.materie) : '', it.note_piano ? dl + 'Note:</span> ' + esc(it.note_piano) : ''];
+    if (key === 'dur') return [it.durata ? dl + 'Durata:</span> ' + it.durata + ' anni' : '', it.monte_ore ? dl + 'Monte ore:</span> ' + esc(it.monte_ore) : ''];
+    if (key === 'titoli') return [it.eqf ? dl + 'EQF:</span> ' + esc(it.eqf) : '', it.cfu ? dl + 'CFU/CFP:</span> ' + esc(it.cfu) : ''];
+    if (key === 'costi') { var r = [dl + 'Costo:</span> ' + (it.costo === 0 ? '<strong style="color:#1a7a3c;">Gratuito</strong>' : it.costo + ' €'), dl + 'Borse:</span> ' + esc(it.borse)]; if (it.alloggio === 'Si') r.push(dl + 'College:</span> <strong style="color:#1a7a3c;">Sì</strong>'); if (it.costi_altro) r.push(dl + 'Altro:</span> ' + esc(it.costi_altro)); return r; }
+    if (key === 'accesso') return [dl + 'Test:</span> ' + esc(it.test), it.scadenza ? dl + 'Scadenza:</span> ' + esc(it.scadenza) : ''];
+    if (key === 'perf') { var r = [dl + 'Occupazione:</span> ' + it.occupazione + '%']; if (it.punti_forza) { it.punti_forza.split(',').forEach(function(pf) { pf = pf.trim(); if (pf) r.push('<span class="strength-inline"><i class="fas fa-bolt"></i> ' + esc(pf) + '</span>'); }); } return r; }
+    if (key === 'fin') { var r = []; if (it.fin_tipologia) r.push(dl + 'Tipologia:</span> <span class="fin-badge"><i class="fas fa-coins"></i> ' + esc(it.fin_tipologia) + '</span>'); if (it.fin_importo) r.push(dl + 'Importo:</span> <strong style="color:#15803d;">' + esc(it.fin_importo) + '</strong>'); if (it.fin_destinatari) r.push(dl + 'Destinatari:</span> ' + esc(it.fin_destinatari)); if (it.fin_requisiti) r.push(dl + 'Requisiti:</span> ' + esc(it.fin_requisiti)); if (it.fin_modalita) r.push(dl + 'Modalità:</span> ' + esc(it.fin_modalita)); if (it.fin_desc) r.push(dl + 'Descrizione:</span> ' + esc(it.fin_desc)); return r; }
+    return [];
+}
+function txtSec(key, it) {
+    var lines = [];
+    if (key === 'istr') { if (it.spec) lines.push('  Dettagli: ' + it.spec); if (it.indirizzo) lines.push('  Sede: ' + it.indirizzo + (it.prov ? ' (' + it.prov + ')' : '')); if (it.trasporti) lines.push('  Trasporti: ' + it.trasporti); }
+    if (key === 'piano') { if (it.indirizzi) lines.push('  Indirizzi: ' + it.indirizzi); if (it.materie) lines.push('  Materie: ' + it.materie); if (it.note_piano) lines.push('  Note: ' + it.note_piano); }
+    if (key === 'dur') { if (it.durata) lines.push('  Durata: ' + it.durata + ' anni'); if (it.monte_ore) lines.push('  Monte ore: ' + it.monte_ore); }
+    if (key === 'titoli') { if (it.eqf) lines.push('  EQF: ' + it.eqf); if (it.cfu) lines.push('  CFU/CFP: ' + it.cfu); }
+    if (key === 'costi') { lines.push('  Costo annuo: ' + (it.costo === 0 ? 'Gratuito' : it.costo + ' EUR')); lines.push('  Borse: ' + it.borse); if (it.alloggio === 'Si') lines.push('  College: Sì'); if (it.costi_altro) lines.push('  Altro: ' + it.costi_altro); }
+    if (key === 'accesso') { lines.push('  Test ingresso: ' + it.test); if (it.scadenza) lines.push('  Scadenza: ' + it.scadenza); }
+    if (key === 'perf') { lines.push('  Occupazione: ' + it.occupazione + '%'); if (it.punti_forza) lines.push('  Punti di forza: ' + it.punti_forza); }
+    if (key === 'fin') { if (it.fin_tipologia) lines.push('  Tipologia: ' + it.fin_tipologia); if (it.fin_importo) lines.push('  Importo: ' + it.fin_importo); if (it.fin_destinatari) lines.push('  Destinatari: ' + it.fin_destinatari); if (it.fin_requisiti) lines.push('  Requisiti: ' + it.fin_requisiti); if (it.fin_modalita) lines.push('  Modalità: ' + it.fin_modalita); if (it.fin_desc) lines.push('  Descrizione: ' + it.fin_desc); }
+    return lines;
+}
+
+function salvaDati() {
+    var tipo = document.getElementById('f_tipo').value;
+    if (!tipo) { showToast('Seleziona l\'area tematica', 'error'); return; }
+    var spec = '';
+    if (tipo === 'Unisalento') { var p = ['Unisalento'], d = document.getElementById('f_dipartimento').value.trim(), c = document.getElementById('f_corso_unisalento').value.trim(); if (d) p.push(d); if (c) { p.push(c); document.getElementById('f_corso').value = c; } spec = p.join(' — '); }
+    if (tipo === 'ISUFI') { spec = 'ISUFI'; var t = document.getElementById('f_tipologia_isufi').value, c = document.getElementById('f_corso_isufi').value.trim(); if (t) spec += ' — ' + t; if (c) { spec += ' — ' + c; document.getElementById('f_corso').value = c; } }
+    if (tipo === 'Atenei Italia') { var n = document.getElementById('f_nome_ateneo').value.trim(), c = document.getElementById('f_citta_ateneo').value.trim(), co = document.getElementById('f_corso_atenei').value.trim(); spec = n || 'Ateneo'; if (c) spec += ' — ' + c; if (co) { spec += ' — ' + co; document.getElementById('f_corso').value = co; } }
+    if (tipo === 'ITS') { spec = document.getElementById('f_sub_its').value; var a = document.getElementById('f_area_tecnologica').value.trim(); if (a) spec += ' — ' + a; }
+    if (tipo === 'AFAM') { spec = document.getElementById('f_istituzione_afam').value; var l = document.getElementById('f_livello_afam').value, c = document.getElementById('f_corso_afam').value.trim(); if (l) spec += ' — ' + l; if (c) { spec += ' — ' + c; document.getElementById('f_corso').value = c; } }
+    if (tipo === 'Galattica') {
+        var natura = document.getElementById('f_natura_galattica').value;
+        if (natura === 'formazione') {
+            spec = 'Galattica — Formazione';
+            var i = document.getElementById('f_iniziativa_galattica').value.trim(), t = document.getElementById('f_tipologia_galattica').value;
+            if (t) spec += ' — ' + t; if (i) { spec += ' — ' + i; document.getElementById('f_corso').value = i; }
+            var d = document.getElementById('f_desc_galattica').value.trim();
+            if (d && !document.getElementById('f_corso').value.trim()) document.getElementById('f_corso').value = d;
+        } else if (natura === 'finanziamento') {
+            spec = 'Galattica — Finanziamento';
+            var m = document.getElementById('f_misura_galattica').value.trim(), t = document.getElementById('f_tipologia_fin').value;
+            if (t) spec += ' — ' + t; if (m) { spec += ' — ' + m; document.getElementById('f_corso').value = m; }
+            var d = document.getElementById('f_desc_fin').value.trim();
+            if (d && !document.getElementById('f_corso').value.trim()) document.getElementById('f_corso').value = d;
+        } else { spec = 'Galattica'; }
+    }
+    if (tipo === 'Eurodesk') { spec = 'Portale dei Giovani'; var p = document.getElementById('f_programma_eurodesk').value.trim(), t = document.getElementById('f_tipologia_eurodesk').value, d = document.getElementById('f_destinazione_eurodesk').value.trim(); if (t) spec += ' — ' + t; if (p) { spec += ' — ' + p; document.getElementById('f_corso').value = p; } if (d) spec += ' — ' + d; var de = document.getElementById('f_desc_eurodesk').value.trim(); if (de && !document.getElementById('f_corso').value.trim()) document.getElementById('f_corso').value = de; }
+    if (tipo === 'Altro') { var t = document.getElementById('f_tipo_altro').value.trim(), e = document.getElementById('f_ente_altro').value.trim(); spec = t || 'Altro'; if (e) spec += ' — ' + e; var d = document.getElementById('f_desc_altro').value.trim(); if (d && !document.getElementById('f_corso').value.trim()) document.getElementById('f_corso').value = d; }
+    var nome = document.getElementById('f_nome').value.trim(), corso = document.getElementById('f_corso').value.trim();
+    if (!nome && !corso) { showToast('Inserisci almeno il nome o il corso', 'error'); return; }
+    database.push({
+        id: Date.now(), tipo: tipo, spec: spec, nome: nome || spec, corso: corso, is_fin: tipo === 'Galattica' && document.getElementById('f_natura_galattica').value === 'finanziamento',
+        indirizzo: document.getElementById('f_indirizzo').value.trim(), prov: document.getElementById('f_prov').value.trim().toUpperCase(), trasporti: document.getElementById('f_trasporti').value.trim(),
+        indirizzi: document.getElementById('f_indirizzi').value.trim(), materie: document.getElementById('f_materie').value.trim(), note_piano: document.getElementById('f_note_piano').value.trim(),
+        durata: document.getElementById('f_durata').value, monte_ore: document.getElementById('f_monte_ore').value.trim(), eqf: document.getElementById('f_eqf').value.trim(), cfu: document.getElementById('f_cfu').value.trim(),
+        costo: parseFloat(document.getElementById('f_costo').value) || 0, borse: document.getElementById('f_borse').value, alloggio: document.getElementById('f_alloggio').value, costi_altro: document.getElementById('f_costi_altro').value.trim(),
+        test: document.getElementById('f_test').value, scadenza: document.getElementById('f_scadenza').value.trim(),
+        occupazione: parseFloat(document.getElementById('f_occupazione').value) || 0, interesse: Math.min(10, Math.max(0, parseFloat(document.getElementById('f_interesse').value) || 0)), punti_forza: document.getElementById('f_punti_forza').value.trim(),
+        fin_tipologia: document.getElementById('f_tipologia_fin').value.trim(), fin_importo: document.getElementById('f_importo_fin').value.trim(), fin_destinatari: document.getElementById('f_destinatari_fin').value.trim(),
+        fin_requisiti: document.getElementById('f_requisiti_fin').value.trim(), fin_modalita: document.getElementById('f_modalita_fin').value.trim(), fin_desc: document.getElementById('f_desc_fin').value.trim(),
+        pref: false
+    });
+    var st = document.getElementById('s_nome').value, cl = document.getElementById('s_classe').value;
+    document.getElementById('mainForm').reset(); document.getElementById('s_nome').value = st; document.getElementById('s_classe').value = cl;
+    toggleSubMenus(''); aggiornaTutto(); showToast('Scheda aggiunta', 'success');
+}
+function eliminaScheda(id) { database = database.filter(function(x) { return x.id !== id; }); aggiornaTutto(); showToast('Rimossa', 'info'); }
+function togglePref(id) { var it = database.find(function(x) { return x.id === id; }); if (it) { it.pref = !it.pref; aggiornaTutto(); } }
+function setInteresse(id, val) { var it = database.find(function(x) { return x.id === id; }); if (it) { it.interesse = val; aggiornaBoard(); aggiornaLista(); aggiornaPodio(); aggiornaFiltri(); } }
+function aggiornaTutto() { aggiornaLista(); aggiornaFiltri(); aggiornaBoard(); aggiornaPodio(); }
+
+function aggiornaLista() {
+    var el = document.getElementById('lista'); document.getElementById('cont').textContent = database.length;
+    if (!database.length) { el.innerHTML = '<div style="padding:20px;text-align:center;color:#aaa;"><i class="fas fa-inbox" style="font-size:1.5em;display:block;margin-bottom:8px;"></i>Nessuna scheda</div>'; return; }
+    el.innerHTML = database.map(function(it) {
+        var extra = ''; if (it.alloggio === 'Si') extra += '<span class="tag" style="background:#e6f9ee;color:#1a7a3c;"><i class="fas fa-home" style="font-size:0.6em;"></i> College</span>';
+        if (it.is_fin) extra += '<span class="tag tag-finanziamento"><i class="fas fa-coins" style="font-size:0.6em;"></i> Finanziamento</span>';
+        return '<div class="card-item"><button class="card-delete" onclick="event.stopPropagation();eliminaScheda(' + it.id + ')"><i class="fas fa-times"></i></button><h4 class="card-title">' + esc(it.nome) + '</h4><div class="card-sub">' + esc(it.corso) + '</div><span class="tag ' + (TAG_MAP[it.tipo]||'tag-altro') + '">' + esc(it.tipo) + '</span>' + extra + '</div>';
+    }).join('');
+}
+function aggiornaFiltri() {
+    var counts = { tutti: database.length, pref: 0 }; database.forEach(function(x) { counts[x.tipo] = (counts[x.tipo]||0) + 1; if (x.pref) counts.pref++; });
+    var order = ['tutti','pref','Unisalento','ISUFI','Atenei Italia','ITS','AFAM','Galattica','Eurodesk','Altro'], html = '';
+    order.forEach(function(k) { var c = counts[k]||0; if (c === 0 && k !== 'tutti' && k !== 'pref') return; html += '<button class="filter-btn' + (activeFilter===k?' active':'') + '" onclick="setFilter(\'' + k + '\')"><i class="fas ' + (FILTER_ICONS[k]||'fa-filter') + '"></i> ' + k + ' <span class="filter-count">' + c + '</span></button>'; });
+    document.getElementById('filter-bar').innerHTML = html;
+}
+function setFilter(f) { activeFilter = f; aggiornaFiltri(); aggiornaBoard(); }
+function getFiltered() { if (activeFilter === 'tutti') return database.slice(); if (activeFilter === 'pref') return database.filter(function(x) { return x.pref; }); return database.filter(function(x) { return x.tipo === activeFilter; }); }
+
+function aggiornaBoard() {
+    var grid = document.getElementById('board-grid'), items = getFiltered();
+    if (!items.length) { grid.innerHTML = '<div class="board-empty"><i class="fas fa-search"></i><p>' + (activeFilter==='pref'?'Nessuna preferita — clicca il cuore':'Nessuna opzione') + '</p></div>'; return; }
+    items.sort(function(a, b) { return b.interesse - a.interesse; });
+    grid.innerHTML = items.map(function(it) {
+        var starsH = ''; for (var i = 1; i <= 10; i++) starsH += '<i class="fas fa-star ' + (i<=it.interesse?'lit':'') + '" onclick="setInteresse(' + it.id + ',' + i + ')"></i>';
+        var secs = ''; var keys = ['istr','piano','dur','titoli','costi','accesso','perf'];
+        if (it.is_fin) keys.push('fin');
+        keys.forEach(function(k) { secs += mkSec(k, bs(k, it)); });
+        var typeTags = '<span class="tag ' + (TAG_MAP[it.tipo]||'tag-altro') + '">' + esc(it.tipo) + '</span>';
+        if (it.is_fin) typeTags += '<span class="tag tag-finanziamento"><i class="fas fa-coins" style="font-size:0.6em;"></i> Finanziamento</span>';
+        return '<div class="board-card' + (it.pref?' is-pref':'') + '"><div class="board-card-header"><div class="board-card-type">' + typeTags + '</div><div class="board-card-actions"><button class="btn-pref' + (it.pref?' active':'') + '" onclick="togglePref(' + it.id + ')"><i class="fas fa-heart"></i></button><button class="btn-del" onclick="eliminaScheda(' + it.id + ')"><i class="fas fa-trash-alt"></i></button></div></div><div class="board-card-body"><div class="board-card-name">' + esc(it.nome) + '</div><div class="board-card-corso">' + esc(it.corso || it.spec) + '</div>' + secs + '</div><div class="board-card-stars"><span class="stars-label">Interesse</span><div class="stars-interactive">' + starsH + '</div><span class="stars-score">' + it.interesse + '</span></div></div>';
+    }).join('');
+}
+function aggiornaPodio() {
+    var sec = document.getElementById('podium-section'), prefs = database.filter(function(x) { return x.pref; }).sort(function(a, b) { return b.interesse - a.interesse; });
+    if (prefs.length < 2) { sec.style.display = 'none'; return; } sec.style.display = 'block';
+    var top3 = prefs.slice(0, 3), html = '';
+    [1,0,2].forEach(function(idx) { if (idx < top3.length) { var it = top3[idx]; html += '<div class="podium-card podium-' + (idx+1) + '"><div class="podium-rank">' + (idx+1) + '</div><div class="podium-name">' + esc(it.nome) + '</div><div class="podium-corso">' + esc(it.corso||it.spec) + '</div><div class="podium-score">' + it.interesse + '<span class="podium-label"> / 10</span></div></div>'; } });
+    document.getElementById('podium-row').innerHTML = html;
+}
+
+function buildFullText() {
+    var st = document.getElementById('s_nome').value || 'N/D', cl = document.getElementById('s_classe').value || 'N/D';
+    var now = new Date(), data = now.toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' });
+    var t = '═══════════════════════════════════════════\n           S C O U T I N G   P U G L I A\n═══════════════════════════════════════════\n  Studente: ' + st + '  |  Classe: ' + cl + '\n  Data: ' + data + '  |  Schede: ' + database.length + '\n═══════════════════════════════════════════\n\n';
+    var prefs = database.filter(function(x) { return x.pref; }).sort(function(a, b) { return b.interesse - a.interesse; });
+    if (prefs.length) { t += '★ ─── PREFERITE ─────────────────────────\n\n'; prefs.forEach(function(it, i) { t += txtOption(it, i + 1); }); t += '\n'; }
+    t += '📋 ─── TUTTE LE OPZIONI (' + database.length + ') ─────────────────────\n\n';
+    database.forEach(function(it, i) { t += txtOption(it, i + 1); });
+    return t;
+}
+function txtOption(it, num) {
+    var t = '┌' + '─'.repeat(44) + '┐\n│ ' + num + '. ' + it.nome + ' (' + it.tipo + ')' + ' '.repeat(Math.max(1, 41 - it.nome.length - it.tipo.length - String(num).length)) + '│\n';
+    if (it.corso) t += '│   Corso: ' + it.corso + ' '.repeat(Math.max(1, 40 - it.corso.length)) + '│\n';
+    if (it.is_fin) t += '│   ★ MISURA DI FINANZIAMENTO\n';
+    t += '│   Interesse: ' + it.interesse + '/10' + ' '.repeat(Math.max(1, 33)) + '│\n└' + '─'.repeat(44) + '┘\n';
+    var keys = ['istr','piano','dur','titoli','costi','accesso','perf'];
+    if (it.is_fin) keys.push('fin');
+    var icons = { istr:'▸', piano:'▸', dur:'▸', titoli:'▸', costi:'▸', accesso:'▸', perf:'▸', fin:'💰' };
+    keys.forEach(function(k) { var lines = txtSec(k, it); if (!lines.length) return; t += '  ' + icons[k] + ' ' + SN[k].toUpperCase() + '\n'; lines.forEach(function(l) { t += '    ' + l + '\n'; }); t += '\n'; });
+    return t + '\n';
+}
+
+function buildFullHTML() {
+    var st = document.getElementById('s_nome').value || 'N/D', cl = document.getElementById('s_classe').value || 'N/D';
+    var now = new Date(), data = now.toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' });
+    var h = '<div class="pr-header"><h1>SCOUTING PUGLIA</h1><p class="pr-subtitle">Rapporto di Orientamento Post-Diploma</p><p>Studente: <strong>' + esc(st) + '</strong> &nbsp;|&nbsp; Classe: <strong>' + esc(cl) + '</strong> &nbsp;|&nbsp; Data: ' + data + ' &nbsp;|&nbsp; Schede: ' + database.length + '</p></div>';
+    var prefs = database.filter(function(x) { return x.pref; }).sort(function(a, b) { return b.interesse - a.interesse; });
+    if (prefs.length) { h += '<div class="pr-prefs"><h2><i class="fas fa-trophy" style="margin-right:6px;"></i>OPZIONI PREFERITE</h2>'; prefs.forEach(function(it, i) { h += htmlOption(it, i+1, true); }); h += '</div>'; }
+    h += '<div class="pr-prefs-title" style="margin-bottom:16px;">TUTTE LE OPZIONI (' + database.length + ')</div>';
+    database.forEach(function(it, i) { h += htmlOption(it, i+1, false); });
+    return h;
+}
+function htmlOption(it, num, isPref) {
+    var h = '<div class="pr-option' + (isPref?' pref-opt':'') + '">';
+    h += '<div class="pr-opt-header ' + (isPref?'green':'gray') + '"><div><span class="pr-opt-num">' + num + '. ' + esc(it.nome) + '</span>';
+    if (it.corso) h += '<br><span style="font-size:12px;opacity:0.8;">' + esc(it.corso) + '</span>';
+    h += '</div><span class="pr-opt-type">' + esc(it.tipo) + '</span></div><div class="pr-opt-body">';
+    var keys = ['istr','piano','dur','titoli','costi','accesso','perf'];
+    if (it.is_fin) keys.push('fin');
+    keys.forEach(function(k) { h += ps(SC[k], SI[k], SN[k], ts(k, it)); });
+    h += '<div class="pr-stars">Interesse: ' + it.interesse + '/10</div></div></div>';
+    return h;
+}
+
+function stampaReport() { if (!database.length) { showToast('Nessuna scheda', 'error'); return; } document.getElementById('print-area').innerHTML = buildFullHTML(); setTimeout(function() { window.print(); }, 100); }
+function copiaReport() { if (!database.length) { showToast('Nessuna scheda', 'error'); return; } navigator.clipboard.writeText(buildFullText()).then(function() { showToast('Report copiato negli appunti', 'success'); }).catch(function() { showToast('Errore: verifica i permessi', 'error'); }); }
+function inviaEmail() { if (!database.length) { showToast('Nessuna scheda', 'error'); return; } var st = document.getElementById('s_nome').value || 'N/D', cl = document.getElementById('s_classe').value || 'N/D'; window.location.href = 'mailto:disciplinegiuridicoeconomiche@gmail.com?subject=' + encodeURIComponent('Scouting Puglia — ' + st + ' (' + cl + ')') + '&body=' + encodeURIComponent(buildFullText()); showToast('Apertura client email...', 'info'); }
+function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+aggiornaFiltri();
+</script>
+</body>
+</html>
