@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>🧭 OrientAttivo – Piattaforma Completa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fdf4ff 100%);
+  color: #0f172a;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* STILI COVER */
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.star {
+  position: absolute;
+  background: rgba(13,148,136,0.3);
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle 3s infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.6; }
+}
+
+.floating-bubble {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(13,148,136,0.08), rgba(13,148,136,0.02));
+  pointer-events: none;
+  z-index: 9999;
+  animation: float 20s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-40px) translateX(30px); }
+}
+
+.cover-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fdf4ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cover-content {
+  max-width: 1300px;
+  width: 90%;
+  padding: 40px;
+  text-align: center;
+  position: relative;
+  z-index: 10001;
+}
+
+.logo-animation { margin-bottom: 30px; }
+.logo-circle {
+  width: 100px; height: 100px;
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 30px rgba(13,148,136,0.4);
+}
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.logo-circle i { font-size: 2.8rem; color: white; }
+
+.title {
+  font-size: 3rem; font-weight: 900;
+  background: linear-gradient(135deg, #0d9488, #0f766e, #f59e0b);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 12px;
+  animation: slideUp 0.6s ease;
+}
+.subtitle {
+  font-size: 1.3rem; font-weight: 600; color: #334155;
+  margin-bottom: 40px; animation: slideUp 0.6s ease 0.1s both;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+  margin-bottom: 40px; animation: slideUp 0.6s ease 0.2s both;
+}
+.feature-card {
+  border-radius: 24px; padding: 28px 20px; transition: all 0.3s;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+  min-height: 240px; display: flex; flex-direction: column;
+  text-align: center; position: relative; cursor: pointer;
+}
+
+.feature-card:nth-child(1) { background: linear-gradient(135deg, #1e1b4b, #312e81); }
+.feature-card:nth-child(2) { background: linear-gradient(135deg, #831843, #be185d); }
+.feature-card:nth-child(3) { background: linear-gradient(135deg, #1e3a5f, #1e40af); }
+.feature-card:nth-child(4) { background: linear-gradient(135deg, #064e3b, #047857); }
+.feature-card:nth-child(5) { background: linear-gradient(135deg, #78350f, #b45309); }
+.feature-card:nth-child(6) { background: linear-gradient(135deg, #4c1d95, #6d28d9); }
+.feature-card:nth-child(7) { background: linear-gradient(135deg, #9d174d, #db2777); }
+.feature-card:nth-child(8) { background: linear-gradient(135deg, #0f766e, #0d9488); }
+.feature-card:nth-child(9) { background: linear-gradient(135deg, #1e3a8a, #2563eb); }
+
+.feature-card:hover { transform: translateY(-6px); box-shadow: 0 25px 40px -12px rgba(0,0,0,0.35); }
+
+.feature-icon {
+  width: 60px; height: 60px; background: rgba(255,255,255,0.2);
+  border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.feature-icon i { font-size: 1.8rem; color: white; }
+.feature-card h3 { color: white; font-size: 1.3rem; font-weight: 800; margin-bottom: 12px; }
+.feature-card p { color: #f1f5f9; font-size: 0.9rem; line-height: 1.5; margin-bottom: 0; font-weight: 500; }
+
+.enter-btn {
+  background: linear-gradient(135deg, #0d9488, #0f766e); color: white; border: none;
+  padding: 18px 56px; font-size: 1.3rem; font-weight: 800; border-radius: 60px;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 14px;
+  transition: all 0.3s; box-shadow: 0 10px 25px rgba(13,148,136,0.3);
+  animation: slideUp 0.6s ease 0.35s both; margin-top: 10px;
+}
+.enter-btn:hover { transform: translateY(-3px); gap: 18px; box-shadow: 0 15px 35px rgba(13,148,136,0.4); }
+
+.cover-footer {
+  position: fixed; bottom: 20px; left: 0; right: 0; text-align: center;
+  font-size: 0.75rem; color: #94a3b8; z-index: 10002;
+}
+
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, #0d9488, #f59e0b);
+  width: 0%; transition: width 0.1s linear; z-index: 10003;
+}
+
+/* STILI APP PRINCIPALE */
+:root {
+  --primary: #0d9488; --primary-dark: #0f766e; --primary-light: #14b8a6;
+  --primary-glow: rgba(13,148,136,0.2); --accent: #f59e0b;
+  --accent-dark: #d97706; --accent-light: #fbbf24;
+  --bg-card: #ffffff; --bg-surface: #f8fafc; --text: #0f172a;
+  --text-light: #334155; --text-muted: #64748b; --border: #e2e8f0;
+  --euro-blue: #003399; --euro-yellow: #ffcc00;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --radius: 24px;
+}
+
+.app {
+  display: flex; flex-direction: column; min-height: 100vh;
+  position: relative; z-index: 1;
+}
+
+.bg-animation {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; overflow: hidden;
+}
+.bg-animation .bubble {
+  position: absolute; background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  border-radius: 50%; opacity: 0.06; animation: float 20s infinite ease-in-out;
+}
+
+.hdr {
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+  padding: 20px 32px; display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px; border-bottom: 1px solid rgba(226,232,240,0.6);
+  box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;
+}
+.hdr h2 {
+  font-size: 1.6rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  display: flex; align-items: center; gap: 12px;
+}
+.student-info { display: flex; gap: 12px; }
+.student-info input {
+  padding: 12px 20px; border: 1px solid var(--border); border-radius: 50px;
+  background: white; font-size: 0.9rem; font-family: inherit; width: 200px;
+}
+.student-info input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+
+.challenge-banner {
+  background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 16px 32px;
+  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+  border-bottom: 1px solid #fcd34d;
+}
+.challenge-banner .left { display: flex; align-items: center; gap: 16px; }
+.challenge-banner .icon { font-size: 1.8rem; animation: bounce 2s infinite; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.challenge-banner .title { font-weight: 800; font-size: 1.1rem; color: #92400e; }
+.challenge-banner .desc { font-size: 0.85rem; color: #b45309; }
+.challenge-banner .badge { background: #92400e; color: #fef3c7; padding: 8px 20px; border-radius: 50px; font-size: 0.85rem; font-weight: 700; }
+
+.tab-nav {
+  display: flex; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+  padding: 12px 24px; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--border);
+  position: sticky; top: 85px; z-index: 99;
+}
+.tab-btn {
+  padding: 12px 24px; background: transparent; border: none; font-weight: 700;
+  font-size: 0.9rem; color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; gap: 10px; border-radius: 50px;
+}
+.tab-btn i { font-size: 1.1rem; }
+.tab-btn:hover:not(.disabled) { background: var(--bg-surface); color: var(--primary); }
+.tab-btn.active { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+.tab-btn.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+.tab-content { flex: 1; padding: 32px; max-width: 1400px; margin: 0 auto; width: 100%; }
+.tab-pane { display: none; animation: fadeInUp 0.4s ease; }
+.tab-pane.active { display: block; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+.card-header { padding: 20px 24px; font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #f8fafc, #ffffff); }
+.card-body { padding: 20px 24px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 28px; }
+
+.link-item {
+  display: flex; align-items: center; gap: 16px; padding: 16px 20px;
+  background: var(--bg-surface); border-radius: 20px; text-decoration: none;
+  color: var(--text); border: 1px solid var(--border); margin-bottom: 12px;
+}
+.link-item:hover { background: white; transform: translateX(8px); border-color: var(--primary); }
+.link-item i { width: 36px; font-size: 1.3rem; }
+.link-item .link-title { font-weight: 700; font-size: 1rem; }
+.link-item .link-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+.test-hero {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 32px; padding: 40px;
+  margin-bottom: 32px; color: white; text-align: center;
+}
+.test-hero i { font-size: 3rem; color: var(--euro-yellow); margin-bottom: 16px; }
+.test-hero h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 12px; }
+.quiz-centered-container { max-width: 750px; margin: 0 auto; background: white; border-radius: 32px; padding: 32px; box-shadow: var(--shadow-lg); }
+#quizQuestions { min-height: 350px; }
+.quiz-question { background: #f8fafc; border-radius: 24px; padding: 24px; margin-bottom: 24px; }
+.question-text { font-weight: 800; font-size: 1rem; margin-bottom: 20px; }
+.options { display: flex; flex-direction: column; gap: 12px; }
+.option {
+  display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: white;
+  border-radius: 16px; border: 1px solid var(--border); cursor: pointer;
+}
+.option:hover { background: #f1f5f9; border-color: var(--primary); }
+.option input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+.option label { flex: 1; cursor: pointer; }
+.quiz-progress { background: #e2e8f0; border-radius: 20px; height: 10px; margin: 20px 0; overflow: hidden; }
+.quiz-progress-fill { background: linear-gradient(90deg, var(--primary), var(--accent)); height: 100%; width: 0%; }
+.quiz-buttons { display: flex; gap: 12px; margin-top: 20px; }
+.quiz-btn { flex: 1; padding: 14px; border: none; border-radius: 60px; font-weight: 800; cursor: pointer; }
+.quiz-btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+.quiz-btn-secondary { background: #e2e8f0; color: var(--text); }
+.result-area { text-align: center; padding: 20px; }
+.result-score { font-size: 3.5rem; font-weight: 900; color: var(--primary); margin: 20px 0; }
+.result-feedback { background: #f0fdf4; padding: 24px; border-radius: 20px; margin: 20px 0; text-align: center; }
+
+.orientagame-hero, .sni-hero, .missions-hero, .cv-europass-hero {
+  border-radius: 32px; padding: 40px; margin-bottom: 32px; color: white; text-align: center;
+}
+.orientagame-hero { background: linear-gradient(135deg, #f97316, #ea580c); }
+.sni-hero { background: linear-gradient(135deg, #059669, #047857); }
+.missions-hero { background: linear-gradient(135deg, #1e3a5f, #0f2b45); }
+.cv-europass-hero { background: linear-gradient(135deg, var(--euro-blue), #002266); }
+
+.orientagame-card, .sni-card {
+  background: white; border-radius: 28px; padding: 32px; box-shadow: var(--shadow-lg); text-align: center;
+}
+.orientagame-btn, .sni-btn, .cv-big-btn {
+  display: inline-flex; align-items: center; gap: 16px;
+  padding: 18px 40px; font-size: 1.2rem; font-weight: 800;
+  text-decoration: none; border-radius: 60px; transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2); margin-top: 16px;
+}
+.orientagame-btn { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
+.sni-btn { background: linear-gradient(135deg, #059669, #047857); color: white; }
+.cv-big-btn { background: var(--euro-yellow); color: var(--euro-blue); margin-top: 24px; }
+
+.btn-report, .btn-check-mission, .add-big-btn, .save-btn, .diary-report-btn,
+.pap-save-btn, .pap-report-btn {
+  background: #10b981; color: white; border: none; padding: 12px 24px;
+  border-radius: 50px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s;
+}
+.btn-check-mission { background: var(--primary); width: 100%; margin-top: 16px; }
+.add-big-btn { background: linear-gradient(135deg, #ea580c, #c2410c); width: 100%; padding: 16px; margin-top: 24px; font-size: 1rem; }
+.save-btn { background: #0284c7; width: 100%; margin: 20px 0; }
+.diary-report-btn { background: #10b981; margin-top: 10px; width: 100%; }
+.pap-save-btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); width: 100%; margin-top: 20px; }
+.pap-report-btn { background: linear-gradient(135deg, #10b981, #059669); width: 100%; margin-top: 20px; }
+
+.missions-container { max-width: 1200px; margin: 0 auto; }
+.missions-progress { background: white; border-radius: 20px; padding: 20px; margin-bottom: 32px; text-align: center; }
+.progress-bar-missions { height: 12px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin: 12px 0; }
+.progress-fill-missions { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; }
+.missions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 28px; }
+.mission-card { background: white; border-radius: 28px; padding: 28px; border: 2px solid var(--border); }
+.mission-card.completed { border-color: #10b981; background: linear-gradient(135deg, #f0fdf4, #dcfce7); }
+.mission-icon { width: 70px; height: 70px; background: linear-gradient(135deg, #e0f2fe, #bae6fd); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.mission-icon i { font-size: 2rem; color: var(--primary); }
+.mission-question { font-size: 0.9rem; font-weight: 600; color: #92400e; margin: 16px 0; padding: 12px 14px; background: #fef3c7; border-radius: 16px; border-left: 4px solid #f59e0b; }
+.mission-answer textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 16px; font-size: 0.85rem; resize: vertical; }
+.mission-status { margin-top: 16px; font-size: 0.8rem; display: flex; justify-content: flex-end; }
+.status-completed { color: #10b981; }
+.status-pending { color: #f59e0b; }
+.mission-link { display: inline-flex; align-items: center; gap: 8px; color: var(--primary); font-weight: 700; font-size: 0.85rem; text-decoration: none; margin-bottom: 16px; }
+
+.cerca-lavoro-hero { background: linear-gradient(135deg, #1e3a5f, #0f2b45); border-radius: 32px; padding: 32px; margin-bottom: 28px; color: white; }
+.cerca-lavoro-mission {
+  background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 20px;
+  padding: 20px 24px; margin-bottom: 28px; display: flex;
+  align-items: center; gap: 16px; border-left: 6px solid #f59e0b;
+}
+.cerca-lavoro-mission i { font-size: 2rem; color: #d97706; }
+.cerca-lavoro-mission div h4 { font-size: 1rem; font-weight: 800; color: #92400e; margin-bottom: 6px; }
+
+.wanter-highlight {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 28px;
+  padding: 28px 32px; margin-bottom: 28px; display: flex;
+  align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+}
+.wanter-highlight-btn { background: white; color: #6366f1; padding: 14px 28px; border-radius: 50px; text-decoration: none; font-weight: 800; }
+
+.add-card {
+  background: linear-gradient(135deg, #ffffff, #fef9e8);
+  border-radius: 32px; padding: 40px; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.15);
+}
+.add-title {
+  font-size: 1.8rem; font-weight: 800; margin-bottom: 32px;
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, #0d9488, #f59e0b);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.form-row { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+.form-row > div { flex: 1; min-width: 200px; }
+.form-label { font-size: 0.85rem; font-weight: 800; color: #0f766e; text-transform: uppercase; margin-bottom: 10px; display: block; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 14px 18px; border: 2px solid #cbd5e1;
+  border-radius: 20px; font-size: 1rem; font-family: inherit; background: white;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13,148,136,0.15);
+}
+
+.board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+.filter-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+.filter-btn { padding: 10px 20px; border: 1px solid var(--border); background: white; border-radius: 50px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
+.filter-btn.active { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+.stat-card { background: white; border-radius: 24px; padding: 20px; text-align: center; border: 1px solid var(--border); }
+.stat-value { font-size: 2rem; font-weight: 900; color: var(--primary); }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; }
+.board-card { background: white; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+.board-card.favorite { border: 2px solid var(--accent); }
+.board-card .card-header { padding: 16px 20px; background: #f8fafc; display: flex; justify-content: space-between; }
+.card-actions button { background: none; border: none; cursor: pointer; padding: 8px; }
+.card-content { padding: 20px; }
+.card-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+.rating-stars { display: flex; gap: 5px; }
+.rating-stars i { cursor: pointer; color: #cbd5e1; }
+.rating-stars i.active { color: var(--accent); }
+
+.cv-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 32px; }
+.cv-feature-card { background: white; border-radius: 24px; padding: 28px; text-align: center; border: 1px solid var(--border); }
+.cv-steps { background: #f8fafc; border-radius: 28px; padding: 32px; margin-bottom: 32px; }
+.cv-steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+.cv-step { display: flex; gap: 16px; align-items: flex-start; }
+.cv-step-number { width: 44px; height: 44px; background: linear-gradient(135deg, var(--euro-blue), #4a6eb5); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+.cv-tips-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+.cv-tip { background: #fffde6; border-radius: 20px; padding: 20px; display: flex; gap: 14px; border-left: 4px solid var(--euro-yellow); }
+
+/* STILI PIANO D'AZIONE - CONTRASTO MIGLIORATO */
+.pap-hero { text-align: center; margin-bottom: 40px; }
+.pap-hero h2 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #0d9488, #0f766e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+.pap-hero p { color: #334155; font-size: 1rem; }
+
+.pap-timeline { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+.pap-timeline-card { flex: 1; background: linear-gradient(135deg, #ffffff, #f8fafc); border-radius: 20px; padding: 20px; text-align: center; cursor: pointer; border: 2px solid #e2e8f0; transition: all 0.3s; }
+.pap-timeline-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.pap-timeline-card.active { border-color: var(--primary); background: linear-gradient(135deg, #f0fdfa, #ccfbf1); box-shadow: var(--shadow-lg); }
+.pap-timeline-icon { font-size: 2rem; margin-bottom: 8px; }
+.pap-timeline-card h3 { font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+.pap-timeline-card .period { font-size: 0.75rem; color: #64748b; }
+
+.pap-panel { background: linear-gradient(135deg, #ffffff, #f8fafc); border-radius: 28px; padding: 32px; margin-bottom: 32px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); }
+.pap-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 2px solid #0d9488; padding-bottom: 16px; }
+.pap-panel-header h3 { font-size: 1.5rem; font-weight: 800; color: #0f766e; }
+.pap-panel-stats { background: #e0f2fe; padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 700; color: #0f766e; }
+
+.pap-section { margin-bottom: 28px; background: white; border-radius: 20px; padding: 20px; border: 1px solid #e2e8f0; }
+.pap-section-title { font-size: 1.1rem; font-weight: 800; color: #0d9488; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; background: #f0fdfa; padding: 10px 16px; border-radius: 12px; }
+
+.pap-items-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.pap-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0; }
+.pap-item.completed { background: #f0fdf4; border-color: #10b981; }
+.pap-item.completed .pap-item-text { text-decoration: line-through; color: #64748b; }
+.pap-item-check { width: 22px; height: 22px; accent-color: var(--primary); cursor: pointer; }
+.pap-item-text { flex: 1; font-size: 0.95rem; font-weight: 500; color: #1e293b; }
+.pap-item-delete { background: none; border: none; cursor: pointer; color: #ef4444; padding: 0 8px; font-size: 1rem; transition: transform 0.2s; }
+.pap-item-delete:hover { transform: scale(1.1); }
+
+.pap-add-form { display: flex; gap: 12px; margin-top: 8px; }
+.pap-add-form input { flex: 1; padding: 14px 18px; border: 2px solid #cbd5e1; border-radius: 16px; font-size: 0.9rem; font-family: inherit; }
+.pap-add-form input:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
+.pap-add-form button { background: linear-gradient(135deg, #0d9488, #0f766e); color: white; border: none; padding: 14px 24px; border-radius: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.pap-add-form button:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+.pap-extra-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px; }
+.pap-extra-card { background: white; border-radius: 20px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: var(--shadow); transition: transform 0.2s; }
+.pap-extra-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.pap-extra-card h4 { font-size: 1rem; font-weight: 800; color: #0f766e; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; background: #f0fdfa; padding: 8px 12px; border-radius: 10px; }
+.pap-extra-card textarea { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 16px; resize: vertical; font-family: inherit; font-size: 0.85rem; transition: all 0.2s; }
+.pap-extra-card textarea:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
+
+.pap-saved { background: linear-gradient(135deg, #fffbeb, #fef3c7); border-radius: 20px; padding: 24px; margin-bottom: 24px; border: 1px solid #fde68a; }
+.pap-saved h4 { font-size: 1.1rem; font-weight: 800; color: #92400e; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.pap-saved-list { display: flex; flex-direction: column; gap: 10px; }
+.pap-saved-item { background: white; padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border: 1px solid #fde68a; }
+.pap-saved-date { font-weight: 600; color: #92400e; font-size: 0.85rem; }
+.pap-saved-stats { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 6px; color: #64748b; }
+.pap-saved-actions { display: flex; gap: 8px; }
+.pap-saved-load, .pap-saved-delete { padding: 8px 16px; border-radius: 40px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s; }
+.pap-saved-load { background: #0d9488; color: white; }
+.pap-saved-load:hover { background: #0f766e; transform: translateY(-1px); }
+.pap-saved-delete { background: #ef4444; color: white; }
+.pap-saved-delete:hover { background: #dc2626; transform: translateY(-1px); }
+
+.diary-card { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: var(--radius); padding: 32px; }
+.progress-section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 24px; }
+.progress-header { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; }
+.diary-textarea { width: 100%; padding: 14px; border: 1px solid #bae6fd; border-radius: 16px; resize: vertical; }
+
+/* STILI DIARIO - NUOVI PULSANTI */
+.diary-buttons-row {
+  display: flex;
+  gap: 16px;
+  margin: 20px 0 12px 0;
+}
+
+.diary-buttons-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.diary-save-btn, .diary-report-btn, .diary-export-btn, .diary-import-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 60px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.diary-save-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: white;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.diary-save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
+  background: linear-gradient(135deg, #0369a1, #0284c7);
+}
+
+.diary-report-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.diary-report-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.diary-export-btn {
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  color: white;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.diary-export-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4);
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+}
+
+.diary-import-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  cursor: pointer;
+}
+
+.diary-import-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+}
+
+/* Responsive per mobile */
+@media (max-width: 550px) {
+  .diary-buttons-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .diary-save-btn, .diary-report-btn, .diary-export-btn, .diary-import-btn {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .pap-timeline {
+    flex-direction: column;
+  }
+  
+  .pap-extra-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.top3-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 28px; }
+.top3-card { background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 24px; padding: 24px; text-align: center; position: relative; }
+.top3-rank { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 36px; height: 36px; background: #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; }
+
+.toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1100; }
+.toast { background: #1e293b; color: white; padding: 14px 28px; border-radius: 60px; display: flex; align-items: center; gap: 12px; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+.modal.show { display: flex; }
+.modal-content { background: white; border-radius: 28px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+.modal-header { padding: 24px 28px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 28px 28px 0 0; }
+
+.empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+
+.tab-btn .fa-lock, .tab-btn .fa-lock-open { font-size: 0.8rem; margin-left: 6px; }
+
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .top3-grid { grid-template-columns: 1fr; }
+  .missions-grid { grid-template-columns: 1fr; }
+  .tab-btn { padding: 10px 18px; font-size: 0.8rem; }
+  .features-grid { gap: 20px; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 550px) {
+  .features-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover-container" id="coverContainer" style="display: none;">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="cover-content">
+    <div class="logo-animation">
+      <div class="logo-circle"><i class="fas fa-compass"></i></div>
+    </div>
+    <h1 class="title">🧭 OrientAttivo</h1>
+    <p class="subtitle">La tua bussola per il futuro professionale</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon"><i class="fas fa-brain"></i></div><h3>📝 Test d'ingresso</h3><p>Scopri il tuo livello di conoscenza sul mondo del lavoro. Supera il test con almeno il 70%!</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fas fa-gamepad"></i></div><h3>🎮 Orientagame</h3><p>Gioca e scopri chi vuoi diventare! Guida il tuo avatar attraverso 3 livelli interattivi.</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fas fa-chart-line"></i></div><h3>📌 Test Imprenditorialità</h3><p>Hai mai pensato di metterti in proprio? Scopri la tua attitudine imprenditoriale!</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fas fa-scroll"></i></div><h3>🎯 Missioni di Ricerca</h3><p>Esplora i portali, trova le informazioni e completa le 6 missioni per sbloccare tutto!</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fas fa-briefcase"></i></div><h3>📍 Cerca Lavoro</h3><p>Naviga tra i principali portali, scopri le professioni più richieste e trova i concorsi attivi.</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fas fa-file-alt"></i></div><h3>📄 Crea il tuo CV</h3><p>Il tuo Curriculum Vitae in formato Europass, riconosciuto in tutta Europa.</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fas fa-calendar-check"></i></div><h3>📋 Piano d'Azione</h3><p>Organizza i tuoi obiettivi a breve, medio e lungo termine. Traccia il tuo futuro!</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fas fa-book-open"></i></div><h3>📔 Diario di Bordo</h3><p>Traccia il tuo percorso di crescita, annota le scoperte e monitora i progressi giorno dopo giorno.</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fab fa-google"></i></div><h3>Condividi su Classroom</h3><p>Esporta i tuoi report, le missioni completate e il piano di azione direttamente su Google Classroom.</p></div>
+    </div>
+    <button class="enter-btn" id="enterBtn">INIZIA IL TUO VIAGGIO <i class="fas fa-arrow-right"></i></button>
+  </div>
+  <div class="cover-footer"><p>🧭 OrientAttivo – La bussola per il tuo futuro | Scuola e Orientamento</p></div>
+</div>
+
+<!-- MAIN APP -->
+<div class="bg-animation" id="bgAnimation"></div>
+<div class="app" id="mainApp">
+  <div class="hdr">
+    <h2><i class="fas fa-compass"></i> 🧭 OrientAttivo – La mia bussola</h2>
+    <div class="student-info">
+      <input type="text" id="studentName" placeholder="Il tuo nome">
+      <input type="text" id="studentClass" placeholder="La tua classe">
+    </div>
+  </div>
+  <div class="challenge-banner" onclick="openChallengeModal()">
+    <div class="left"><div class="icon">🏆</div><div><div class="title">🔥 Sfida del giorno!</div><div class="desc">Completa tutte le missioni di ricerca e sblocca nuove funzionalità!</div></div></div>
+    <div class="badge" id="challengeBadgeHeader">Missioni: <span id="missionsCompletedHeader">0</span>/6</div>
+  </div>
+
+  <div class="tab-nav" id="tabNav">
+    <button class="tab-btn" data-tab="test"><i class="fas fa-brain"></i> 📝 Test d'ingresso <i class="fas fa-lock-open" style="color:#10b981"></i></button>
+    <button class="tab-btn" data-tab="orientagame" disabled><i class="fas fa-gamepad"></i> 🎮 Orientagame <i class="fas fa-lock" id="lock-orientagame"></i></button>
+    <button class="tab-btn" data-tab="sni" disabled><i class="fas fa-chart-line"></i> 📌 Test Imprenditorialità <i class="fas fa-lock" id="lock-sni"></i></button>
+    <button class="tab-btn" data-tab="stats" disabled><i class="fas fa-chart-line"></i> 🎯 Missioni di Ricerca <i class="fas fa-lock" id="lock-stats"></i></button>
+    <button class="tab-btn" data-tab="ricerca" disabled><i class="fas fa-search"></i> 📍 Cerca Lavoro <i class="fas fa-lock" id="lock-ricerca"></i></button>
+    <button class="tab-btn" data-tab="aggiungi" disabled><i class="fas fa-plus-circle"></i> 📝 Ricerche trovate <i class="fas fa-lock" id="lock-aggiungi"></i></button>
+    <button class="tab-btn" data-tab="board" disabled><i class="fas fa-clipboard-list"></i> 📚 Ricerche salvate <i class="fas fa-lock" id="lock-board"></i></button>
+    <button class="tab-btn" data-tab="cv" disabled><i class="fas fa-file-alt"></i> 📄 Crea il tuo CV <i class="fas fa-lock" id="lock-cv"></i></button>
+    <button class="tab-btn" data-tab="pap" disabled><i class="fas fa-calendar-check"></i> 📋 Piano d'Azione <i class="fas fa-lock" id="lock-pap"></i></button>
+    <button class="tab-btn" data-tab="diario"><i class="fas fa-book-open"></i> 📔 Diario <i class="fas fa-lock-open" style="color:#10b981"></i></button>
+  </div>
+
+  <div class="tab-content" id="tabContent">
+    <!-- TEST D'INGRESSO -->
+    <div class="tab-pane" id="tab-test">
+      <div class="test-hero"><i class="fas fa-brain"></i><h2>📝 Test d'ingresso</h2><p>Scopri il tuo livello di conoscenza sul mondo del lavoro. Supera il test con almeno il 70% per sbloccare le sezioni successive!</p></div>
+      <div class="quiz-centered-container">
+        <div id="quizQuestions"></div>
+        <div class="quiz-progress"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+        <div class="quiz-buttons">
+          <button class="quiz-btn quiz-btn-secondary" id="prevBtn" onclick="prevQuestion()" style="display:none">◀ Indietro</button>
+          <button class="quiz-btn quiz-btn-primary" id="nextBtn" onclick="nextQuestion()">Avanti ▶</button>
+          <button class="quiz-btn quiz-btn-primary" id="submitBtn" onclick="submitQuiz()" style="display:none">✅ Completa Test</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORIENTAGAME -->
+    <div class="tab-pane" id="tab-orientagame">
+      <div class="orientagame-hero"><i class="fas fa-gamepad"></i><h2>🎮 Orientagame</h2><p>Gioca e scopri chi vuoi diventare</p></div>
+      <div class="orientagame-card">
+        <p><strong>Guida il tuo avatar attraverso i tre livelli del quiz interattivo.</strong> Scopri le tue passioni e le tue competenze.</p>
+        <p>Che tu stia scegliendo la scuola superiore, l'università o il tuo percorso professionale, il gioco ti aiuterà a capire chi sei, cosa ti piace veramente e cosa potrai diventare.</p>
+        <p><strong>Inizia il gioco e scopri il tuo report completo!</strong></p>
+        <div style="text-align: center;">
+          <a href="https://orientagame.unioncamere.it/EO/Enter" target="_blank" class="orientagame-btn" id="orientagameLink" onclick="unlockAfterOrientagame()">🎮 Gioca Ora <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEST IMPRENDITORIALITÀ -->
+    <div class="tab-pane" id="tab-sni">
+      <div class="sni-hero"><i class="fas fa-chart-line"></i><h2>📌 Test Imprenditorialità</h2><p>Scopri la tua attitudine imprenditoriale</p></div>
+      <div class="sni-card">
+        <p><strong>Hai mai pensato di metterti in proprio?</strong> Svolgi almeno un test presente sulla piattaforma SNI (Servizio Nuove Imprese) di Unioncamere e scopri se hai le qualità per diventare imprenditore.</p>
+        <p>La piattaforma offre diversi test di autovalutazione per verificare le tue competenze imprenditoriali, la tua propensione al rischio e le tue capacità gestionali.</p>
+        <p><strong>Svolgi il test, scarica il report e conservalo per il tuo futuro professionale per condividerlo su Classroom con il docente!</strong></p>
+        <a href="https://sni.unioncamere.it/fai-il-test" target="_blank" class="sni-btn" id="sniLink" onclick="unlockAfterSni()">📊 Vai su Unioncamere e fai il test <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- MISSIONI DI RICERCA -->
+    <div class="tab-pane" id="tab-stats">
+      <div class="missions-container">
+        <div class="missions-hero"><i class="fas fa-scroll"></i><h2>📜 Missioni di Ricerca</h2><p>Esplora i link, trova le informazioni e rispondi alle domande. Completa tutte le missioni per sbloccare le altre sezioni!</p></div>
+        <div class="missions-progress"><h3>🎯 Progresso Missioni</h3><div class="progress-bar-missions"><div class="progress-fill-missions" id="missionsProgressFill" style="width:0%"></div></div><p id="missionsProgressText">0/6 missioni completate</p></div>
+        
+        <button class="btn-report" onclick="generateMissionsReport()" style="margin-bottom: 24px; background: linear-gradient(135deg, #0d9488, #0f766e); padding: 14px; font-size: 1rem;"><i class="fas fa-file-alt"></i> 📊 Genera Report Missioni per Classroom</button>
+        
+        <div class="missions-grid" id="missionsGrid">
+          <div class="mission-card" id="mission1"><div class="mission-icon"><i class="fas fa-chart-simple"></i></div><h3>🏛️ Missione UNICA</h3><a href="https://unica.istruzione.gov.it/portale/it/orientamento/guida-alla-scelta/statistiche" target="_blank" class="mission-link">🔗 Vai al sito UNICA <i class="fas fa-external-link-alt"></i></a><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 1:</strong> "Qual è la percentuale di occupazione a 3 anni dal diploma per il tuo indirizzo di studi?"</div><div class="mission-answer"><textarea id="mission1Answer1" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 2:</strong> "Qual è la percentuale di occupazione a 5 anni dal diploma per il tuo indirizzo di studi?"</div><div class="mission-answer"><textarea id="mission1Answer2" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 3:</strong> "Qual è lo stipendio medio mensile a 3 anni dal diploma per il tuo indirizzo?"</div><div class="mission-answer"><textarea id="mission1Answer3" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-status" id="mission1Status"><span class="status-pending"><i class="fas fa-clock"></i> In attesa</span></div><button class="btn-check-mission" onclick="checkMission(1)">✅ Conferma missione</button></div>
+          
+          <div class="mission-card" id="mission2"><div class="mission-icon"><i class="fas fa-microchip"></i></div><h3>🎓 Missione ITS Puglia</h3><a href="https://www.sistemaitspuglia.it/" target="_blank" class="mission-link">🔗 Vai al sito Sistema ITS Puglia <i class="fas fa-external-link-alt"></i></a><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 1:</strong> "Indica almeno 3 corsi ITS disponibili in Puglia"</div><div class="mission-answer"><textarea id="mission2Answer1" rows="2" placeholder="Es. ITS Turismo, ITS Agroalimentare..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 2:</strong> "Qual è il tasso di placement a 1 anno dal diploma per gli ITS in Puglia?"</div><div class="mission-answer"><textarea id="mission2Answer2" rows="2" placeholder="Scrivi qui la percentuale..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 3:</strong> "Quante ore di stage sono previste mediamente in un percorso ITS?"</div><div class="mission-answer"><textarea id="mission2Answer3" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-status" id="mission2Status"><span class="status-pending"><i class="fas fa-clock"></i> In attesa</span></div><button class="btn-check-mission" onclick="checkMission(2)">✅ Conferma missione</button></div>
+          
+          <div class="mission-card" id="mission3"><div class="mission-icon"><i class="fas fa-chart-column"></i></div><h3>📊 Missione Excelsior</h3><a href="https://public.tableau.com/app/profile/unioncamere.anpal/viz/DashboardExcelsior/Home" target="_blank" class="mission-link">🔗 Vai al dashboard Excelsior <i class="fas fa-external-link-alt"></i></a><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 1:</strong> "Quali sono le 3 professioni più richieste in Puglia secondo gli ultimi dati?"</div><div class="mission-answer"><textarea id="mission3Answer1" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 2:</strong> "Quali sono i 3 settori economici in Puglia che prevedono più assunzioni?"</div><div class="mission-answer"><textarea id="mission3Answer2" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 3:</strong> "Quali sono i 3 indirizzi di studio più richiesti dalle imprese in Puglia?"</div><div class="mission-answer"><textarea id="mission3Answer3" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 4:</strong> "Per una delle professioni trovate, quali competenze sono richieste?"</div><div class="mission-answer"><textarea id="mission3Answer4" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-status" id="mission3Status"><span class="status-pending"><i class="fas fa-clock"></i> In attesa</span></div><button class="btn-check-mission" onclick="checkMission(3)">✅ Conferma missione</button></div>
+          
+          <div class="mission-card" id="mission4"><div class="mission-icon"><i class="fas fa-graduation-cap"></i></div><h3>📚 Missione Che ci faccio col diploma?</h3><a href="https://checifacciocoldiploma.skuola.net/" target="_blank" class="mission-link">🔗 Vai al sito <i class="fas fa-external-link-alt"></i></a><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 1:</strong> "Scrivi almeno 3 lavori che puoi fare con il tuo diploma"</div><div class="mission-answer"><textarea id="mission4Answer1" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 2:</strong> "Cerca un lavoro che ti interessa (es. 'tecnico informatico', 'ragioniere', 'perito meccanico'). Nella scheda del lavoro, qual è lo stipendio medio indicato?"</div><div class="mission-answer"><textarea id="mission4Answer2" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-status" id="mission4Status"><span class="status-pending"><i class="fas fa-clock"></i> In attesa</span></div><button class="btn-check-mission" onclick="checkMission(4)">✅ Conferma missione</button></div>
+          
+          <div class="mission-card" id="mission5"><div class="mission-icon"><i class="fas fa-globe-europe"></i></div><h3>Missione EURES</h3><a href="https://europa.eu/eures/portal/jv-se/home?lang=it" target="_blank" class="mission-link">🔗 Vai al portale EURES <i class="fas fa-external-link-alt"></i></a><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 1:</strong> "Quale azienda cerca il personale?"</div><div class="mission-answer"><textarea id="mission5Answer1" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 2:</strong> "Qual è il titolo della posizione lavorativa?"</div><div class="mission-answer"><textarea id="mission5Answer2" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 3:</strong> "In quale paese si trova il lavoro?"</div><div class="mission-answer"><textarea id="mission5Answer3" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 4:</strong> "Quale titolo di studio è richiesto?"</div><div class="mission-answer"><textarea id="mission5Answer4" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 5:</strong> "Perché questa offerta corrisponde al tuo profilo o alle tue aspettative?"</div><div class="mission-answer"><textarea id="mission5Answer5" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 6:</strong> "Cosa ti manca, al momento, per poterti candidare?"</div><div class="mission-answer"><textarea id="mission5Answer6" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-status" id="mission5Status"><span class="status-pending"><i class="fas fa-clock"></i> In attesa</span></div><button class="btn-check-mission" onclick="checkMission(5)">✅ Conferma missione</button></div>
+          
+          <div class="mission-card" id="mission6"><div class="mission-icon"><i class="fas fa-university"></i></div><h3>🎓 Missione AlmaLaurea</h3><div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;"><a href="https://www.almalaurea.it/" target="_blank" class="mission-link">🔗 Profilo Laureati <i class="fas fa-external-link-alt"></i></a><a href="https://www.almalaurea.it/i-dati/le-nostre-indagini/condizione-occupazionale-laureati" target="_blank" class="mission-link">🔗 Rapporto Occupazionale <i class="fas fa-external-link-alt"></i></a></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 1:</strong> "Qual è lo stipendio medio a 1 anno dalla laurea per la facoltà che ti interessa?"</div><div class="mission-answer"><textarea id="mission6Answer1" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 2:</strong> "Qual è il tasso di occupazione dei laureati a 5 anni dal titolo?"</div><div class="mission-answer"><textarea id="mission6Answer2" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-question"><i class="fas fa-question-circle"></i> <strong>Domanda 3:</strong> "Guardando il grafico delle diverse aree di studio, qual è l'indirizzo di studi che ha registrato in assoluto il maggior numero di laureati nel 2024?"</div><div class="mission-answer"><textarea id="mission6Answer3" rows="2" placeholder="Scrivi qui la tua risposta..."></textarea></div><div class="mission-status" id="mission6Status"><span class="status-pending"><i class="fas fa-clock"></i> In attesa</span></div><button class="btn-check-mission" onclick="checkMission(6)">✅ Conferma missione</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CERCA LAVORO -->
+    <div class="tab-pane" id="tab-ricerca">
+      <div class="cerca-lavoro-hero"><p>🔍 <strong>Naviga tra i principali portali di ricerca lavoro</strong>, scopri le professioni più richieste e trova i concorsi attivi. Ogni scoperta che fai qui può diventare una scheda nella tua board personale o un obiettivo nel tuo Piano di Azione.</p></div>
+      <div class="cerca-lavoro-mission"><i class="fas fa-flag-checkered"></i><div><h4>🎯 Missione da svolgere:</h4><p>Naviga tra i diversi siti di annunci (istituzionali e non) e individua almeno tre professioni o concorsi pubblici che ritieni interessanti per il tuo futuro e aggiungile in "Ricerche trovate".</p></div></div>
+      <div class="wanter-highlight"><div class="wanter-highlight-content"><div class="wanter-highlight-icon"><i class="fas fa-chart-line"></i></div><div class="wanter-highlight-text"><h3>🔍 Non sai ancora che lavoro fare?</h3><p>Scopri le professioni del futuro con video testimonianze di chi lavora già!</p></div></div><a href="https://wanter.valored.it/it/" target="_blank" class="wanter-highlight-btn">Scopri Wanter <i class="fas fa-arrow-right"></i></a></div>
+      <div class="grid-2">
+        <div class="card"><div class="card-header" style="background:linear-gradient(135deg,#fef2f2,#fee2e2); color:#b91c1c"><i class="fas fa-briefcase"></i> 💼 Portali di Lavoro</div><div class="card-body"><a href="https://it.indeed.com/jobs-in-Puglia" target="_blank" class="link-item"><i class="fas fa-search" style="color:#dc2626"></i><div><div class="link-title">Indeed Puglia</div><div class="link-desc">Migliaia di offerte di lavoro attive</div></div></a><a href="https://www.linkedin.com/jobs/" target="_blank" class="link-item"><i class="fab fa-linkedin" style="color:#0a66c2"></i><div><div class="link-title">LinkedIn Jobs</div><div class="link-desc">Networking professionale</div></div></a><a href="https://lavoroperte.regione.puglia.it/offerte-lavoro/" target="_blank" class="link-item"><i class="fas fa-handshake" style="color:#059669"></i><div><div class="link-title">LavoroPerTe</div><div class="link-desc">Portale Regione Puglia</div></div></a><a href="https://www.cliclavoro.gov.it/" target="_blank" class="link-item"><i class="fas fa-laptop-code" style="color:#7c3aed"></i><div><div class="link-title">ClicLavoro</div><div class="link-desc">Portale Nazionale del Lavoro</div></div></a><a href="https://www.inpa.gov.it/" target="_blank" class="link-item"><i class="fas fa-landmark" style="color:#0f766e"></i><div><div class="link-title">inPA</div><div class="link-desc">Concorsi pubblici</div></div></a><a href="https://www.portaledeigiovani.it/" target="_blank" class="link-item"><i class="fas fa-users" style="color:#0891b2"></i><div><div class="link-title">Portale dei Giovani</div><div class="link-desc">Opportunità per giovani</div></div></a></div></div>
+        <div class="card"><div class="card-header" style="background:linear-gradient(135deg,#f3e8ff,#e9d5ff); color:#6d28d9"><i class="fas fa-shield-haltered"></i> 🎖️ Forze Armate e dell'Ordine</div><div class="card-body"><a href="https://concorsi.difesa.it/" target="_blank" class="link-item"><i class="fas fa-gavel"></i><div><div class="link-title">Portale Unico Concorsi Difesa</div><div class="link-desc">Tutti i concorsi</div></div></a><a href="https://concorsi.difesa.it/am/Pagine/default.aspx" target="_blank" class="link-item"><i class="fas fa-plane"></i><div><div class="link-title">Aeronautica Militare</div><div class="link-desc">Ufficiali, Marescialli, Avieri</div></div></a><a href="https://concorsi.difesa.it/mm/Pagine/default.aspx" target="_blank" class="link-item"><i class="fas fa-ship"></i><div><div class="link-title">Marina Militare</div><div class="link-desc">Accademia Navale</div></div></a><a href="https://www.esercito.difesa.it/concorsi/Pagine/default.aspx" target="_blank" class="link-item"><i class="fas fa-flag-checkered"></i><div><div class="link-title">Esercito Italiano</div><div class="link-desc">VFP1, VFP4, Marescialli</div></div></a><a href="https://concorsi.gdf.gov.it/" target="_blank" class="link-item"><i class="fas fa-chart-simple"></i><div><div class="link-title">Guardia di Finanza</div><div class="link-desc">Allievi Finanzieri, Ufficiali</div></div></a><a href="https://www.carabinieri.it/concorsi" target="_blank" class="link-item"><i class="fas fa-shield-heart"></i><div><div class="link-title">Arma dei Carabinieri</div><div class="link-desc">Allievi, Marescialli, Ufficiali</div></div></a><a href="https://www.poliziadistato.it/articolo/concorsi" target="_blank" class="link-item"><i class="fas fa-user-cop"></i><div><div class="link-title">Polizia di Stato</div><div class="link-desc">Agenti, Ispettori, Commissari</div></div></a></div></div>
+      </div>
+    </div>
+
+    <!-- RICERCHE TROVATE -->
+    <div class="tab-pane" id="tab-aggiungi">
+      <div class="add-card">
+        <div class="add-title"><i class="fas fa-plus-circle"></i> ✨ Registra una nuova scoperta</div>
+        <div class="form-row"><div><label class="form-label">Settore</label><select class="form-select" id="sector"><option value="">-- Seleziona --</option><option value="Tecnologia IT">💻 Tecnologia IT</option><option value="Sanità">🏥 Sanità</option><option value="Marketing">📢 Marketing</option><option value="Finanza">💰 Finanza</option><option value="Educazione">📚 Educazione</option><option value="Artigianato">🔨 Artigianato/Edilizia</option><option value="Pubblica Amministrazione">🏛️ Pubblica Amm.</option><option value="Agricoltura">🌾 Agricoltura</option><option value="Turismo">✈️ Turismo</option><option value="Forze Armate">🎖️ Forze Armate</option><option value="Forze dell'Ordine">👮 Forze dell'Ordine</option><option value="Altro">📌 Altro</option></select></div><div><label class="form-label">Azienda / Ente</label><input class="form-input" type="text" id="company" placeholder="es. Accenture"></div></div>
+        <div class="form-row"><div><label class="form-label">Ruolo / Posizione</label><input class="form-input" type="text" id="position" placeholder="es. Sviluppatore"></div><div><label class="form-label">Località</label><input class="form-input" type="text" id="location" placeholder="es. Bari"></div></div>
+        <div class="form-row"><div><label class="form-label">Titolo studio richiesto</label><select class="form-select" id="education"><option value="Diploma">Diploma</option><option value="Laurea Triennale">Laurea Triennale</option><option value="Laurea Magistrale">Laurea Magistrale</option><option value="Master">Master</option></select></div><div><label class="form-label">Stipendio (€/mese)</label><input class="form-input" type="number" id="salary" placeholder="es. 1800"></div></div>
+        <label class="form-label">Competenze richieste</label><textarea class="form-textarea" id="skills" rows="2" placeholder="es. Python, JavaScript..."></textarea>
+        <div class="form-row"><div><label class="form-label">Interesse (1-10)</label><input class="form-input" type="number" id="interest" min="1" max="10" value="7"></div><div><label class="form-label">Coerenza profilo (1-10)</label><input class="form-input" type="number" id="fit" min="1" max="10" value="6"></div></div>
+        <label class="form-label">Cosa mi manca?</label><textarea class="form-textarea" id="gap" rows="1" placeholder="es. Laurea, esperienza..."></textarea>
+        <label class="form-label">Note</label><textarea class="form-textarea" id="notes" rows="1" placeholder="es. Scadenza bando..."></textarea>
+        <button class="add-big-btn" onclick="addCard()"><i class="fas fa-save"></i> 💾 SALVA SCOPERTA</button>
+      </div>
+    </div>
+
+    <!-- RICERCHE SALVATE -->
+    <div class="tab-pane" id="tab-board">
+      <div class="board-header"><h2><i class="fas fa-clipboard-list"></i> Le mie scoperte</h2><div class="filter-bar" id="filterBar"></div></div>
+      <div class="stats-grid" id="statsPanel" style="display:none"><div class="stat-card"><div class="stat-value" id="totalCards">0</div><div class="stat-label">Totale scoperte</div></div><div class="stat-card"><div class="stat-value" id="avgInterest">0</div><div class="stat-label">Interesse medio</div></div><div class="stat-card"><div class="stat-value" id="topSector">—</div><div class="stat-label">Settore top</div></div><div class="stat-card"><div class="stat-value" id="avgSalary">—</div><div class="stat-label">Stipendio medio</div></div></div>
+      <div class="top3-grid" id="top3Grid"></div>
+      <div class="cards-grid" id="boardGrid"><div class="empty-state"><i class="fas fa-search"></i><p>Inizia ad esplorare i portali e aggiungi le tue scoperte!</p></div></div>
+      <button class="btn-report" id="mainReportBtn" onclick="generateFullReport()" style="margin-top:20px; width:100%; background: linear-gradient(135deg, #0d9488, #0f766e);"><i class="fas fa-file-alt"></i> 📊 Genera Report per Classroom</button>
+    </div>
+
+    <!-- CREA IL TUO CV -->
+    <div class="tab-pane" id="tab-cv">
+      <div class="cv-europass-hero"><i class="fas fa-passport"></i><h2>Il tuo Curriculum Vitae in formato Europeo</h2><p>Un CV professionale è il primo passo per il tuo futuro!</p><a href="https://europa.eu/europass/eportfolio/screen/cv-editor?lang=it" target="_blank" class="cv-big-btn" id="cvLink" onclick="unlockAfterCv()"><i class="fas fa-external-link-alt"></i> CREA IL TUO CV SU EUROPASS <i class="fas fa-arrow-right"></i></a></div>
+      <div class="cv-features"><div class="cv-feature-card"><i class="fas fa-check-circle"></i><h3>✅ Riconosciuto in Europa</h3><p>Accettato in tutti i paesi UE</p></div><div class="cv-feature-card"><i class="fas fa-save"></i><h3>💾 Salva e modifica</h3><p>Account gratuito per modifiche future</p></div><div class="cv-feature-card"><i class="fas fa-download"></i><h3>📄 Esporta in PDF</h3><p>Scarica e invia alle aziende</p></div></div>
+      <div class="cv-steps"><h3><i class="fas fa-compass"></i> Come creare il tuo CV Europass in 5 passi</h3><div class="cv-steps-grid"><div class="cv-step"><div class="cv-step-number">1</div><div class="cv-step-text"><h4>Clicca sul pulsante blu</h4><p>Si aprirà il sito ufficiale</p></div></div><div class="cv-step"><div class="cv-step-number">2</div><div class="cv-step-text"><h4>Registrati con la tua email</h4><p>Per salvare e modificare</p></div></div><div class="cv-step"><div class="cv-step-number">3</div><div class="cv-step-text"><h4>Compila le tue informazioni</h4><p>Dati personali, formazione, esperienze</p></div></div><div class="cv-step"><div class="cv-step-number">4</div><div class="cv-step-text"><h4>Aggiungi le tue esperienze PCTO</h4><p>Stage e alternanza scuola-lavoro</p></div></div><div class="cv-step"><div class="cv-step-number">5</div><div class="cv-step-text"><h4>Scarica il tuo CV in PDF</h4><p>Esporta e conserva</p></div></div></div></div>
+      <div class="cv-tips-row"><div class="cv-tip"><i class="fas fa-lightbulb"></i><p><strong>💡 Consiglio #1</strong> Usa una foto formale</p></div><div class="cv-tip"><i class="fas fa-envelope"></i><p><strong>💡 Consiglio #2</strong> Email professionale</p></div><div class="cv-tip"><i class="fas fa-certificate"></i><p><strong>💡 Consiglio #3</strong> Inserisci le certificazioni</p></div><div class="cv-tip"><i class="fas fa-spell-check"></i><p><strong>💡 Consiglio #4</strong> Controlla l'ortografia</p></div></div>
+    </div>
+
+    <!-- PIANO D'AZIONE -->
+    <div class="tab-pane" id="tab-pap">
+      <div class="pap-hero"><h2><i class="fas fa-calendar-check"></i> Il tuo Piano d'Azione</h2><p>Organizza i tuoi obiettivi passo dopo passo</p></div>
+      <div class="pap-timeline"><div class="pap-timeline-card short" data-period="short" onclick="selectPapPeriod('short')"><div class="pap-timeline-icon">⏳</div><h3>Breve termine</h3><div class="period">3-6 mesi | Entro fine anno scolastico</div></div><div class="pap-timeline-card medium" data-period="medium" onclick="selectPapPeriod('medium')"><div class="pap-timeline-icon">📅</div><h3>Medio termine</h3><div class="period">1 anno | Entro fine anno successivo</div></div><div class="pap-timeline-card long" data-period="long" onclick="selectPapPeriod('long')"><div class="pap-timeline-icon">🎯</div><h3>Lungo termine</h3><div class="period">12-24 mesi | Post-diploma</div></div></div>
+      <div class="pap-panel" id="papPanel"><div class="pap-panel-header"><h3 id="papPanelTitle"><i class="fas fa-hourglass-start"></i> Breve termine</h3><div class="pap-panel-stats" id="papPanelStats">📊 0 obiettivi | 0 competenze</div></div><div class="pap-section"><div class="pap-section-title"><i class="fas fa-bullseye"></i> 🎯 I miei obiettivi</div><div id="papGoalsList" class="pap-items-list"></div><div class="pap-add-form"><input type="text" id="newGoalInput" placeholder="Scrivi un nuovo obiettivo..."><button onclick="addCurrentGoal()"><i class="fas fa-plus"></i> Aggiungi</button></div></div><div class="pap-section"><div class="pap-section-title"><i class="fas fa-brain"></i> 🧠 Competenze da sviluppare</div><div id="papSkillsList" class="pap-items-list"></div><div class="pap-add-form"><input type="text" id="newSkillInput" placeholder="Scrivi una competenza..."><button onclick="addCurrentSkill()"><i class="fas fa-plus"></i> Aggiungi</button></div></div></div>
+      <div class="pap-extra-grid"><div class="pap-extra-card"><h4><i class="fas fa-graduation-cap"></i> 📚 Formazione e Certificazioni</h4><textarea id="papEducation" rows="3" placeholder="Corsi, certificazioni..."></textarea></div><div class="pap-extra-card"><h4><i class="fas fa-road"></i> ⚠️ Ostacoli e soluzioni</h4><textarea id="papObstacles" rows="3" placeholder="Difficoltà e soluzioni..."></textarea></div><div class="pap-extra-card"><h4><i class="fas fa-toolbox"></i> 📦 Risorse necessarie</h4><textarea id="papResources" rows="3" placeholder="Cosa ti serve..."></textarea></div><div class="pap-extra-card"><h4><i class="fas fa-users"></i> 🤝 Mentori e Supporto</h4><textarea id="papMentors" rows="3" placeholder="Chi può aiutarti..."></textarea></div><div class="pap-extra-card"><h4><i class="fas fa-tasks"></i> 📋 Azioni concrete</h4><textarea id="papActions" rows="3" placeholder="Cosa fare nei prossimi giorni..."></textarea></div><div class="pap-extra-card"><h4><i class="fas fa-calendar-week"></i> 📅 Scadenze importanti</h4><textarea id="papDeadlines" rows="3" placeholder="Date importanti..."></textarea></div></div>
+      <div class="pap-saved"><h4><i class="fas fa-history"></i> I tuoi piani salvati</h4><div id="savedPlansList" class="pap-saved-list"></div></div>
+      <button class="pap-save-btn" onclick="savePap()"><i class="fas fa-save"></i> SALVA IL TUO PIANO D'AZIONE</button>
+      <button class="pap-report-btn" onclick="generatePapReport()"><i class="fas fa-file-alt"></i> 📊 Genera Report per Classroom</button>
+    </div>
+
+    <!-- DIARIO -->
+    <div class="tab-pane" id="tab-diario">
+      <div class="diary-card">
+        <div class="progress-section">
+          <div class="progress-header">
+            <span><i class="fas fa-chart-line"></i> Settori esplorati</span>
+            <span id="sectorCount">0 / 12</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="sectorFill" style="width:0%"></div></div>
+          <div style="margin-top:15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <span><i class="fas fa-star"></i> Schede oggi: <strong id="todayCount">0</strong> / 3</span>
+            <span class="badge" id="challengeBadge">🔥 In corso</span>
+          </div>
+        </div>
+        
+        <div class="diary-label"><i class="fas fa-pen"></i> ✏️ Cosa ho scoperto oggi?</div>
+        <textarea class="diary-textarea" id="diaryNote" rows="2" placeholder="es. La figura del developer è molto richiesta..."></textarea>
+        
+        <div class="diary-label"><i class="fas fa-list-check"></i> 📌 Cosa voglio approfondire</div>
+        <textarea class="diary-textarea" id="diaryTodo" rows="2" placeholder="es. Cercare corsi ITS..."></textarea>
+        
+        <div class="diary-buttons-row">
+          <button class="diary-save-btn" onclick="saveProgress()">
+            <i class="fas fa-save"></i>
+            <span>Salva nel diario</span>
+          </button>
+          <button class="diary-report-btn" onclick="generateDiaryReport()">
+            <i class="fas fa-chalkboard-user"></i>
+            <span>Report Classroom</span>
+          </button>
+        </div>
+        
+        <div class="diary-buttons-row">
+          <button class="diary-export-btn" onclick="exportAllData()">
+            <i class="fas fa-download"></i>
+            <span>Esporta backup (JSON)</span>
+          </button>
+          <label for="importJsonFile" class="diary-import-btn">
+            <i class="fas fa-upload"></i>
+            <span>Importa backup (JSON)</span>
+            <input type="file" id="importJsonFile" accept=".json" style="display: none;" onchange="importAllData(this)">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALI -->
+<div class="modal" id="reportModal"><div class="modal-content"><div class="modal-header"><h3><i class="fas fa-file-alt"></i> Report Completo</h3></div><div class="modal-body" id="reportBody"></div><div class="modal-footer"><button onclick="closeModal()">Chiudi</button><button onclick="copyReport()"><i class="fas fa-copy"></i> Copia</button></div></div></div>
+<div class="modal" id="challengeModal"><div class="modal-content"><div class="modal-header" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><h3><i class="fas fa-trophy"></i> 🏆 Sfida del giorno</h3></div><div class="modal-body"><p><strong>Obiettivo:</strong> Completa tutte le missioni di ricerca!</p><div style="background:#fef3c7;padding:20px;border-radius:20px"><div>Missioni completate: <strong id="challengeMissions">0</strong>/6</div></div><p><i class="fas fa-gift"></i> <strong>Ricompensa:</strong> Sblocco di tutte le sezioni!</p></div><div class="modal-footer"><button onclick="closeChallengeModal()">Continua! 💪</button></div></div></div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================
+// JAVASCRIPT COMPLETO - VERSIONE CORRETTA
+// ============================================
+
+// Controllo se l'utente è già entrato nell'app
+const appStarted = localStorage.getItem('appStarted');
+
+if (appStarted === 'true') {
+  document.getElementById('coverContainer').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'flex';
+} else {
+  document.getElementById('coverContainer').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+  
+  let progress = 0;
+  const progressBarElem = document.getElementById('progressBar');
+  const intervalId = setInterval(() => {
+    progress += 1;
+    if (progressBarElem) progressBarElem.style.width = `${progress}%`;
+    if (progress >= 100) clearInterval(intervalId);
+  }, 30);
+  
+  createCoverStars();
+  createCoverBubbles();
+}
+
+document.getElementById('enterBtn').addEventListener('click', () => {
+  localStorage.setItem('appStarted', 'true');
+  document.getElementById('coverContainer').style.animation = 'fadeOut 0.5s ease';
+  setTimeout(() => {
+    document.getElementById('coverContainer').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+  }, 500);
+});
+
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }`;
+document.head.appendChild(styleSheet);
+
+function createCoverStars() {
+  const starsContainer = document.createElement('div');
+  starsContainer.className = 'stars';
+  for (let i = 0; i < 120; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.width = Math.random() * 2.5 + 'px';
+    star.style.height = star.style.width;
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    star.style.animationDuration = Math.random() * 2 + 1 + 's';
+    starsContainer.appendChild(star);
+  }
+  document.body.appendChild(starsContainer);
+}
+
+function createCoverBubbles() {
+  for (let i = 0; i < 10; i++) {
+    const bubble = document.createElement('div');
+    bubble.className = 'floating-bubble';
+    const size = Math.random() * 250 + 100;
+    bubble.style.width = size + 'px';
+    bubble.style.height = size + 'px';
+    bubble.style.left = Math.random() * 100 + '%';
+    bubble.style.top = Math.random() * 100 + '%';
+    bubble.style.animationDelay = Math.random() * 10 + 's';
+    bubble.style.animationDuration = Math.random() * 15 + 10 + 's';
+    document.body.appendChild(bubble);
+  }
+}
+
+function createBubbles() {
+  const container = document.getElementById('bgAnimation');
+  if (!container) return;
+  for (let i = 0; i < 20; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = Math.random() * 300 + 50;
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.left = Math.random() * 100 + '%';
+    b.style.top = Math.random() * 100 + '%';
+    b.style.animationDelay = Math.random() * 20 + 's';
+    b.style.animationDuration = Math.random() * 20 + 15 + 's';
+    container.appendChild(b);
+  }
+}
+
+// QUIZ
+const quizQuestions = [
+  { text: "Cosa significa ITS?", options: ["Istituto Tecnico Superiore", "Istruzione Tecnica Secondaria", "International Training School", "Istituto Tecnologico Standard"], correct: 0 },
+  { text: "Quanto dura generalmente un corso ITS?", options: ["1 anno", "2 anni", "3 anni", "6 mesi"], correct: 1 },
+  { text: "Quale di queste è una Soft Skill?", options: ["Programmazione Python", "Gestione del tempo", "Excel avanzato", "Adobe Photoshop"], correct: 1 },
+  { text: "Quale di queste è una Hard Skill?", options: ["Team working", "Leadership", "Comunicazione efficace", "Conoscenza lingua inglese B2"], correct: 3 },
+  { text: "Quale opzione rappresenta un percorso di studi post-diploma?", options: ["Laurea Triennale", "Scuola media", "Licenza elementare", "Diploma di maturità"], correct: 0 },
+  { text: "Quale portale è ufficiale per i concorsi pubblici in Italia?", options: ["LinkedIn", "Indeed", "inPA", "Europass"], correct: 2 },
+  { text: "Cosa si ottiene con un diploma ITS?", options: ["Solo certificato di frequenza", "Diploma di laurea", "Diploma di specializzazione tecnica superiore", "Master universitario"], correct: 2 },
+  { text: "Quale funzione svolge un Centro per l'Impiego?", options: ["Incontrare persone per svago", "Fornire supporto nella ricerca di lavoro", "Organizzare eventi sportivi", "Gestire le scuole"], correct: 1 },
+  { text: "Quale di questi è un portale per cercare lavoro in Puglia?", options: ["LavoroPerTe", "Subito.it", "Ebay", "Amazon Jobs"], correct: 0 },
+  { text: "Un CV in formato europeo si chiama:", options: ["CV Standard", "Europass CV", "International CV", "European Format"], correct: 1 },
+  { text: "Quale di queste è una certificazione informatica riconosciuta?", options: ["ECDL/ICDL", "TOEFL", "IELTS", "DELE"], correct: 0 },
+  { text: "Cos'è Galattica di Regione Puglia?", options: ["Un videogioco", "Una rete di servizi per i giovani", "Un programma tv", "Un'azienda di moda"], correct: 1 },
+  { text: "Quale piattaforma permette di creare il CV europeo?", options: ["Europass", "Indeed", "LinkedIn", "Glassdoor"], correct: 0 },
+  { text: "Quale soft skill è più apprezzata dalle aziende?", options: ["Adattabilità e flessibilità", "Conoscenza di Excel", "Programmazione Java", "Certificazione linguistica"], correct: 0 },
+  { text: "Quale tra questi è un percorso di formazione professionale post-diploma?", options: ["ITS Academy", "Corso di cucina amatoriale", "Lezioni di ballo", "Corso di giardinaggio hobbistico"], correct: 0 }
+];
+
+let currentQuestion = 0;
+let userAnswers = new Array(quizQuestions.length).fill(null);
+let quizPassed = false;
+let missionsCompleted = [false, false, false, false, false, false];
+let orientagameClicked = false;
+let sniClicked = false;
+let cvClicked = false;
+
+let sectionsUnlocked = {
+  test: true,
+  orientagame: false,
+  sni: false,
+  stats: false,
+  ricerca: false,
+  aggiungi: false,
+  board: false,
+  cv: false,
+  pap: false,
+  diario: true
+};
+
+// VARIABILI PAP (PIANO D'AZIONE)
+let currentPapPeriod = 'short';
+let papShortGoals = [], papShortSkills = [];
+let papMediumGoals = [], papMediumSkills = [];
+let papLongGoals = [], papLongSkills = [];
+let papShortExtra = { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+let papMediumExtra = { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+let papLongExtra = { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+let savedPlans = [];
+
+let cards = [];
+let currentFilter = 'all';
+let todayCards = 0;
+
+// FUNZIONI DI UTILITY
+function showToast(msg) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+}
+
+// FUNZIONI DI SBLOCCIO
+function unlockSection(sectionId) {
+  if (sectionsUnlocked[sectionId]) return;
+  sectionsUnlocked[sectionId] = true;
+  
+  const tabBtn = document.querySelector(`.tab-btn[data-tab="${sectionId}"]`);
+  if (tabBtn) {
+    tabBtn.disabled = false;
+    tabBtn.classList.remove('disabled');
+    const lockIcon = tabBtn.querySelector('.fa-lock');
+    if (lockIcon) {
+      lockIcon.className = 'fas fa-lock-open';
+      lockIcon.style.color = '#10b981';
+    }
+  }
+}
+
+function unlockAfterTest() {
+  if (quizPassed && !sectionsUnlocked.orientagame) {
+    unlockSection('orientagame');
+    showToast('🔓 Sezione Orientagame sbloccata! Vai a giocare!');
+  }
+}
+
+function unlockAfterOrientagame() {
+  if (!orientagameClicked) {
+    orientagameClicked = true;
+    localStorage.setItem('orientagameClicked', 'true');
+    if (!sectionsUnlocked.sni) {
+      unlockSection('sni');
+      showToast('🔓 Sezione Test Imprenditorialità sbloccata!');
+    }
+  }
+  return true;
+}
+
+function unlockAfterSni() {
+  if (!sniClicked) {
+    sniClicked = true;
+    localStorage.setItem('sniClicked', 'true');
+    if (!sectionsUnlocked.stats) {
+      unlockSection('stats');
+      showToast('🔓 Sezione Missioni di Ricerca sbloccata!');
+    }
+  }
+  return true;
+}
+
+function checkAllMissionsComplete() {
+  const allComplete = missionsCompleted.every(v => v === true);
+  if (allComplete && !sectionsUnlocked.ricerca) {
+    unlockSection('ricerca');
+    unlockSection('aggiungi');
+    unlockSection('board');
+    showToast('🔓 Sezioni Cerca Lavoro, Ricerche trovate e Ricerche salvate sbloccate!');
+  }
+}
+
+function unlockAfterRicerca() {
+  if (cards.length >= 1 && !sectionsUnlocked.cv) {
+    unlockSection('cv');
+    showToast('🔓 Sezione Crea il tuo CV sbloccata!');
+  }
+}
+
+function unlockAfterCv() {
+  if (!cvClicked) {
+    cvClicked = true;
+    localStorage.setItem('cvClicked', 'true');
+    if (!sectionsUnlocked.pap) {
+      unlockSection('pap');
+      showToast('🔓 Sezione Piano d\'Azione sbloccata!');
+    }
+  }
+  return true;
+}
+
+// FUNZIONI QUIZ
+function renderQuiz() {
+  const container = document.getElementById('quizQuestions');
+  if (!container) return;
+  const q = quizQuestions[currentQuestion];
+  container.innerHTML = `<div class="quiz-question"><div class="question-text">${currentQuestion+1}. ${q.text}</div><div class="options">${q.options.map((opt, idx) => `<div class="option" onclick="selectOption(${idx})"><input type="radio" name="question" value="${idx}" ${userAnswers[currentQuestion] === idx ? 'checked' : ''}><label>${opt}</label></div>`).join('')}</div></div>`;
+  document.getElementById('quizProgressFill').style.width = `${((currentQuestion + 1) / quizQuestions.length) * 100}%`;
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  prevBtn.style.display = currentQuestion > 0 ? 'flex' : 'none';
+  if (currentQuestion === quizQuestions.length - 1) {
+    nextBtn.style.display = 'none';
+    submitBtn.style.display = 'flex';
+  } else {
+    nextBtn.style.display = 'flex';
+    submitBtn.style.display = 'none';
+  }
+}
+
+function selectOption(idx) {
+  userAnswers[currentQuestion] = idx;
+  renderQuiz();
+}
+
+function nextQuestion() {
+  if (userAnswers[currentQuestion] === null) {
+    showToast('⚠️ Seleziona una risposta!');
+    return;
+  }
+  if (currentQuestion < quizQuestions.length - 1) {
+    currentQuestion++;
+    renderQuiz();
+  }
+}
+
+function prevQuestion() {
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    renderQuiz();
+  }
+}
+
+function submitQuiz() {
+  if (userAnswers[currentQuestion] === null) {
+    showToast('⚠️ Seleziona una risposta!');
+    return;
+  }
+  let correctCount = 0;
+  userAnswers.forEach((a, i) => { if (a === quizQuestions[i].correct) correctCount++; });
+  const score = Math.round((correctCount / quizQuestions.length) * 100);
+  const container = document.getElementById('quizQuestions');
+  if (score >= 70) {
+    quizPassed = true;
+    localStorage.setItem('quizPassed', 'true');
+    showToast('✅ Test superato! Ora puoi accedere alle altre sezioni!');
+    container.innerHTML = `<div class="result-area"><div class="result-score">${score}%</div><div class="result-feedback"><i class="fas fa-trophy"></i><p>🎉 Ottimo! Hai superato il test!</p></div><button class="quiz-btn quiz-btn-primary" onclick="location.reload()">🔄 Continua</button></div>`;
+    unlockAfterTest();
+  } else {
+    container.innerHTML = `<div class="result-area"><div class="result-score">${score}%</div><div class="result-feedback"><i class="fas fa-book-open"></i><p>📚 Punteggio insufficiente. Per sbloccare le sezioni devi raggiungere almeno il 70%. Riprova!</p></div><button class="quiz-btn quiz-btn-primary" onclick="resetQuiz()">🔄 Riprova</button></div>`;
+  }
+  document.getElementById('prevBtn').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('submitBtn').style.display = 'none';
+}
+
+function resetQuiz() {
+  currentQuestion = 0;
+  userAnswers = new Array(quizQuestions.length).fill(null);
+  renderQuiz();
+  document.getElementById('prevBtn').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'flex';
+  document.getElementById('submitBtn').style.display = 'none';
+}
+
+// FUNZIONI MISSIONI
+function checkMission(missionId) {
+  if (missionId === 1) {
+    const a1 = document.getElementById('mission1Answer1').value.trim();
+    const a2 = document.getElementById('mission1Answer2').value.trim();
+    const a3 = document.getElementById('mission1Answer3').value.trim();
+    if (!a1 || !a2 || !a3) { showToast('⚠️ Compila tutte e 3 le risposte!'); return; }
+    if (!missionsCompleted[0]) {
+      missionsCompleted[0] = true;
+      document.getElementById('mission1').classList.add('completed');
+      document.getElementById('mission1Status').innerHTML = '<span class="status-completed"><i class="fas fa-check-circle"></i> Completata!</span>';
+      localStorage.setItem('mission1Completed', 'true');
+      localStorage.setItem('mission1Answer1', a1);
+      localStorage.setItem('mission1Answer2', a2);
+      localStorage.setItem('mission1Answer3', a3);
+      updateMissionsProgress();
+      showToast('🎉 Missione 1 completata!');
+      checkAllMissionsComplete();
+    }
+  } else if (missionId === 2) {
+    const a1 = document.getElementById('mission2Answer1').value.trim();
+    const a2 = document.getElementById('mission2Answer2').value.trim();
+    const a3 = document.getElementById('mission2Answer3').value.trim();
+    if (!a1 || !a2 || !a3) { showToast('⚠️ Compila tutte e 3 le risposte!'); return; }
+    if (!missionsCompleted[1]) {
+      missionsCompleted[1] = true;
+      document.getElementById('mission2').classList.add('completed');
+      document.getElementById('mission2Status').innerHTML = '<span class="status-completed"><i class="fas fa-check-circle"></i> Completata!</span>';
+      localStorage.setItem('mission2Completed', 'true');
+      localStorage.setItem('mission2Answer1', a1);
+      localStorage.setItem('mission2Answer2', a2);
+      localStorage.setItem('mission2Answer3', a3);
+      updateMissionsProgress();
+      showToast('🎉 Missione 2 completata!');
+      checkAllMissionsComplete();
+    }
+  } else if (missionId === 3) {
+    const a1 = document.getElementById('mission3Answer1').value.trim();
+    const a2 = document.getElementById('mission3Answer2').value.trim();
+    const a3 = document.getElementById('mission3Answer3').value.trim();
+    const a4 = document.getElementById('mission3Answer4').value.trim();
+    if (!a1 || !a2 || !a3 || !a4) { showToast('⚠️ Compila tutte e 4 le risposte!'); return; }
+    if (!missionsCompleted[2]) {
+      missionsCompleted[2] = true;
+      document.getElementById('mission3').classList.add('completed');
+      document.getElementById('mission3Status').innerHTML = '<span class="status-completed"><i class="fas fa-check-circle"></i> Completata!</span>';
+      localStorage.setItem('mission3Completed', 'true');
+      localStorage.setItem('mission3Answer1', a1);
+      localStorage.setItem('mission3Answer2', a2);
+      localStorage.setItem('mission3Answer3', a3);
+      localStorage.setItem('mission3Answer4', a4);
+      updateMissionsProgress();
+      showToast('🎉 Missione 3 completata!');
+      checkAllMissionsComplete();
+    }
+  } else if (missionId === 4) {
+    const a1 = document.getElementById('mission4Answer1').value.trim();
+    const a2 = document.getElementById('mission4Answer2').value.trim();
+    if (!a1 || !a2) { showToast('⚠️ Compila entrambe le risposte!'); return; }
+    if (!missionsCompleted[3]) {
+      missionsCompleted[3] = true;
+      document.getElementById('mission4').classList.add('completed');
+      document.getElementById('mission4Status').innerHTML = '<span class="status-completed"><i class="fas fa-check-circle"></i> Completata!</span>';
+      localStorage.setItem('mission4Completed', 'true');
+      localStorage.setItem('mission4Answer1', a1);
+      localStorage.setItem('mission4Answer2', a2);
+      updateMissionsProgress();
+      showToast('🎉 Missione 4 completata!');
+      checkAllMissionsComplete();
+    }
+  } else if (missionId === 5) {
+    const a1 = document.getElementById('mission5Answer1').value.trim();
+    const a2 = document.getElementById('mission5Answer2').value.trim();
+    const a3 = document.getElementById('mission5Answer3').value.trim();
+    const a4 = document.getElementById('mission5Answer4').value.trim();
+    const a5 = document.getElementById('mission5Answer5').value.trim();
+    const a6 = document.getElementById('mission5Answer6').value.trim();
+    if (!a1 || !a2 || !a3 || !a4 || !a5 || !a6) { showToast('⚠️ Compila tutte le risposte!'); return; }
+    if (!missionsCompleted[4]) {
+      missionsCompleted[4] = true;
+      document.getElementById('mission5').classList.add('completed');
+      document.getElementById('mission5Status').innerHTML = '<span class="status-completed"><i class="fas fa-check-circle"></i> Completata!</span>';
+      localStorage.setItem('mission5Completed', 'true');
+      localStorage.setItem('mission5Answer1', a1);
+      localStorage.setItem('mission5Answer2', a2);
+      localStorage.setItem('mission5Answer3', a3);
+      localStorage.setItem('mission5Answer4', a4);
+      localStorage.setItem('mission5Answer5', a5);
+      localStorage.setItem('mission5Answer6', a6);
+      updateMissionsProgress();
+      showToast('🎉 Missione 5 completata!');
+      checkAllMissionsComplete();
+    }
+  } else if (missionId === 6) {
+    const a1 = document.getElementById('mission6Answer1').value.trim();
+    const a2 = document.getElementById('mission6Answer2').value.trim();
+    const a3 = document.getElementById('mission6Answer3').value.trim();
+    if (!a1 || !a2 || !a3) { showToast('⚠️ Compila tutte e 3 le risposte!'); return; }
+    if (!missionsCompleted[5]) {
+      missionsCompleted[5] = true;
+      document.getElementById('mission6').classList.add('completed');
+      document.getElementById('mission6Status').innerHTML = '<span class="status-completed"><i class="fas fa-check-circle"></i> Completata!</span>';
+      localStorage.setItem('mission6Completed', 'true');
+      localStorage.setItem('mission6Answer1', a1);
+      localStorage.setItem('mission6Answer2', a2);
+      localStorage.setItem('mission6Answer3', a3);
+      updateMissionsProgress();
+      showToast('🎉 Missione 6 completata!');
+      checkAllMissionsComplete();
+    }
+  }
+}
+
+function updateMissionsProgress() {
+  const c = missionsCompleted.filter(v => v === true).length;
+  const fillElem = document.getElementById('missionsProgressFill');
+  if (fillElem) fillElem.style.width = `${(c / 6) * 100}%`;
+  const textElem = document.getElementById('missionsProgressText');
+  if (textElem) textElem.innerHTML = `${c}/6 missioni completate`;
+  const headerElem = document.getElementById('missionsCompletedHeader');
+  if (headerElem) headerElem.innerText = c;
+  const challengeElem = document.getElementById('challengeMissions');
+  if (challengeElem) challengeElem.innerText = c;
+}
+
+function generateMissionsReport() {
+  let report = "📋 REPORT MISSIONI DI RICERCA\n";
+  report += "═══════════════════════════════════════\n";
+  report += `Studente: ${document.getElementById('studentName').value || 'Non specificato'}\n`;
+  report += `Classe: ${document.getElementById('studentClass').value || 'Non specificata'}\n`;
+  report += `Data: ${new Date().toLocaleDateString('it-IT')}\n\n`;
+  for (let i = 1; i <= 6; i++) {
+    report += `━━━ Missione ${i} ━━━\n`;
+    if (localStorage.getItem(`mission${i}Completed`) === 'true') {
+      report += `✅ COMPLETATA\n`;
+      if (i === 1) {
+        report += `Risposta 1: ${localStorage.getItem('mission1Answer1') || ''}\nRisposta 2: ${localStorage.getItem('mission1Answer2') || ''}\nRisposta 3: ${localStorage.getItem('mission1Answer3') || ''}\n`;
+      } else if (i === 2) {
+        report += `Risposta 1: ${localStorage.getItem('mission2Answer1') || ''}\nRisposta 2: ${localStorage.getItem('mission2Answer2') || ''}\nRisposta 3: ${localStorage.getItem('mission2Answer3') || ''}\n`;
+      } else if (i === 3) {
+        report += `Risposta 1: ${localStorage.getItem('mission3Answer1') || ''}\nRisposta 2: ${localStorage.getItem('mission3Answer2') || ''}\nRisposta 3: ${localStorage.getItem('mission3Answer3') || ''}\nRisposta 4: ${localStorage.getItem('mission3Answer4') || ''}\n`;
+      } else if (i === 4) {
+        report += `Risposta 1: ${localStorage.getItem('mission4Answer1') || ''}\nRisposta 2: ${localStorage.getItem('mission4Answer2') || ''}\n`;
+      } else if (i === 5) {
+        for (let j = 1; j <= 6; j++) report += `Risposta ${j}: ${localStorage.getItem(`mission5Answer${j}`) || ''}\n`;
+      } else if (i === 6) {
+        report += `Risposta 1: ${localStorage.getItem('mission6Answer1') || ''}\nRisposta 2: ${localStorage.getItem('mission6Answer2') || ''}\nRisposta 3: ${localStorage.getItem('mission6Answer3') || ''}\n`;
+      }
+    } else {
+      report += `❌ NON COMPLETATA\n`;
+    }
+    report += `\n`;
+  }
+  const blob = new Blob([report], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `report_missioni_${document.getElementById('studentName').value || 'studente'}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📄 Report missioni scaricato!');
+}
+
+// FUNZIONI CARDS (SCOPERTE)
+function addCard() {
+  const sector = document.getElementById('sector').value;
+  if (!sector) { showToast('Seleziona un settore'); return; }
+  const card = {
+    id: Date.now(),
+    sector: sector,
+    company: document.getElementById('company').value || 'Non specificato',
+    position: document.getElementById('position').value || 'Non specificato',
+    location: document.getElementById('location').value || 'Puglia',
+    education: document.getElementById('education').value,
+    salary: parseInt(document.getElementById('salary').value) || 0,
+    skills: document.getElementById('skills').value,
+    interest: parseInt(document.getElementById('interest').value) || 5,
+    fit: parseInt(document.getElementById('fit').value) || 5,
+    gap: document.getElementById('gap').value,
+    notes: document.getElementById('notes').value,
+    favorite: false,
+    date: new Date().toISOString()
+  };
+  cards.unshift(card);
+  todayCards++;
+  saveToLocal();
+  updateAll();
+  document.getElementById('company').value = '';
+  document.getElementById('position').value = '';
+  document.getElementById('location').value = '';
+  document.getElementById('salary').value = '';
+  document.getElementById('skills').value = '';
+  document.getElementById('gap').value = '';
+  document.getElementById('notes').value = '';
+  showToast(`🎉 Nuova scoperta! Oggi ne hai ${todayCards}/3`);
+  if (todayCards >= 3) showToast('🏆 Sfida completata!');
+  unlockAfterRicerca();
+}
+
+function deleteCard(id) {
+  cards = cards.filter(c => c.id !== id);
+  saveToLocal();
+  updateAll();
+  showToast('Scheda rimossa');
+}
+
+function toggleFavorite(id) {
+  const card = cards.find(c => c.id === id);
+  if (card) card.favorite = !card.favorite;
+  saveToLocal();
+  updateAll();
+}
+
+function setInterest(id, val) {
+  const card = cards.find(c => c.id === id);
+  if (card) card.interest = val;
+  saveToLocal();
+  updateAll();
+}
+
+function getFilteredCards() {
+  if (currentFilter === 'all') return cards;
+  if (currentFilter === 'favorites') return cards.filter(c => c.favorite);
+  return cards.filter(c => c.sector === currentFilter);
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  updateFilterBar();
+  updateBoard();
+}
+
+function getSectorIcon(s) {
+  const icons = {
+    'Tecnologia IT': '💻', 'Sanità': '🏥', 'Marketing': '📢', 'Finanza': '💰',
+    'Educazione': '📚', 'Artigianato': '🔨', 'Pubblica Amministrazione': '🏛️',
+    'Agricoltura': '🌾', 'Turismo': '✈️', 'Forze Armate': '🎖️',
+    'Forze dell\'Ordine': '👮', 'Altro': '📌'
+  };
+  return icons[s] || '📌';
+}
+
+function updateFilterBar() {
+  const sectors = [...new Set(cards.map(c => c.sector))];
+  const container = document.getElementById('filterBar');
+  if (!container) return;
+  container.innerHTML = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">📋 Tutte (${cards.length})</button><button class="filter-btn ${currentFilter === 'favorites' ? 'active' : ''}" onclick="setFilter('favorites')">❤️ Preferite (${cards.filter(c => c.favorite).length})</button>${sectors.map(sec => `<button class="filter-btn ${currentFilter === sec ? 'active' : ''}" onclick="setFilter('${sec.replace(/'/g, "\\'")}')">${getSectorIcon(sec)} ${sec} (${cards.filter(c => c.sector === sec).length})</button>`).join('')}`;
+}
+
+function updateBoard() {
+  const filtered = getFilteredCards().sort((a, b) => b.interest - a.interest);
+  const container = document.getElementById('boardGrid');
+  if (!container) return;
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>Nessuna scheda</p></div>';
+    return;
+  }
+  container.innerHTML = filtered.map(card => `
+    <div class="board-card ${card.favorite ? 'favorite' : ''}">
+      <div class="card-header">
+        <div><strong>${escapeHtml(card.company)}</strong><br><small>${escapeHtml(card.position)}</small></div>
+        <div class="card-actions">
+          <button onclick="toggleFavorite(${card.id})" style="color:${card.favorite ? '#ea580c' : '#cbd5e1'}"><i class="fas fa-heart"></i></button>
+          <button onclick="deleteCard(${card.id})" style="color:#ef4444"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="card-sector"><span class="card-tag" style="background:#ccfbf1;color:#0f766e">${getSectorIcon(card.sector)} ${escapeHtml(card.sector)}</span><span class="card-tag" style="background:#f1f5f9"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(card.location)}</span></div>
+        <div class="card-detail"><div class="card-detail-title">Titolo studio richiesto</div><div class="card-detail-text">${escapeHtml(card.education)}</div></div>
+        ${card.salary > 0 ? `<div class="card-detail"><div class="card-detail-title">Stipendio</div><div class="card-detail-text">€ ${card.salary.toLocaleString()}/mese</div></div>` : ''}
+        ${card.skills ? `<div class="card-detail"><div class="card-detail-title">Competenze</div><div class="card-detail-text">${escapeHtml(card.skills)}</div></div>` : ''}
+        ${card.gap ? `<div class="card-detail"><div class="card-detail-title">Cosa mi manca</div><div class="card-detail-text">${escapeHtml(card.gap)}</div></div>` : ''}
+      </div>
+      <div class="card-footer">
+        <div class="rating-stars">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `<i class="fas fa-star ${i <= card.interest ? 'active' : ''}" onclick="setInterest(${card.id}, ${i})"></i>`).join('')}</div>
+        <div class="rating-value">Interesse: ${card.interest}/10</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateStats() {
+  const panel = document.getElementById('statsPanel');
+  const top3 = document.getElementById('top3Grid');
+  if (!panel || !top3) return;
+  if (cards.length === 0) {
+    panel.style.display = 'none';
+    top3.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'grid';
+  top3.style.display = 'grid';
+  document.getElementById('totalCards').innerText = cards.length;
+  document.getElementById('avgInterest').innerText = (cards.reduce((s, c) => s + c.interest, 0) / cards.length).toFixed(1);
+  const sc = {};
+  cards.forEach(c => sc[c.sector] = (sc[c.sector] || 0) + 1);
+  const topSector = Object.keys(sc).sort((a, b) => sc[b] - sc[a])[0];
+  document.getElementById('topSector').innerHTML = `${getSectorIcon(topSector)} ${topSector || '—'}`;
+  const salaries = cards.filter(c => c.salary > 0);
+  document.getElementById('avgSalary').innerHTML = salaries.length ? `€ ${Math.round(salaries.reduce((s, c) => s + c.salary, 0) / salaries.length).toLocaleString()}` : '—';
+  const favs = cards.filter(c => c.favorite).sort((a, b) => b.interest - a.interest).slice(0, 3);
+  top3.innerHTML = favs.map((c, i) => `
+    <div class="top3-card">
+      <div class="top3-rank">${i + 1}</div>
+      <div><strong>${escapeHtml(c.company)}</strong></div>
+      <div style="font-size:0.85rem;color:#64748b">${escapeHtml(c.position)}</div>
+      <div style="color:#ea580c;margin-top:8px;font-weight:800">⭐ ${c.interest}/10</div>
+    </div>
+  `).join('');
+  if (favs.length === 0) top3.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:20px">❤️ Clicca sul cuore per aggiungere preferite</div>';
+}
+
+function updateSectorProgress() {
+  const s = [...new Set(cards.map(c => c.sector))];
+  const all = ['Tecnologia IT', 'Sanità', 'Marketing', 'Finanza', 'Educazione', 'Artigianato', 'Pubblica Amministrazione', 'Agricoltura', 'Turismo', 'Forze Armate', 'Forze dell\'Ordine', 'Altro'];
+  const countElem = document.getElementById('sectorCount');
+  if (countElem) countElem.innerText = `${s.length} / ${all.length}`;
+  const fillElem = document.getElementById('sectorFill');
+  if (fillElem) fillElem.style.width = `${(s.length / all.length) * 100}%`;
+}
+
+function saveProgress() {
+  localStorage.setItem('studentName', document.getElementById('studentName')?.value || '');
+  localStorage.setItem('studentClass', document.getElementById('studentClass')?.value || '');
+  localStorage.setItem('diaryNote', document.getElementById('diaryNote')?.value || '');
+  localStorage.setItem('diaryTodo', document.getElementById('diaryTodo')?.value || '');
+  localStorage.setItem('todayCards', todayCards);
+  localStorage.setItem('scoutingCards', JSON.stringify(cards));
+  showToast('📔 Diario salvato!');
+}
+
+function updateAll() {
+  updateSectorProgress();
+  updateFilterBar();
+  updateBoard();
+  updateStats();
+  const todayElem = document.getElementById('todayCount');
+  if (todayElem) todayElem.innerText = todayCards;
+  const badge = document.getElementById('challengeBadge');
+  if (badge) badge.innerHTML = todayCards >= 3 ? '✅ Completata!' : '🔥 In corso';
+  const challengeMissions = document.getElementById('challengeMissions');
+  if (challengeMissions) challengeMissions.innerText = missionsCompleted.filter(c => c === true).length;
+}
+
+// FUNZIONI PAP (PIANO D'AZIONE)
+function saveCurrentExtraToPeriod() {
+  const extraData = {
+    education: document.getElementById('papEducation')?.value || '',
+    obstacles: document.getElementById('papObstacles')?.value || '',
+    resources: document.getElementById('papResources')?.value || '',
+    mentors: document.getElementById('papMentors')?.value || '',
+    actions: document.getElementById('papActions')?.value || '',
+    deadlines: document.getElementById('papDeadlines')?.value || ''
+  };
+  
+  if (currentPapPeriod === 'short') papShortExtra = extraData;
+  else if (currentPapPeriod === 'medium') papMediumExtra = extraData;
+  else papLongExtra = extraData;
+  
+  savePapData();
+}
+
+function loadPapData() {
+  const saved = localStorage.getItem('papData');
+  if (saved) {
+    try {
+      const d = JSON.parse(saved);
+      papShortGoals = d.shortGoals || [];
+      papShortSkills = d.shortSkills || [];
+      papMediumGoals = d.mediumGoals || [];
+      papMediumSkills = d.mediumSkills || [];
+      papLongGoals = d.longGoals || [];
+      papLongSkills = d.longSkills || [];
+      papShortExtra = d.shortExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+      papMediumExtra = d.mediumExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+      papLongExtra = d.longExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+    } catch (e) { }
+  }
+  const sp = localStorage.getItem('savedPapPlans');
+  if (sp) {
+    try {
+      savedPlans = JSON.parse(sp);
+    } catch (e) { }
+  }
+  renderPapPanel();
+  renderSavedPlans();
+}
+
+function savePapData() {
+  localStorage.setItem('papData', JSON.stringify({
+    shortGoals: papShortGoals,
+    shortSkills: papShortSkills,
+    mediumGoals: papMediumGoals,
+    mediumSkills: papMediumSkills,
+    longGoals: papLongGoals,
+    longSkills: papLongSkills,
+    shortExtra: papShortExtra,
+    mediumExtra: papMediumExtra,
+    longExtra: papLongExtra
+  }));
+}
+
+function selectPapPeriod(period) {
+  saveCurrentExtraToPeriod();
+  currentPapPeriod = period;
+  document.querySelectorAll('.pap-timeline-card').forEach(c => c.classList.remove('active'));
+  const activeCard = document.querySelector(`.pap-timeline-card.${period}`);
+  if (activeCard) activeCard.classList.add('active');
+  renderPapPanel();
+}
+
+function renderPapPanel() {
+  let goals = [], skills = [], title = '', extra = {};
+  if (currentPapPeriod === 'short') {
+    goals = papShortGoals;
+    skills = papShortSkills;
+    title = 'Breve termine';
+    extra = papShortExtra;
+  } else if (currentPapPeriod === 'medium') {
+    goals = papMediumGoals;
+    skills = papMediumSkills;
+    title = 'Medio termine';
+    extra = papMediumExtra;
+  } else {
+    goals = papLongGoals;
+    skills = papLongSkills;
+    title = 'Lungo termine';
+    extra = papLongExtra;
+  }
+  
+  const titleElem = document.getElementById('papPanelTitle');
+  if (titleElem) titleElem.innerHTML = `<i class="fas fa-${currentPapPeriod === 'short' ? 'hourglass-start' : currentPapPeriod === 'medium' ? 'calendar-week' : 'calendar-alt'}"></i> ${title}`;
+  const statsElem = document.getElementById('papPanelStats');
+  if (statsElem) statsElem.innerHTML = `📊 ${goals.length} obiettivi | ${skills.length} competenze`;
+  
+  const goalsList = document.getElementById('papGoalsList');
+  if (goalsList) {
+    if (goals.length === 0) {
+      goalsList.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">✨ Nessun obiettivo</div>';
+    } else {
+      goalsList.innerHTML = goals.map((item, idx) => `
+        <div class="pap-item ${item.completed ? 'completed' : ''}">
+          <input type="checkbox" class="pap-item-check" ${item.completed ? 'checked' : ''} onchange="togglePapItem('goal', ${idx}, this.checked)">
+          <span class="pap-item-text">${escapeHtml(item.text)}</span>
+          <button class="pap-item-delete" onclick="deletePapItem('goal', ${idx})"><i class="fas fa-trash"></i></button>
+        </div>
+      `).join('');
+    }
+  }
+  
+  const skillsList = document.getElementById('papSkillsList');
+  if (skillsList) {
+    if (skills.length === 0) {
+      skillsList.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8">✨ Nessuna competenza</div>';
+    } else {
+      skillsList.innerHTML = skills.map((item, idx) => `
+        <div class="pap-item ${item.completed ? 'completed' : ''}">
+          <input type="checkbox" class="pap-item-check" ${item.completed ? 'checked' : ''} onchange="togglePapItem('skill', ${idx}, this.checked)">
+          <span class="pap-item-text">${escapeHtml(item.text)}</span>
+          <button class="pap-item-delete" onclick="deletePapItem('skill', ${idx})"><i class="fas fa-trash"></i></button>
+        </div>
+      `).join('');
+    }
+  }
+  
+  const ed = document.getElementById('papEducation');
+  if (ed) ed.value = extra.education;
+  const obs = document.getElementById('papObstacles');
+  if (obs) obs.value = extra.obstacles;
+  const res = document.getElementById('papResources');
+  if (res) res.value = extra.resources;
+  const men = document.getElementById('papMentors');
+  if (men) men.value = extra.mentors;
+  const act = document.getElementById('papActions');
+  if (act) act.value = extra.actions;
+  const dead = document.getElementById('papDeadlines');
+  if (dead) dead.value = extra.deadlines;
+}
+
+function addCurrentGoal() {
+  const input = document.getElementById('newGoalInput');
+  const text = input?.value.trim();
+  if (text) {
+    if (currentPapPeriod === 'short') papShortGoals.push({ text, completed: false });
+    else if (currentPapPeriod === 'medium') papMediumGoals.push({ text, completed: false });
+    else papLongGoals.push({ text, completed: false });
+    if (input) input.value = '';
+    savePapData();
+    renderPapPanel();
+    showToast('✅ Obiettivo aggiunto!');
+  } else {
+    showToast('⚠️ Scrivi un obiettivo!');
+  }
+}
+
+function addCurrentSkill() {
+  const input = document.getElementById('newSkillInput');
+  const text = input?.value.trim();
+  if (text) {
+    if (currentPapPeriod === 'short') papShortSkills.push({ text, completed: false });
+    else if (currentPapPeriod === 'medium') papMediumSkills.push({ text, completed: false });
+    else papLongSkills.push({ text, completed: false });
+    if (input) input.value = '';
+    savePapData();
+    renderPapPanel();
+    showToast('✅ Competenza aggiunta!');
+  } else {
+    showToast('⚠️ Scrivi una competenza!');
+  }
+}
+
+function togglePapItem(type, idx, checked) {
+  let list;
+  if (currentPapPeriod === 'short') {
+    list = type === 'goal' ? papShortGoals : papShortSkills;
+  } else if (currentPapPeriod === 'medium') {
+    list = type === 'goal' ? papMediumGoals : papMediumSkills;
+  } else {
+    list = type === 'goal' ? papLongGoals : papLongSkills;
+  }
+  if (list[idx]) list[idx].completed = checked;
+  savePapData();
+  renderPapPanel();
+}
+
+function deletePapItem(type, idx) {
+  let list;
+  if (currentPapPeriod === 'short') {
+    list = type === 'goal' ? papShortGoals : papShortSkills;
+  } else if (currentPapPeriod === 'medium') {
+    list = type === 'goal' ? papMediumGoals : papMediumSkills;
+  } else {
+    list = type === 'goal' ? papLongGoals : papLongSkills;
+  }
+  list.splice(idx, 1);
+  savePapData();
+  renderPapPanel();
+  showToast('🗑️ Rimosso');
+}
+
+function savePap() {
+  saveCurrentExtraToPeriod();
+  
+  const snapshot = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString(),
+    shortGoals: [...papShortGoals],
+    shortSkills: [...papShortSkills],
+    mediumGoals: [...papMediumGoals],
+    mediumSkills: [...papMediumSkills],
+    longGoals: [...papLongGoals],
+    longSkills: [...papLongSkills],
+    shortExtra: {...papShortExtra},
+    mediumExtra: {...papMediumExtra},
+    longExtra: {...papLongExtra}
+  };
+  savedPlans.unshift(snapshot);
+  if (savedPlans.length > 5) savedPlans.pop();
+  localStorage.setItem('savedPapPlans', JSON.stringify(savedPlans));
+  savePapData();
+  renderSavedPlans();
+  showToast('✅ Piano salvato!');
+}
+
+function renderSavedPlans() {
+  const container = document.getElementById('savedPlansList');
+  if (!container) return;
+  if (savedPlans.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:16px;color:#92400e">📭 Nessun piano salvato</div>';
+    return;
+  }
+  container.innerHTML = savedPlans.map((plan, idx) => `
+    <div class="pap-saved-item">
+      <div>
+        <div class="pap-saved-date"><i class="far fa-calendar-alt"></i> ${plan.date}</div>
+        <div class="pap-saved-stats">
+          <span>🎯 ${(plan.shortGoals?.length || 0) + (plan.mediumGoals?.length || 0) + (plan.longGoals?.length || 0)} obiettivi</span>
+          <span>🧠 ${(plan.shortSkills?.length || 0) + (plan.mediumSkills?.length || 0) + (plan.longSkills?.length || 0)} competenze</span>
+        </div>
+      </div>
+      <div class="pap-saved-actions">
+        <button class="pap-saved-load" onclick="loadPlan(${idx})"><i class="fas fa-undo"></i> Carica</button>
+        <button class="pap-saved-delete" onclick="deletePlan(${idx})"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadPlan(idx) {
+  const plan = savedPlans[idx];
+  if (!plan) return;
+  papShortGoals = plan.shortGoals || [];
+  papShortSkills = plan.shortSkills || [];
+  papMediumGoals = plan.mediumGoals || [];
+  papMediumSkills = plan.mediumSkills || [];
+  papLongGoals = plan.longGoals || [];
+  papLongSkills = plan.longSkills || [];
+  papShortExtra = plan.shortExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+  papMediumExtra = plan.mediumExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+  papLongExtra = plan.longExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+  savePapData();
+  renderPapPanel();
+  const ed = document.getElementById('papEducation');
+  if (ed) ed.value = papShortExtra.education;
+  const obs = document.getElementById('papObstacles');
+  if (obs) obs.value = papShortExtra.obstacles;
+  const res = document.getElementById('papResources');
+  if (res) res.value = papShortExtra.resources;
+  const men = document.getElementById('papMentors');
+  if (men) men.value = papShortExtra.mentors;
+  const act = document.getElementById('papActions');
+  if (act) act.value = papShortExtra.actions;
+  const dead = document.getElementById('papDeadlines');
+  if (dead) dead.value = papShortExtra.deadlines;
+  showToast(`📋 Piano del ${plan.date} caricato!`);
+}
+
+function deletePlan(idx) {
+  if (confirm('Eliminare questo piano?')) {
+    savedPlans.splice(idx, 1);
+    localStorage.setItem('savedPapPlans', JSON.stringify(savedPlans));
+    renderSavedPlans();
+    showToast('🗑️ Piano eliminato!');
+  }
+}
+
+function generatePapReport() {
+  let report = "📋 REPORT PIANO D'AZIONE\n";
+  report += "═══════════════════════════════════════\n";
+  report += `Studente: ${document.getElementById('studentName').value || 'Non specificato'}\n`;
+  report += `Classe: ${document.getElementById('studentClass').value || 'Non specificata'}\n`;
+  report += `Data: ${new Date().toLocaleDateString('it-IT')}\n\n`;
+  report += "━━━ OBIETTIVI ━━━\n";
+  report += `Breve termine (${papShortGoals.length}):\n${papShortGoals.map(g => `  - ${g.text} ${g.completed ? '✅' : '⏳'}`).join('\n') || '  Nessuno'}\n\n`;
+  report += `Medio termine (${papMediumGoals.length}):\n${papMediumGoals.map(g => `  - ${g.text} ${g.completed ? '✅' : '⏳'}`).join('\n') || '  Nessuno'}\n\n`;
+  report += `Lungo termine (${papLongGoals.length}):\n${papLongGoals.map(g => `  - ${g.text} ${g.completed ? '✅' : '⏳'}`).join('\n') || '  Nessuno'}\n\n`;
+  report += "━━━ COMPETENZE ━━━\n";
+  report += `Breve termine (${papShortSkills.length}):\n${papShortSkills.map(s => `  - ${s.text} ${s.completed ? '✅' : '⏳'}`).join('\n') || '  Nessuna'}\n\n`;
+  report += `Medio termine (${papMediumSkills.length}):\n${papMediumSkills.map(s => `  - ${s.text} ${s.completed ? '✅' : '⏳'}`).join('\n') || '  Nessuna'}\n\n`;
+  report += `Lungo termine (${papLongSkills.length}):\n${papLongSkills.map(s => `  - ${s.text} ${s.completed ? '✅' : '⏳'}`).join('\n') || '  Nessuna'}\n\n`;
+  report += "━━━ FORMAZIONE (Breve termine)━━━\n" + (papShortExtra.education || 'Nessuna') + "\n\n";
+  report += "━━━ OSTACOLI (Breve termine)━━━\n" + (papShortExtra.obstacles || 'Nessuno') + "\n\n";
+  report += "━━━ RISORSE (Breve termine)━━━\n" + (papShortExtra.resources || 'Nessuna') + "\n\n";
+  const blob = new Blob([report], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `report_piano_azione_${document.getElementById('studentName').value || 'studente'}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📄 Report Piano d\'Azione scaricato!');
+}
+
+function generateDiaryReport() {
+  let report = "📋 REPORT DIARIO DI BORDO\n";
+  report += "═══════════════════════════════════════\n";
+  report += `Studente: ${document.getElementById('studentName').value || 'Non specificato'}\n`;
+  report += `Classe: ${document.getElementById('studentClass').value || 'Non specificata'}\n`;
+  report += `Data: ${new Date().toLocaleDateString('it-IT')}\n\n`;
+  report += "━━━ COSA HO SCOPERTO OGGI? ━━━\n";
+  report += document.getElementById('diaryNote').value || 'Nessuna annotazione\n\n';
+  report += "\n━━━ COSA VOGLIO APPROFONDIRE ━━━\n";
+  report += document.getElementById('diaryTodo').value || 'Nessuna annotazione\n\n';
+  report += "━━━ STATISTICHE ━━━\n";
+  report += `Settori esplorati: ${document.getElementById('sectorCount')?.innerText || '0 / 12'}\n`;
+  report += `Schede oggi: ${document.getElementById('todayCount')?.innerText || '0'}/3\n`;
+  const blob = new Blob([report], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `report_diario_${document.getElementById('studentName').value || 'studente'}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📄 Report Diario scaricato!');
+}
+
+function generateFullReport() {
+  let report = "📋 REPORT COMPLETO\n";
+  report += "═══════════════════════════════════════\n";
+  report += `Studente: ${document.getElementById('studentName')?.value || 'Non specificato'}\n`;
+  report += `Classe: ${document.getElementById('studentClass')?.value || 'Non specificata'}\n`;
+  report += `Data: ${new Date().toLocaleDateString('it-IT')}\n\n`;
+  report += `Missioni completate: ${missionsCompleted.filter(c => c === true).length}/6\n`;
+  report += `Scoperte registrate: ${cards.length}\n`;
+  const blob = new Blob([report], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `report_completo_${document.getElementById('studentName')?.value || 'studente'}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📄 Report completo scaricato!');
+}
+
+// FUNZIONI IMPORT/EXPORT JSON
+function getMissionsAnswers() {
+  const answers = {};
+  for (let i = 1; i <= 6; i++) {
+    answers[`mission${i}`] = {};
+    let answerCount = i === 3 ? 4 : (i === 4 ? 2 : (i === 5 ? 6 : (i === 6 ? 3 : 3)));
+    for (let j = 1; j <= answerCount; j++) {
+      answers[`mission${i}`][`a${j}`] = localStorage.getItem(`mission${i}Answer${j}`) || '';
+    }
+  }
+  return answers;
+}
+
+function exportAllData() {
+  const allData = {
+    version: "2.0",
+    exportDate: new Date().toISOString(),
+    student: {
+      name: document.getElementById('studentName')?.value || '',
+      class: document.getElementById('studentClass')?.value || ''
+    },
+    quiz: {
+      passed: quizPassed,
+      answers: userAnswers
+    },
+    missions: {
+      completed: missionsCompleted,
+      answers: getMissionsAnswers()
+    },
+    scoutingCards: cards,
+    pap: {
+      shortGoals: papShortGoals,
+      shortSkills: papShortSkills,
+      mediumGoals: papMediumGoals,
+      mediumSkills: papMediumSkills,
+      longGoals: papLongGoals,
+      longSkills: papLongSkills,
+      shortExtra: papShortExtra,
+      mediumExtra: papMediumExtra,
+      longExtra: papLongExtra,
+      savedPlans: savedPlans
+    },
+    diary: {
+      note: document.getElementById('diaryNote')?.value || '',
+      todo: document.getElementById('diaryTodo')?.value || '',
+      todayCards: todayCards
+    },
+    clicks: {
+      orientagame: orientagameClicked,
+      sni: sniClicked,
+      cv: cvClicked
+    }
+  };
+  
+  const jsonStr = JSON.stringify(allData, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const studentName = document.getElementById('studentName')?.value || 'studente';
+  a.download = `orientattivo_backup_${studentName}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Backup completo esportato!');
+}
+
+function importAllData(fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      if (data.student) {
+        if (document.getElementById('studentName')) 
+          document.getElementById('studentName').value = data.student.name || '';
+        if (document.getElementById('studentClass')) 
+          document.getElementById('studentClass').value = data.student.class || '';
+        localStorage.setItem('studentName', data.student.name || '');
+        localStorage.setItem('studentClass', data.student.class || '');
+      }
+      
+      if (data.quiz) {
+        quizPassed = data.quiz.passed || false;
+        if (data.quiz.answers) userAnswers = data.quiz.answers;
+        localStorage.setItem('quizPassed', quizPassed);
+        if (quizPassed && !sectionsUnlocked.orientagame) unlockSection('orientagame');
+      }
+      
+      if (data.missions) {
+        if (data.missions.completed) {
+          for (let i = 0; i < data.missions.completed.length && i < 6; i++) {
+            missionsCompleted[i] = data.missions.completed[i];
+            localStorage.setItem(`mission${i+1}Completed`, data.missions.completed[i]);
+            const card = document.getElementById(`mission${i+1}`);
+            if (card && data.missions.completed[i]) card.classList.add('completed');
+          }
+        }
+        
+        if (data.missions.answers) {
+          for (let i = 1; i <= 6; i++) {
+            const answers = data.missions.answers[`mission${i}`];
+            if (answers) {
+              Object.keys(answers).forEach((key, idx) => {
+                const answer = answers[key];
+                if (answer) {
+                  localStorage.setItem(`mission${i}Answer${idx+1}`, answer);
+                  const textarea = document.getElementById(`mission${i}Answer${idx+1}`);
+                  if (textarea) textarea.value = answer;
+                }
+              });
+            }
+          }
+        }
+      }
+      
+      if (data.scoutingCards) {
+        cards = data.scoutingCards;
+        localStorage.setItem('scoutingCards', JSON.stringify(cards));
+      }
+      
+      if (data.pap) {
+        papShortGoals = data.pap.shortGoals || [];
+        papShortSkills = data.pap.shortSkills || [];
+        papMediumGoals = data.pap.mediumGoals || [];
+        papMediumSkills = data.pap.mediumSkills || [];
+        papLongGoals = data.pap.longGoals || [];
+        papLongSkills = data.pap.longSkills || [];
+        papShortExtra = data.pap.shortExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+        papMediumExtra = data.pap.mediumExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+        papLongExtra = data.pap.longExtra || { education: '', obstacles: '', resources: '', mentors: '', actions: '', deadlines: '' };
+        savedPlans = data.pap.savedPlans || [];
+        localStorage.setItem('savedPapPlans', JSON.stringify(savedPlans));
+        savePapData();
+      }
+      
+      if (data.diary) {
+        if (document.getElementById('diaryNote')) 
+          document.getElementById('diaryNote').value = data.diary.note || '';
+        if (document.getElementById('diaryTodo')) 
+          document.getElementById('diaryTodo').value = data.diary.todo || '';
+        todayCards = data.diary.todayCards || 0;
+        localStorage.setItem('diaryNote', data.diary.note || '');
+        localStorage.setItem('diaryTodo', data.diary.todo || '');
+        localStorage.setItem('todayCards', todayCards);
+      }
+      
+      if (data.clicks) {
+        orientagameClicked = data.clicks.orientagame || false;
+        sniClicked = data.clicks.sni || false;
+        cvClicked = data.clicks.cv || false;
+        localStorage.setItem('orientagameClicked', orientagameClicked);
+        localStorage.setItem('sniClicked', sniClicked);
+        localStorage.setItem('cvClicked', cvClicked);
+        
+        if (orientagameClicked && !sectionsUnlocked.sni) unlockSection('sni');
+        if (sniClicked && !sectionsUnlocked.stats) unlockSection('stats');
+        if (cvClicked && !sectionsUnlocked.pap) unlockSection('pap');
+      }
+      
+      updateMissionsProgress();
+      if (typeof renderPapPanel === 'function') renderPapPanel();
+      if (typeof renderSavedPlans === 'function') renderSavedPlans();
+      updateAll();
+      
+      showToast('✅ Dati importati! Ricarica la pagina.');
+      setTimeout(() => location.reload(), 1500);
+      
+    } catch (error) {
+      console.error('Errore importazione:', error);
+      showToast('❌ Errore: file non valido');
+    }
+  };
+  reader.readAsText(file);
+  fileInput.value = '';
+}
+
+function openChallengeModal() {
+  const modal = document.getElementById('challengeModal');
+  if (modal) modal.classList.add('show');
+}
+
+function closeChallengeModal() {
+  const modal = document.getElementById('challengeModal');
+  if (modal) modal.classList.remove('show');
+}
+
+function closeModal() {
+  const modal = document.getElementById('reportModal');
+  if (modal) modal.classList.remove('show');
+}
+
+function copyReport() {
+  const body = document.getElementById('reportBody');
+  if (body) {
+    navigator.clipboard.writeText(body.innerText);
+    showToast('Report copiato!');
+  }
+}
+
+// FUNZIONI SALVATAGGIO DATI
+function saveToLocal() {
+  localStorage.setItem('scoutingCards', JSON.stringify(cards));
+  localStorage.setItem('studentName', document.getElementById('studentName').value);
+  localStorage.setItem('studentClass', document.getElementById('studentClass').value);
+  localStorage.setItem('diaryNote', document.getElementById('diaryNote').value);
+  localStorage.setItem('diaryTodo', document.getElementById('diaryTodo').value);
+  localStorage.setItem('todayCards', todayCards);
+}
+
+function loadData() {
+  const saved = localStorage.getItem('scoutingCards');
+  if (saved) {
+    try {
+      cards = JSON.parse(saved);
+    } catch (e) { }
+  }
+  const sd = localStorage.getItem('lastResetDate');
+  if (sd !== new Date().toDateString()) {
+    todayCards = 0;
+    localStorage.setItem('lastResetDate', new Date().toDateString());
+  } else {
+    todayCards = parseInt(localStorage.getItem('todayCards')) || 0;
+  }
+  const name = localStorage.getItem('studentName');
+  const cn = localStorage.getItem('studentClass');
+  const note = localStorage.getItem('diaryNote');
+  const todo = localStorage.getItem('diaryTodo');
+  if (name) document.getElementById('studentName').value = name;
+  if (cn) document.getElementById('studentClass').value = cn;
+  if (note) document.getElementById('diaryNote').value = note;
+  if (todo) document.getElementById('diaryTodo').value = todo;
+  for (let i = 1; i <= 6; i++) {
+    if (localStorage.getItem(`mission${i}Completed`) === 'true') {
+      missionsCompleted[i - 1] = true;
+      const card = document.getElementById(`mission${i}`);
+      if (card) card.classList.add('completed');
+    }
+  }
+  updateMissionsProgress();
+  loadPapData();
+  updateAll();
+  if (localStorage.getItem('orientagameClicked') === 'true') orientagameClicked = true;
+  if (localStorage.getItem('sniClicked') === 'true') sniClicked = true;
+  if (localStorage.getItem('cvClicked') === 'true') cvClicked = true;
+  if (localStorage.getItem('quizPassed') === 'true') {
+    quizPassed = true;
+    if (!sectionsUnlocked.orientagame) {
+      unlockSection('orientagame');
+    }
+  }
+}
+
+// GESTIONE TAB
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    const tabId = btn.getAttribute('data-tab');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    const activePane = document.getElementById(`tab-${tabId}`);
+    if (activePane) activePane.classList.add('active');
+  });
+});
+
+// INIT
+document.addEventListener('DOMContentLoaded', () => {
+  createBubbles();
+  loadData();
+  renderQuiz();
+  selectPapPeriod('short');
+});
+</script>
+</body>
+</html>
