@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrientAttivo — Lezione Finale</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0a09;--card:#1c1917;--card2:#292524;--border:#44403c;--fg:#fafaf9;--muted:#a8a29e;--accent:#f59e0b;--ok:#10b981;--err:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--cyan:#06b6d4}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg-mesh .blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:.12;animation:blobMove 20s infinite alternate}
+.blob-1{width:600px;height:600px;background:#f59e0b;top:-200px;left:-100px}
+.blob-2{width:500px;height:500px;background:#ef4444;bottom:-150px;right:-100px;animation-delay:-7s}
+.blob-3{width:400px;height:400px;background:#06b6d4;top:40%;left:50%;animation-delay:-14s}
+@keyframes blobMove{0%{transform:translate(0,0) scale(1)}100%{transform:translate(80px,-60px) scale(1.15)}}
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+.particle{position:absolute;width:3px;height:3px;background:var(--accent);border-radius:50%;opacity:0;animation:particleFloat linear infinite}
+@keyframes particleFloat{0%{opacity:0;transform:translateY(100vh)}10%{opacity:.6}90%{opacity:.6}100%{opacity:0;transform:translateY(-10vh)}}
+.app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem}
+.screen{display:none;width:100%;max-width:1100px;animation:fadeSlideIn .5s ease}
+.screen.active{display:block}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.glass{background:rgba(28,25,23,.75);backdrop-filter:blur(20px);border:1px solid rgba(68,64,60,.5);border-radius:1rem}
+.progress-track{width:100%;height:6px;background:var(--card2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .6s}
+.option-btn{width:100%;text-align:left;padding:1rem 1.25rem;border-radius:.75rem;border:2px solid var(--border);background:var(--card2);color:var(--fg);cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.75rem}
+.option-btn:hover:not(.locked){border-color:var(--accent);background:rgba(245,158,11,.08);transform:translateX(4px)}
+.option-btn .letter{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;background:var(--card);border:2px solid var(--border)}
+.option-btn.correct{border-color:var(--ok)!important;background:rgba(16,185,129,.1)!important}
+.option-btn.correct .letter{background:var(--ok);border-color:var(--ok);color:#fff}
+.option-btn.wrong{border-color:var(--err)!important;background:rgba(239,68,68,.1)!important}
+.option-btn.wrong .letter{background:var(--err);border-color:var(--err);color:#fff}
+.option-btn.locked{cursor:default;opacity:.7}
+.explanation-box{padding:1rem;border-radius:.75rem;border-left:4px solid var(--accent);background:rgba(245,158,11,.06);margin-top:1rem}
+.phase-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .85rem;border-radius:2rem;font-size:.75rem;font-weight:600;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--accent)}
+.timer-ring{position:relative;width:56px;height:56px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring circle{fill:none;stroke-width:3}
+.timer-ring .track{stroke:var(--card2)}
+.timer-ring .fill{stroke:var(--accent);stroke-linecap:round}
+.timer-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700}
+.btn-primary{padding:.85rem 2rem;border-radius:.75rem;background:linear-gradient(135deg,var(--accent),#D97706);color:#0c0a09;font-weight:700;border:none;cursor:pointer;transition:all .2s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,158,11,.3)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-secondary{padding:.75rem 1.5rem;border-radius:.75rem;background:transparent;color:var(--fg);font-weight:600;border:2px solid var(--border);cursor:pointer}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.phase-dots{display:flex;gap:.5rem;justify-content:center}
+.phase-dot{width:40px;height:6px;border-radius:3px;background:var(--card2);transition:all .4s}
+.phase-dot.active{width:60px;background:linear-gradient(90deg,var(--accent),var(--ok))}
+.phase-dot.done{background:var(--ok)}
+.celebration{position:fixed;inset:0;z-index:200;pointer-events:none}
+.confetti{position:absolute;border-radius:2px;animation:confettiFall 3s forwards}
+@keyframes confettiFall{to{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:.75rem 1.5rem;border-radius:.75rem;font-weight:600;z-index:300;animation:toastIn .4s}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.id-step-bar{display:flex;gap:.25rem;margin-bottom:2rem;flex-wrap:wrap}
+.id-step-pill{padding:.5rem .85rem;border-radius:2rem;font-size:.7rem;font-weight:600;background:var(--card2);border:1px solid var(--border);color:var(--muted);cursor:pointer}
+.id-step-pill.active{background:rgba(245,158,11,.15);border-color:var(--accent);color:var(--accent)}
+.id-step-pill.done{background:rgba(16,185,129,.15);border-color:var(--ok);color:var(--ok)}
+.id-field{margin-bottom:1.25rem}
+.id-field-label{font-size:.82rem;font-weight:600;color:var(--muted);margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.id-field-label i{color:var(--accent)}
+.id-select{width:100%;padding:.75rem 1rem;border-radius:.75rem;border:2px solid var(--border);background:var(--card2);color:var(--fg);cursor:pointer}
+.id-textarea{width:100%;padding:.75rem 1rem;border-radius:.75rem;border:2px solid var(--border);background:var(--card2);color:var(--fg);resize:vertical;min-height:60px}
+.id-pills-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+.id-pill{padding:.45rem 1rem;border-radius:2rem;font-size:.78rem;font-weight:500;border:2px solid var(--border);background:var(--card2);color:var(--muted);cursor:pointer}
+.id-pill.selected{background:rgba(245,158,11,.15);border-color:var(--accent);color:var(--accent)}
+.id-likert{display:flex;gap:.4rem;flex-wrap:wrap}
+.id-likert-btn{flex:1;min-width:50px;padding:.6rem .2rem;border-radius:.5rem;border:2px solid var(--border);background:var(--card2);color:var(--muted);font-weight:600;cursor:pointer;text-align:center}
+.id-likert-btn.selected{background:rgba(245,158,11,.2);border-color:var(--accent);color:var(--accent)}
+.id-likert-labels{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:.25rem}
+.id-step-icon{font-size:2rem;margin-bottom:.75rem;display:block}
+.id-step-title{font-family:'Space Grotesk';font-size:1.3rem;font-weight:700}
+.id-step-desc{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem}
+.id-section-intro{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:.75rem;padding:.75rem 1rem;margin-bottom:1.5rem;font-size:.82rem;color:#fbbf24}
+.topic-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .85rem;border-radius:2rem;font-size:.7rem;font-weight:600;margin-bottom:1rem}
+.rpt{background:#fff;color:#1a1a1a;padding:2rem;max-width:1000px;margin:0 auto}
+.rpt h1{font-size:1.8rem;color:#0f766e;border-left:4px solid #10b981;padding-left:1rem;margin-bottom:1rem}
+.rpt h2{font-size:1.2rem;color:#0f766e;margin:1.5rem 0 .75rem;border-bottom:2px solid #e2e8f0;padding-bottom:0.5rem;display:flex;align-items:center;gap:0.75rem}
+.rpt h2 i{color:#f59e0b;font-size:1.3rem}
+.rpt h3{font-size:1rem;color:#0f766e;margin:1rem 0 0.5rem 0;padding-left:0.5rem;border-left:3px solid}
+.rpt p{font-size:.87rem;color:#475569;line-height:1.6}
+.rpt-score-card{background:#f0fdf4;border:2px solid #10b981;border-radius:16px;padding:1.5rem;text-align:center;margin:1.5rem 0}
+.rpt-score-num{font-size:2.5rem;font-weight:800;color:#0d9488}
+.rpt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.rpt-grid-card{background:#f8fafc;border-radius:12px;padding:1rem;text-align:center;border-left:4px solid}
+.rpt-grid-card .val{font-size:1.3rem;font-weight:700}
+.rpt-bar{margin:.4rem 0}
+.rpt-bar-track{height:7px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.rpt-bar-fill{height:100%;border-radius:4px}
+.rpt-tag{display:inline-block;padding:.2rem .6rem;border-radius:1rem;font-size:.72rem;font-weight:600;margin:.15rem;background:#f0fdf4;color:#065f46}
+.rpt-progetto{background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:1.25rem}
+.rpt-kiviat{background:#f8fafc;border-radius:16px;padding:1.5rem;margin:1.5rem 0;text-align:center}
+.rpt-kiviat canvas,.rpt-kiviat img{max-width:500px;margin:0 auto;height:auto;display:block}
+.rpt-classe{background:#f8fafc;border-radius:16px;padding:1.25rem}
+.rpt-roadmap{background:linear-gradient(135deg,#f0fdf4,#eff6ff);border-radius:16px;padding:1.25rem;margin:1rem 0}
+.rpt-roadmap-step{display:flex;gap:.75rem;align-items:flex-start;margin:.75rem 0}
+.rpt-roadmap-num{width:28px;height:28px;border-radius:50%;background:#0f766e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+.kiviat-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-top:1rem;font-size:0.85rem}
+.kiviat-legend span i{font-size:1rem}
+.kiviat-legend span{font-size:0.85rem;color:#475569}
+.quote-block{border-left:3px solid var(--accent);padding:12px 20px;background:rgba(245,158,11,.05);border-radius:0 12px 12px 0;margin:1rem 0;font-style:italic;font-size:.85rem}
+.pill-group{display:flex;flex-wrap:wrap;gap:0.5rem;margin:1rem 0}
+.pill{display:inline-block;padding:0.45rem 1rem;border-radius:2rem;font-size:0.78rem;font-weight:500;border:1px solid;background:rgba(77,150,255,0.1);border-color:rgba(77,150,255,0.3)}
+@media(max-width:640px){.rpt-grid{grid-template-columns:1fr}.id-likert-btn{min-width:calc(33% - .35rem)}.kiviat-legend{font-size:0.7rem}}
+
+.report-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 1rem;
+}
+.report-modal-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+}
+.report-modal-header {
+    background: linear-gradient(135deg, #0f766e, #0d9488);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.report-modal-header h3 {
+    color: white;
+    font-size: 1.1rem;
+    margin: 0;
+}
+.close-modal {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.close-modal:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+.report-print-footer {
+    text-align: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+.report-print-btn {
+    background: linear-gradient(135deg, #f59e0b, #D97706);
+    color: #0c0a09;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+.report-print-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-container {
+    background: var(--card);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+<div class="bg-mesh"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+<div class="particles" id="particles"></div>
+<div class="app">
+
+<div class="screen active" id="welcomeScreen">
+  <div class="glass p-8 text-center">
+    <div class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 text-sm font-semibold"><i class="fa-solid fa-compass"></i> Orientamento — Lezione Finale</div>
+    <h1 class="text-3xl md:text-5xl font-bold mb-4">La Tua Prova Finale</h1>
+    <p class="text-lg mb-2 text-muted">Quiz oggettivo + Profilo personalizzato + Questionario di Gradimento</p>
+    <div class="mb-4"><div class="slider-label flex justify-between text-sm mb-2"><span><i class="fa-regular fa-face-frown"></i> Non pronto</span><span><i class="fa-regular fa-face-smile"></i> Prontissimo!</span></div>
+    <input type="range" id="readinessSlider" min="0" max="10" value="5" step="1" class="w-full">
+    <div class="text-center mt-2 text-sm text-amber-400" id="readinessValue">Livello 5/10</div></div>
+    <div class="mb-6"><label class="block text-sm font-semibold mb-2 text-left text-muted">Il tuo nome e cognome</label>
+    <input id="nameInput" type="text" placeholder="Scrivi il tuo nome e cognome..." class="w-full px-4 py-3 rounded-lg border-2 bg-transparent text-white focus:outline-none focus:border-amber-500" style="border-color:var(--border)"></div>
+    <div class="flex gap-3">
+      <button class="btn-primary flex-1 text-lg" id="startBtn" disabled>Inizia il Quiz</button>
+      <button class="btn-secondary" id="skipToSecondPartBtn"><i class="fa-solid fa-key"></i> Seconda parte</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="quizScreen"><div id="quizContainer"></div></div>
+<div class="screen" id="pauseScreen"><div id="pauseContent"></div></div>
+
+<div class="screen" id="identikitScreen">
+  <div class="glass p-6">
+    <div class="text-center mb-4"><div class="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 text-sm font-semibold"><i class="fa-solid fa-dna"></i> Il tuo DNA</div>
+    <h1 class="text-2xl md:text-3xl font-bold mb-1">Identità Personale e Professionale</h1>
+    <p class="text-sm text-muted">Risposte soggettive — <span class="text-emerald-400">NON influenzano il punteggio</span></p></div>
+    <div class="id-step-bar" id="idStepBar"></div>
+    <div id="idStepContent"></div>
+    <div class="flex gap-3 mt-6"><button class="btn-secondary" id="idPrevBtn" style="display:none"><i class="fa-solid fa-arrow-left mr-2"></i>Indietro</button><button class="btn-primary flex-1" id="idNextBtn">Avanti <i class="fa-solid fa-arrow-right ml-2"></i></button></div>
+  </div>
+</div>
+
+<div class="screen" id="feedbackScreen"><div id="feedbackContent"></div></div>
+<div class="screen" id="resultsScreen"><div id="resultsContent"></div></div>
+</div>
+
+<script>
+// ==================== MODULI ====================
+var MODULES = [
+  {id:'m1', title:'Modulo 1 — Conoscere Se Stessi', icon:'fa-user', color:'#f59e0b'},
+  {id:'m2', title:'Modulo 2 — Competenze e Team', icon:'fa-people-group', color:'#f97316'},
+  {id:'m3', title:'Modulo 3 — Orientamento e Futuro', icon:'fa-map-location-dot', color:'#06b6d4'}
+];
+
+function Topic(icon, topic, color) { return { icon: icon, topic: topic, topicColor: color }; }
+
+// ==================== DOMANDE OGGETTIVE ====================
+function buildQuestions() {
+  var Q = [], M1 = 0, M2 = 1, M3 = 2;
+  
+  // MODULO 1
+  var t1 = Topic('fa-brain', '16Personalità & Johari', '#c77dff');
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quanti gruppi principali individua il test 16Personalità?', opts: ['2', '3', '4', '6'], correct: 2, explain: '4 gruppi: Analisti, Diplomatici, Sentinel, Esploratori.' }, t1));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'La personalità è fissa dalla nascita e non può cambiare.', correct: false, explain: 'Falso. Può evolversi con le esperienze.' }, t1));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Nella Finestra di Johari, l\'area con info note a sé e agli altri è "Area ______".', opts: ['Aperta', 'Cieca', 'Nascosta', 'Sconosciuta'], correct: 0, explain: 'Area Aperta.' }, t1));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Nella Finestra di Johari, l\'area che contiene informazioni note agli altri ma non a sé stessi è il "Punto ______".', opts: ['Aperto', 'Cieco', 'Nascosto', 'Sconosciuto'], correct: 1, explain: 'Punto Cieco: gli altri vedono, tu no.' }, t1));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'La Finestra di Johari è composta da 4 quadranti.', correct: true, explain: 'Vero: Arena, Punto Cieco, Area Nascosta, Area Sconosciuta.' }, t1));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'L\'obiettivo della Finestra di Johari è ampliare l\'Arena e ridurre il Punto Cieco.', correct: true, explain: 'Vero: ricevendo feedback si riduce il punto cieco.' }, t1));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'I quattro gruppi principali del test 16Personalità sono: Analisti, ______, Sentinel ed Esploratori.', opts: ['Diplomatici', 'Strategici', 'Empatici', 'Organizzatori'], correct: 0, explain: 'Diplomatici è il secondo gruppo.' }, t1));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Il gruppo degli ______ è caratterizzato da logica, strategia e pensiero critico.', opts: ['Analisti', 'Diplomatici', 'Sentinel', 'Esploratori'], correct: 0, explain: 'Gli Analisti sono logici e strategici.' }, t1));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quale di questi è un gruppo del test 16Personalità?', opts: ['Analisti', 'Matematici', 'Artisti', 'Scienziati'], correct: 0, explain: 'I 4 gruppi sono: Analisti, Diplomatici, Sentinel, Esploratori.' }, t1));
+  
+  var t2 = Topic('fa-chart-simple', 'SWOT & Responsabilità', '#f59e0b');
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Nella SWOT, la S (Strengths) rappresenta:', opts: ['Strategia', 'Sviluppo', 'Punti di Forza', 'Situazione'], correct: 2, explain: 'Strengths = Punti di Forza.' }, t2));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Nella SWOT, la W (Weaknesses) rappresenta:', opts: ['Punti di Debolezza', 'Work', 'Watch', 'Win'], correct: 0, explain: 'Weaknesses = Debolezze.' }, t2));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Nella SWOT, la O (Opportunities) rappresenta:', opts: ['Obiettivi', 'Opportunità', 'Osservazione', 'Organizzazione'], correct: 1, explain: 'Opportunità.' }, t2));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Nella SWOT, la T (Threats) rappresenta:', opts: ['Tempo', 'Tattica', 'Minacce', 'Team'], correct: 2, explain: 'Threats = Minacce.' }, t2));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Nella SWOT personale, i Punti di Forza (Strengths) e le Debolezze (Weaknesses) sono fattori ______ (interni/esterni).', opts: ['interni', 'esterni', 'misti', 'variabili'], correct: 0, explain: 'Sono fattori interni alla persona.' }, t2));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Nella SWOT personale, le Opportunità (Opportunities) e le Minacce (Threats) sono fattori ______ (interni/esterni).', opts: ['interni', 'esterni', 'misti', 'variabili'], correct: 1, explain: 'Sono fattori esterni al contesto.' }, t2));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'La SWOT analysis trasforma l\'autoconsapevolezza in un piano d\'azione.', correct: true, explain: 'Vero: la SWOT collega consapevolezza e azione.' }, t2));
+  Q.push(Object.assign({ module: M1, type: 'sequence', q: 'Metti in ordine le fasi di costruzione della consapevolezza:', items: ['SWOT analysis', 'Test 16Personalità', 'Albero delle Competenze'], correct: [2,1,0], explain: 'Prima Albero, poi 16P, infine SWOT.' }, t2));
+  
+  var t3 = Topic('fa-heart-pulse', 'Strategie di Coping', '#ef4444');
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quale NON è una strategia di coping sana?', opts: ['Reset Fisico', 'Scomposizione', 'Ignorare emozione', 'Ancoraggio'], correct: 2, explain: 'Ignorare non è sano.' }, t3));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Il "Reset Fisico" prevede:', opts: ['Cambiare pensieri', 'Respirazione', 'Parlare', 'Scrivere'], correct: 1, explain: 'Usa il corpo per calmare la mente.' }, t3));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'La "Scomposizione" significa:', opts: ['Ignorare', 'Dividere in passi', 'Chiedere aiuto', 'Pensare positivo'], correct: 1, explain: 'Rendere il problema gestibile.' }, t3));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'L\'"Ancoraggio" significa:', opts: ['Ignorare', 'Dividere', 'Ricordo positivo', 'Chiedere aiuto'], correct: 2, explain: 'Usa ricordi positivi.' }, t3));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Il "Supporto sociale" significa:', opts: ['Ignorare', 'Dividere', 'Pensare positivo', 'Chiedere aiuto'], correct: 3, explain: 'Chiedere aiuto.' }, t3));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'La strategia di coping che consiste nel suddividere un problema in parti più piccole e gestibili si chiama ______.', opts: ['Reset Fisico', 'Scomposizione', 'Ancoraggio', 'Supporto Sociale'], correct: 1, explain: 'Scomposizione = dividere in passi gestibili.' }, t3));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'La strategia di coping che utilizza un ricordo positivo per ritrovare la calma si chiama ______.', opts: ['Reset Fisico', 'Scomposizione', 'Ancoraggio', 'Supporto Sociale'], correct: 2, explain: 'Ancoraggio = ricordare un momento positivo.' }, t3));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quale strategia di coping consiste nel chiedere aiuto a qualcuno?', opts: ['Reset Fisico', 'Supporto Sociale', 'Scomposizione', 'Ancoraggio'], correct: 1, explain: 'Il Supporto Sociale significa chiedere aiuto ad altri.' }, t3));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'Ignorare un\'emozione è considerata una strategia di coping sana.', correct: false, explain: 'Falso: ignorare non è sano, va riconosciuta e gestita.' }, t3));
+  
+  // Domanda 6 dal PDF
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quale tra questi è un esempio di coping fisico?', opts: ['Parlare con un amico', 'Pallina antistress', 'Mettere in dubbio un pensiero', 'Scrivere obiettivi'], correct: 1, explain: 'La pallina antistress è uno strumento fisico (tattile) per scaricare la tensione.' }, t3));
+  
+  // Domanda 102 dal PDF
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quale strategia di coping è più efficace quando si prova ansia da prestazione prima di un esame?', opts: ['Ignorare l\'emozione', 'Reset fisico (respirazione)', 'Isolamento sociale', 'Rimuginare sui possibili errori'], correct: 1, explain: 'Il reset fisico (respirazione profonda) calma il sistema nervoso e riduce l\'ansia da prestazione.' }, t3));
+  
+  // Domanda 114 dal PDF
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quale strategia di coping è più adatta quando si prova depressione o senso di vuoto?', opts: ['Micro-obiettivo', 'Reset fisico', 'Stop & Esci', 'Scomposizione'], correct: 0, explain: 'Il micro-obiettivo (piccolo compito realizzabile subito) aiuta a uscire dal blocco emotivo e a ritrovare motivazione.' }, t3));
+  
+  // Domanda 141 dal PDF
+  Q.push(Object.assign({ module: M1, type: 'ranking', q: 'Classifica le seguenti strategie di coping dalla più passiva alla più attiva:', items: ['Ignorare', 'Scomposizione', 'Reset fisico', 'Supporto sociale'], correct: [0,1,3,2], explain: 'Ignorare è passiva (evitamento), Scomposizione è analitica, Supporto sociale è collaborativa, Reset fisico è attivamente calmante.' }, t3));
+  
+  // NUOVA DOMANDA 130 - Strategie di Coping (Ancoraggio - completamento)
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'La strategia di coping che consiste nel ricordare un momento positivo per ritrovare la calma si chiama ______.', opts: ['Reset Fisico', 'Scomposizione', 'Ancoraggio', 'Supporto Sociale'], correct: 2, explain: 'L\'Ancoraggio utilizza un ricordo positivo per ritrovare la calma e la lucidità.' }, { icon: 'fa-heart-pulse', topic: 'Strategie di Coping', topicColor: '#ef4444' }));
+  
+  var t4 = Topic('fa-face-smile', 'Emozioni & Plutchik', '#06b6d4');
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Dove si percepiscono le emozioni nel corpo?', opts: ['Solo testa', 'Testa/petto/stomaco/gola', 'Mani', 'Nessuna sede'], correct: 1, explain: 'In più parti del corpo.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quante emozioni di base ha Plutchik?', opts: ['4', '6', '8', '10'], correct: 2, explain: '8 emozioni di base.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Quali sono le 8 emozioni di base?', opts: ['Felicità/tristezza/rabbia/paura', 'Gioia/fiducia/paura/sorpresa/tristezza/disgusto/rabbia/aspettativa', 'Amore/odio/gioia/tristezza', 'Calma/agitazione/serenità/ansia'], correct: 1, explain: 'Le 8 emozioni di Plutchik.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Prima zona di allarme nel termometro?', opts: ['Calmo 0-1', 'Leggermente agitato 2-3', 'Nervoso 4-5', 'Molto agitato 6-7'], correct: 1, explain: 'Zona 2-3 primo campanello.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Secondo Plutchik, le emozioni di base sono ______.', opts: ['4', '6', '8', '10'], correct: 2, explain: '8 emozioni di base secondo Plutchik.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Nella ruota di Plutchik, l\'emozione opposta alla Gioia è la ______.', opts: ['Paura', 'Rabbia', 'Tristezza', 'Disgusto'], correct: 2, explain: 'Gioia e Tristezza sono opposte.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'Le emozioni sono né buone né cattive di per sé.', correct: true, explain: 'Vero: tutte hanno una funzione per la sopravvivenza.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Nella Zona 3 del termometro emotivo (livelli 4-5), la ______ si spegne e prevalgono le emozioni.', opts: ['memoria', 'logica', 'creatività', 'attenzione'], correct: 1, explain: 'Nella zona 3 la logica si spegne.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Nella Zona 1 del termometro emotivo (livelli 0-1) si sperimenta ______ e connessione.', opts: ['calma', 'tensione', 'rabbia', 'frustrazione'], correct: 0, explain: 'Zona 1: calma e connessione.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'sequence', q: 'Metti in ordine crescente di intensità emotiva le zone del termometro:', items: ['Rabbia e crisi', 'Calma', 'Inizio tensione'], correct: [1,2,0], explain: 'Prima calma, poi tensione, infine rabbia.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'Nella Zona 2 (livelli 2-3) si manifestano i primi segnali di allarme.', correct: true, explain: 'Vero: tensione e preoccupazione.' }, t4));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'Secondo Plutchik, la paura ha quale funzione evolutiva?', opts: ['Riprodursi/Cooperare', 'Proteggersi/Fuggire', 'Difendersi/Attaccare', 'Recuperare/Chiedere aiuto'], correct: 1, explain: 'La paura serve a proteggersi e fuggire dal pericolo.' }, t4));
+  
+  // Domanda 45 dal PDF
+  Q.push(Object.assign({ module: M1, type: 'ranking', q: 'Ordina le seguenti emozioni per intensità (dalla più bassa alla più alta secondo Plutchik):', items: ['Estasi', 'Gioia', 'Serenità'], correct: [2,1,0], explain: 'Serenità (bassa intensità) → Gioia (media) → Estasi (massima intensità).' }, t4));
+  
+  // Domanda 107 dal PDF (modificata)
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'La "Gestione dello Stress" è la capacità di:', opts: ['Capire le emozioni altrui', 'Gestire un momento di forte pressione o ansia', 'Saper leggere il linguaggio del corpo', 'Agire senza farsi condizionare'], correct: 1, explain: 'Gestire lo stress significa mantenere il controllo e agire efficacemente sotto pressione.' }, t4));
+  
+  // Domanda 23 dal PDF
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'La competenza "Digitale" è una delle 8 Competenze Chiave Europee.', correct: true, explain: 'Vero: la Raccomandazione UE del 2018 include la competenza digitale tra le 8 chiavi.' }, t4));
+  
+  var t5 = Topic('fa-lightbulb', 'Strumenti M1', '#fbbf24');
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'FutureMe.org serve a:', opts: ['Cercare lavoro', 'Scrivere al futuro io', 'Test personalità', 'Corsi'], correct: 1, explain: 'Lettera al futuro.' }, t5));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'IDRlabs misura:', opts: ['QI', 'Quoziente emotivo', 'Personalità', 'Apprendimento'], correct: 1, explain: 'Quoziente emotivo.' }, t5));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'Le emozioni hanno tutte una funzione evolutiva.', correct: true, explain: 'Vero.' }, t5));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'La tristezza si manifesta con:', opts: ['Calore petto', 'Freddo arti', 'Tensione testa', 'Farfalle'], correct: 1, explain: 'Freddo e pesantezza.' }, t5));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'La paura si manifesta con:', opts: ['Calore petto', 'Freddo arti', 'Attivazione petto/testa', 'Pesantezza'], correct: 2, explain: 'Prepara alla fuga.' }, t5));
+  Q.push(Object.assign({ module: M1, type: 'single', q: 'L\'esercizio del rigore emotivo serviva a capire che:', opts: ['Calcio sport emotivo', 'Emozioni dominano performance', 'Rigori fortuna', 'Allenatori non contano'], correct: 1, explain: 'Le emozioni possono dominare.' }, t5));
+  Q.push(Object.assign({ module: M1, type: 'completion', q: 'Nell\'attività "Albero delle Competenze", i ______ rappresentano le cose che sai fare o che ti rappresentano.', opts: ['radici', 'tronco', 'rami', 'foglie'], correct: 2, explain: 'I rami rappresentano le competenze.' }, t5));
+  Q.push(Object.assign({ module: M1, type: 'truefalse', q: 'L\'Albero delle Competenze è un\'attività che si svolge prima del test 16Personalità.', correct: true, explain: 'Vero: prima Albero, poi 16P, poi SWOT.' }, t5));
+  
+  // MODULO 2
+  var t6 = Topic('fa-wrench', 'Hard & Soft Skill', '#f97316');
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Differenza Hard vs Soft Skill?', opts: ['Nessuna', 'Hard=tecniche, Soft=relazionali', 'Hard più importanti', 'Solo a scuola'], correct: 1, explain: 'Hard tecniche, Soft trasversali.' }, t6));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Esempio di Hard Skill:', opts: ['Comunicazione', 'Leadership', 'Programmazione', 'Empatia'], correct: 2, explain: 'Programmazione è tecnica.' }, t6));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Esempio di Soft Skill:', opts: ['Excel', 'Contabilità', 'Lavoro squadra', 'Inglese'], correct: 2, explain: 'Lavoro di squadra trasversale.' }, t6));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Perché le Soft Skill sono importanti?', opts: ['Non importanti', 'Relazionarsi', 'Solo dirigenti', 'Solo creativi'], correct: 1, explain: 'Per collaborare.' }, t6));
+  
+  // Domanda 13 dal PDF (modificata)
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Quale soft skill è più richiesta dalle aziende?', opts: ['Leadership', 'Adattabilità', 'Creatività', 'Puntualità'], correct: 1, explain: 'L\'adattabilità è la soft skill più richiesta dalle aziende in un mercato in rapido cambiamento.' }, t6));
+  
+  Q.push(Object.assign({ module: M2, type: 'completion', q: 'Le ______ Skills sono competenze tecniche e specifiche di un ambito professionale.', opts: ['Hard', 'Soft', 'Trasversali', 'Digitali'], correct: 0, explain: 'Hard Skill = competenze tecniche.' }, t6));
+  Q.push(Object.assign({ module: M2, type: 'completion', q: 'Le ______ Skills sono competenze trasversali come la comunicazione e il lavoro di squadra.', opts: ['Hard', 'Soft', 'Tecniche', 'Specialistiche'], correct: 1, explain: 'Soft Skill = competenze trasversali.' }, t6));
+  Q.push(Object.assign({ module: M2, type: 'truefalse', q: 'Le Soft Skill sono meno importanti delle Hard Skill.', correct: false, explain: 'Falso: sono entrambe importanti.' }, t6));
+  
+  // Domanda 42 dal PDF
+  Q.push(Object.assign({ module: M2, type: 'ranking', q: 'Ordina le seguenti soft skills per importanza percepita dalle aziende (dalla più richiesta alla meno richiesta):', items: ['Leadership', 'Adattabilità', 'Comunicazione', 'Problem Solving'], correct: [1,2,3,0], explain: 'Adattabilità è la più richiesta, seguita da Comunicazione, Problem Solving e Leadership.' }, t6));
+  
+  var t7 = Topic('fa-people-group', 'Lavoro di Gruppo', '#10b981');
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Prima cosa da fare in gruppo?', opts: ['Scrivere nome', 'Assegnare ruoli', 'Capire compito', 'Iniziare'], correct: 2, explain: 'Prima capire.' }, t7));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Se un membro non partecipa?', opts: ['Escludere', 'Parlare e capire', 'Fare da solo', 'Segnalare'], correct: 1, explain: 'Comunicazione chiave.' }, t7));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Come evitare conflitti nei ruoli?', opts: ['Tirare sorte', 'Valutare competenze', 'Cambiare spesso', 'Il più bravo fa tutto'], correct: 1, explain: 'Assegnazione strategica.' }, t7));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Qualità più importante in un gruppo?', opts: ['Velocità', 'Creatività', 'Ascolto', 'Competenze'], correct: 2, explain: 'Ascolto fondamentale.' }, t7));
+  Q.push(Object.assign({ module: M2, type: 'truefalse', q: 'La diversità di talenti è un problema.', correct: false, explain: 'Falso, è una forza.' }, t7));
+  Q.push(Object.assign({ module: M2, type: 'truefalse', q: 'Un gruppo diventa una squadra quando c\'è fiducia e comunicazione efficace.', correct: true, explain: 'Vero: la fiducia è fondamentale.' }, t7));
+  Q.push(Object.assign({ module: M2, type: 'completion', q: 'La qualità più importante in un gruppo di lavoro secondo i risultati dei poll è la capacità di ______.', opts: ['velocità', 'creatività', 'ascolto', 'competenza'], correct: 2, explain: 'L\'ascolto è risultata la qualità più importante.' }, t7));
+  
+  var t8 = Topic('fa-gem', 'Talenti', '#8b5cf6');
+  Q.push(Object.assign({ module: M2, type: 'single', q: '"Saper fare / Saper risolvere / Saper dire" rappresentano:', opts: ['Tre intelligenze', 'Tre dimensioni talento', 'Tre stili', 'Tre livelli'], correct: 1, explain: 'Talento pratico, creativo, relazionale.' }, t8));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Tre elementi identità società:', opts: ['Nome/logo/slogan', 'Colore/font/musica', 'Sito/email/telefono', 'Biglietto/brochure'], correct: 0, explain: 'Nome, logo, slogan.' }, t8));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'L\'applicazione "Skill Check" scopre:', opts: ['Data nascita', 'Hard/Soft Skill dominanti', 'Voto', 'Città ideale'], correct: 1, explain: 'Identifica competenze.' }, t8));
+  Q.push(Object.assign({ module: M2, type: 'single', q: '"Market Match" abbina profilo a:', opts: ['Partner', 'Settori/professioni', 'Punteggio', 'Colore'], correct: 1, explain: 'Associa a settori.' }, t8));
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Qualità più unica di un team vincente:', opts: ['Intelligenza singolo', 'Combinazione talenti', 'Stesso talento', 'Copiare'], correct: 1, explain: 'Combinare talenti diversi.' }, t8));
+  
+  var t9 = Topic('fa-comments', 'Dinamiche', '#3b82f6');
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Cosa cercheresti in un dipendente?', opts: ['Genialità', 'Capacità squadra', 'Energia', 'Competenze'], correct: 1, explain: 'Capacità di fare squadra.' }, t9));
+  Q.push(Object.assign({ module: M2, type: 'truefalse', q: 'Lavoro di gruppo è sempre più efficace.', correct: false, explain: 'Dipende.' }, t9));
+  
+  var t17 = Topic('fa-laptop-code', 'Skill Check & Market Match', '#f97316');
+  Q.push(Object.assign({ module: M2, type: 'completion', q: '"Skill Check" è un simulatore che aiuta a scoprire le proprie Hard Skill e ______ Skill dominanti.', opts: ['Soft', 'Tecniche', 'Digitali', 'Specialistiche'], correct: 0, explain: 'Skill Check identifica Hard e Soft Skill.' }, t17));
+  Q.push(Object.assign({ module: M2, type: 'completion', q: 'Lo strumento che abbina il profilo delle competenze a settori e professioni si chiama "Market ______".', opts: ['Match', 'Check', 'Scan', 'Finder'], correct: 0, explain: 'Market Match associa profilo a settori.' }, t17));
+  Q.push(Object.assign({ module: M2, type: 'truefalse', q: 'Il gioco Skill Check termina con un colloquio di lavoro simulato.', correct: true, explain: 'Vero: il colloquio finale è parte del gioco.' }, t17));
+  Q.push(Object.assign({ module: M2, type: 'sequence', q: 'Metti in ordine le fasi del gioco Skill Check:', items: ['Colloquio finale', 'Decisioni comportamentali', 'Quiz tecnici'], correct: [2,1,0], explain: 'Prima quiz tecnici, poi decisioni, infine colloquio.' }, t17));
+  
+  // Domanda 8 dal PDF
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Quale piattaforma permette di creare il CV europeo?', opts: ['LinkedIn', 'Europass', 'Indeed', 'Glassdoor'], correct: 1, explain: 'Europass è il portale ufficiale per il CV europeo standardizzato.' }, t17));
+  
+  var t18 = Topic('fa-building', 'Simulazione d\'Impresa', '#10b981');
+  Q.push(Object.assign({ module: M2, type: 'completion', q: 'Nella simulazione "Sportello Imprese", la soglia di finanziabilità è ______/100.', opts: ['50', '60', '65', '70'], correct: 1, explain: '60/100 è la soglia minima per essere finanziati.' }, t18));
+  Q.push(Object.assign({ module: M2, type: 'completion', q: 'Il documento che valuta l\'attitudine al finanziamento di un progetto si chiama ______ Scoring.', opts: ['Credit', 'Debit', 'Risk', 'Impact'], correct: 0, explain: 'Credit Scoring valuta l\'affidabilità.' }, t18));
+  Q.push(Object.assign({ module: M2, type: 'truefalse', q: 'Nella simulazione d\'impresa, il team viene valutato anche sulle Soft Skills.', correct: true, explain: 'Vero: si valutano Hard e Soft Skills del team.' }, t18));
+  
+  // Domanda 10 dal PDF
+  Q.push(Object.assign({ module: M2, type: 'single', q: 'Quale durata standard ha un corso ITS Academy?', opts: ['1 anno', '2 anni', '3 anni', '6 mesi'], correct: 1, explain: 'Gli ITS Academy hanno durata biennale (1800-2000 ore).' }, t18));
+  
+  // MODULO 3
+  var t10 = Topic('fa-graduation-cap', 'ITS/IFTS/AFAM', '#06b6d4');
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Cosa sono gli IFTS?', opts: ['Laurea', 'Percorsi annuali post-diploma', 'Master', 'Dottorato'], correct: 1, explain: 'Percorsi annuali.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Ente formazione giovani in Puglia?', opts: ['Unisalento', 'Galattica', 'INPS', 'Agenzia'], correct: 1, explain: 'Galattica.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Cosa offre l\'ISUFI?', opts: ['Laurea', 'Alta Formazione', 'Scuole', 'Lingue'], correct: 1, explain: 'Alta Formazione.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'L\'AFAM riguarda:', opts: ['Accademie/Conservatori', 'Medicina', 'Informatica', 'Apprendistato'], correct: 0, explain: 'Accademie, Conservatori.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Quanti su 10 trovano lavoro entro 3 anni?', opts: ['1', '3', '6', '10'], correct: 2, explain: 'Circa 6 su 10.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Un ITS Academy offre:', opts: ['Laurea', 'Specializzazione tecnica', 'Master', 'Dottorato'], correct: 1, explain: 'Diploma specializzazione.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'Gli ITS hanno tassi occupazione bassi.', correct: false, explain: 'Falso, >80%.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'L\'acronimo ITS sta per Istituto Tecnico ______.', opts: ['Superiore', 'Specialistico', 'Scolastico', 'Sviluppo'], correct: 0, explain: 'ITS = Istituto Tecnico Superiore.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'L\'acronimo IFTS sta per Istruzione e Formazione Tecnica ______.', opts: ['Superiore', 'Specialistica', 'Scolastica', 'Secondaria'], correct: 0, explain: 'IFTS = Istruzione e Formazione Tecnica Superiore.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'L\'AFAM riguarda l\'Alta Formazione Artistica, Musicale e ______.', opts: ['Coreutica', 'Digitale', 'Scientifica', 'Linguistica'], correct: 0, explain: 'AFAM = Alta Formazione Artistica, Musicale e Coreutica.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'Gli ITS Academy hanno tassi di occupazione superiori all\'80%.', correct: true, explain: 'Vero: gli ITS hanno alti tassi di occupazione.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'La maggior parte degli studenti (6 su 10) trova lavoro entro 3 anni dal diploma.', correct: true, explain: 'Vero: circa il 60% trova lavoro entro 3 anni.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Cosa caratterizza un ITS Academy?', opts: ['Percorso annuale', 'Percorso biennale tecnico', 'Percorso accademico triennale', 'Finanziamento regionale'], correct: 1, explain: 'Gli ITS Academy sono percorsi biennali di specializzazione tecnica.' }, t10));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Qual è la durata standard di un IFTS?', opts: ['1 anno', '2 anni', '3 anni', '4 anni'], correct: 0, explain: 'Gli IFTS hanno durata annuale (1000 ore circa).' }, t10));
+  
+  // Domanda 92 dal PDF
+  Q.push(Object.assign({ module: M3, type: 'ranking', q: 'Ordina i seguenti percorsi post-diploma per tasso di occupazione medio (dal più alto al più basso):', items: ['ITS', 'Laurea triennale', 'IFTS', 'Lavoro diretto'], correct: [0,1,2,3], explain: 'ITS (>80%), Laurea triennale (~70%), IFTS (~60%), Lavoro diretto (variabile).' }, t10));
+  
+  // Domanda 142 dal PDF
+  Q.push(Object.assign({ module: M3, type: 'ranking', q: 'Ordina i seguenti percorsi formativi per durata (dal più breve al più lungo):', items: ['Corso singolo', 'IFTS', 'ITS', 'Laurea magistrale'], correct: [0,1,2,3], explain: 'Corso singolo (mesi), IFTS (1 anno), ITS (2 anni), Laurea magistrale (5 anni post-diploma).' }, t10));
+  
+  var t11 = Topic('fa-map-location-dot', 'Scouting', '#0ea5e9');
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Strumento per Scouting in Puglia?', opts: ['Google Maps', 'Padlet', 'Scheda digitale', 'Excel'], correct: 2, explain: 'Scheda digitale.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Portale Giovani con Eurodesk serve per:', opts: ['Alloggi', 'Opportunità europee', 'Viaggi', 'Giochi'], correct: 1, explain: 'Erasmus+, CES.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'sequence', q: 'Metti in ordine le fasi Scouting:', items: ['Ricerca', 'Analisi', 'Verifica requisiti', 'Selezione'], correct: [0,1,2,3], explain: 'Cerca, analizza, verifica, seleziona.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Le 5 aree di interesse per l\'orientamento:', opts: ['Scienze/Lettere', 'Umanistica/Scientifica/Tecnica/Artistica/Sociale', 'Pratica/Teorica', 'Tecnica/Scientifica'], correct: 1, explain: 'Le 5 aree.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'Scouting Puglia ha esplorato solo università.', correct: false, explain: 'Anche ITS, IFTS, AFAM.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'Il portale che offre informazioni sulle opportunità europee per i giovani si chiama ______.', opts: ['Erasmus+', 'Eurodesk', 'EuropeanPortal', 'YouthEU'], correct: 1, explain: 'Eurodesk è il portale per opportunità europee.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'L\'ente di formazione regionale per i giovani in Puglia si chiama ______.', opts: ['Unisalento', 'Galattica', 'ISUFI', 'PugliaGiovane'], correct: 1, explain: 'Galattica è l\'ente regionale pugliese.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'L\'ISUFI è l\'Istituto Universitario per la ______ Formazione.', opts: ['Alta', 'Superiore', 'Professionale', 'Continua'], correct: 0, explain: 'ISUFI = Istituto Universitario per l\'Alta Formazione.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'Lo Scouting Puglia ha esplorato solo le università del territorio.', correct: false, explain: 'Falso: ha esplorato anche ITS, IFTS, AFAM.' }, t11));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Galattica è un ente di formazione:', opts: ['Nazionale', 'Regionale pugliese', 'Europeo', 'Scolastico'], correct: 1, explain: 'Galattica è l\'ente regionale per i giovani in Puglia.' }, t11));
+  
+  var t12 = Topic('fa-handshake', 'Colloqui', '#f59e0b');
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Quanto conta la prima impressione?', opts: ['Non conta', '80%', 'Poco', 'Solo commerciali'], correct: 1, explain: 'Determinante.' }, t12));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Errore grave in colloquio:', opts: ['Arrivare in anticipo', 'Portare CV', 'Mentire', 'Fare domande'], correct: 2, explain: 'Mai mentire.' }, t12));
+  Q.push(Object.assign({ module: M3, type: 'ranking', q: 'Ordina le fasi del colloquio:', items: ['Preparazione', 'Presentazione', 'Domande tecniche', 'Domande finali'], correct: [0,1,2,3], explain: 'Preparazione, presentazione, tecniche, finali.' }, t12));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'La stretta di mano non è importante.', correct: false, explain: 'Trasmette sicurezza.' }, t12));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'La prima impressione in un colloquio conta per circa il ______% del successo.', opts: ['50', '60', '70', '80'], correct: 3, explain: 'La prima impressione conta per l\'80%.' }, t12));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'Dopo un colloquio, è buona prassi inviare un\'email di ______.', opts: ['ringraziamento', 'richiesta', 'sollecito', 'conferma'], correct: 0, explain: 'L\'email di ringraziamento è buona prassi.' }, t12));
+  Q.push(Object.assign({ module: M3, type: 'sequence', q: 'Metti in ordine le fasi del colloquio di lavoro:', items: ['Domande tecniche', 'Preparazione', 'Presentazione personale', 'Domande finali del candidato'], correct: [1,2,0,3], explain: 'Preparazione, presentazione, domande tecniche, domande finali.' }, t12));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'Mentire durante un colloquio è considerato un errore grave.', correct: true, explain: 'Vero: non bisogna mai mentire al colloquio.' }, t12));
+  
+  // Domanda 60 dal PDF
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Quale portale europeo offre opportunità di lavoro e formazione in tutti i paesi UE?', opts: ['Europass', 'EURES', 'Erasmus+', 'LinkedIn'], correct: 1, explain: 'EURES (EURopean Employment Services) è il portale per la mobilità lavorativa in Europa.' }, t12));
+  
+  // Domanda 139 dal PDF
+  Q.push(Object.assign({ module: M3, type: 'sequence', q: 'Metti in ordine le fasi della ricerca di lavoro:', items: ['Colloquio', 'Invio candidatura', 'Analisi delle offerte', 'Contratto'], correct: [2,1,0,3], explain: 'Prima si analizzano le offerte, poi si invia la candidatura, si sostiene il colloquio e infine si firma il contratto.' }, t12));
+  
+  var t13 = Topic('fa-compass', 'Strumenti M3', '#10b981');
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Cosa aiuta a capire che lavoro fa per te?', opts: ['Film', 'Test attitudini', 'Dormire', 'Pizza'], correct: 1, explain: 'Test attitudini.' }, t13));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Portale ufficiale concorsi pubblici?', opts: ['LinkedIn', 'Indeed', 'inPA', 'Europass'], correct: 2, explain: 'inPA.' }, t13));
+  Q.push(Object.assign({ module: M3, type: 'single', q: 'Cosa fare dopo un colloquio?', opts: ['Aspettare', 'Email ringraziamento', 'Chiamare ogni giorno', 'Dimenticare'], correct: 1, explain: 'Email di ringraziamento.' }, t13));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'Il portale ufficiale italiano per i concorsi pubblici si chiama ______.', opts: ['inPA', 'Concorsi.it', 'PAonline', 'GovJobs'], correct: 0, explain: 'inPA è il portale ufficiale per i concorsi pubblici.' }, t13));
+  Q.push(Object.assign({ module: M3, type: 'completion', q: 'Il test delle ______ aiuta a capire quale lavoro fa per te.', opts: ['attitudini', 'personalità', 'QI', 'lingue'], correct: 0, explain: 'Il test delle attitudini aiuta nell\'orientamento.' }, t13));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'L\'app OrientAttivo contiene test, missioni, un diario di bordo e un piano d\'azione.', correct: true, explain: 'Vero: OrientAttivo è la bussola per il futuro professionale.' }, t13));
+  Q.push(Object.assign({ module: M3, type: 'truefalse', q: 'Guardare un film può aiutare a capire che lavoro fa per te.', correct: false, explain: 'Falso: il test delle attitudini è lo strumento giusto.' }, t13));
+  
+  // Domanda 99 dal PDF (MULTIPLA)
+  Q.push(Object.assign({ 
+    module: M3, 
+    type: 'multiple', 
+    q: 'Quali sono le competenze chiave europee? (Scegli più opzioni)', 
+    opts: ['Alfabetica funzionale', 'Multilinguistica', 'Digitale', 'Imprenditoriale', 'Guida di mezzi pesanti'], 
+    correct: [0,1,2,3], 
+    explain: 'Secondo la Raccomandazione UE 2018, le 8 competenze chiave includono: alfabetica funzionale, multilinguistica, matematica/scienze/tecnologia, digitale, personale/sociale/capacità di imparare, cittadinanza, imprenditoriale, consapevolezza culturale. La guida di mezzi pesanti non è una competenza chiave europea.' 
+  }, t13));
+  
+  return Q;
+}
+
+var OBJECTIVE_QS = buildQuestions();
+var TOTAL_QS = OBJECTIVE_QS.length;
+
+// ==================== STATO APP ====================
+var appState = {
+  name: '', readiness: 5, module: 0, qIndex: 0, score: 0, answers: [],
+  timerSeconds: 180 * 60, timerInterval: null,
+  matchS: {}, rankS: {}, seqS: {}, multipleSel: {}
+};
+
+var idStep = 0;
+var idData = {
+  personalita: '', coping: '', responsabilita: '', emozionePeggiore: '', emozioneMeglio: '', puntoForte: '', puntoDebolezza: '',
+  hardSkills: [], softSkills: [], altreHard: '', altreSoft: '', talenti: [], ruoloGruppo: '',
+  settore: '', settoreAltro: '', dimensione: '', mobilita: '', condizione: '',
+  dopoDiploma: '', dopoDiplomaAltro: '', esperienze: [], esperienzeAltro: '',
+  ostacoli: { soCosaVoglio: 3, competenzeAdeguate: 3, conoscoTerritorio: 3, sostegnoFamiglia: 3, pauraFallire: 3, telefono: 3, stanchezza: 3, nonCapisco: 3, mancaVoglia: 3 },
+  progetto: { breve: '', medio: '', lungo: '' }
+};
+
+var idDataRiflessione = {
+  trattiCarattere: [],
+  altriTrattiCarattere: '',
+  imparatoDagliAltri: '',
+  feedbackRicevuto: '',
+  qualitaAmmirata: '',
+  attivitaSignificativa: '',
+  scopertaSuDiMe: '',
+  momentoIndimenticabile: '',
+  aspettoDaValorizzare: '',
+  pauraRiconosciuta: ''
+};
+
+var feedbackRisposte = {
+  utilita: null,
+  aspettoPreferito: null,
+  aspettoPreferitoAltro: '',
+  competenzaSviluppata: null,
+  competenzaSviluppataAltro: '',
+  partecipazione: null,
+  difficolta: null,
+  rifare: null,
+  preparato: null,
+  moduloPreferito: null,
+  portoConMe: '',
+  apprezzato: '',
+  migliorare: ''
+};
+
+// ==================== DATI DELLA CLASSE ====================
+var CLASSE = {
+  studenti: 24, partecipazione: 88, mindsetCrescita: 90, personalitaPuòCambiare: 90,
+  mbti: { diplomatici: 38, sentinel: 17, esploratori: 13, analisti: 13 },
+  reazioneDifficolta: { evita: 38, rimanda: 38, affronta: 21 },
+  prioritaLavoro: { guadagno: 71, passione: 17, tempoLibero: 8, utilita: 0 },
+  mobilita: { estero: 42, dipende: 38, soloItalia: 8, resta: 13 }, apertoAMobilita: 80,
+  tempoStudio: { meno30: 21, trenta60: 42, unoDue: 21, oltreDue: 4 }, studiaMeno1Ora: 63,
+  motivazione: { molto: 17, abbastanza: 46, poco: 25, perNiente: 8 },
+  spintaPrincipale: { diploma: 47, amicizia: 39, apprendimento: 13, evitareLitigi: 0 },
+  scuolaUtile: { molto: 0, inParte: 75, poco: 17, perNiente: 8 },
+  scuolaPrepara: { molto: 4, abbastanza: 42, poco: 38, perNiente: 17 }, gapScuolaRealtà: 75,
+  votiRispecchianoImpegno: { sempre: 17, aVolte: 58, quasiMai: 4, nonMiImpegno: 0 },
+  ostacoliStudio: { telefono: 46, stanchezza: 42, nonCapisco: 8, mancaVoglia: 8 },
+  gestioneStress: { sport: 33, telefono: 33, parlare: 21, tengoDentro: 13 },
+  attribuzioneSuccesso: { studio: 63, fortuna: 21, portato: 13, profSpiega: 4 },
+  esperienzeLavorative: { regolare: 29, estate: 29, occasionale: 13, mai: 25 },
+  ideeFuture: { chiara: 24, qualcheIdea: 44, ciPenso: 32, nonSo: 0 },
+  dopoDiploma: { lavoro: 42, studi: 42, impresa: 13, nonSo: 4 },
+  influenze: { famiglia: 46, professori: 29, amici: 4, social: 0 },
+  autoDescrizione: { divertente: 59, nessunaRisposta: 18, riflessivo: 18, serio: 6 },
+  pauraGiudizio: { molta: 0, unPo: 6, nessuna: 19, altraRisposta: 31, nessunaRisposta: 44 },
+  consapevolezzaPercezione: { molto: 13, abbastanza: 56, poco: 13, nessunaRisposta: 19 },
+  sottoPressione: { vogliaSpaccare: 38, calcoloTecnico: 38, pauraDeludere: 12, vuoto: 12 },
+  emozioneDecisiva: { farcelaCosti: 54, sottoPressione: 17, concentrato: 13, strategie: 8 },
+  skillCheckDifficolta: { quizTecnici: 70, decisioniSoft: 20, colloquio: 10, imprevisti: 0 },
+  hardSoftComprensione: { perfetta: 15, vaga: 25, capitoGiocando: 50, confuso: 10 },
+  marketMatchRispecchia: { si: 40, inParte: 50, no: 10 },
+  settoriStimolanti: { amministrazione: 30, marketing: 35, risorseUmane: 20, logistica: 15 },
+  gruppoSuccesso: { nomeLogo: 4, slogan: 30, tuttiTre: 66 },
+  gruppoPrimaCosa: { leggereCompito: 43, assegnareRuoli: 30, aprireLink: 9, scrivereNome: 0 },
+  gruppoConflittiRuoli: { valutareCompetenze: 83, tirareSorte: 9, cambiareRuolo: 4, bravoFaIo: 4 },
+  gruppoQualitaImportante: { creativita: 50, ascolto: 25, competenze: 25, velocita: 0 },
+  gruppoCompetenzaMigliore: { organizzazione: 48, lavoroGruppo: 17, creativita: 17, scadenze: 9 },
+  gruppoEmozionePrevalente: { entusiasmo: 70, stress: 20, noia: 10 },
+  gruppoPartecipazione: { tuttiAttivi: 60, qualcunoLavora: 30, unoFaTutto: 10 },
+  gruppoLeadership: { unLeader: 40, decisioneInsieme: 50, confusione: 10 },
+  startupMediaPunteggio: 61.9, startupFinanziate: 8, startupTrend: { ai: 8, sostenibilita: 6, digitalizzazione: 10 },
+  ancoreCarriera: { stabilità: 65, superareSfide: 70, essereCapo: 55, autonomia: 60, curiositàCompetenza: 75, restareQui: 30, aiutareAltri: 50, bilanciamento: 45, creareQualcosa: 68 },
+  quadranti: { personeidee: 35, personedati: 30, cosedati: 20, coseidee: 15 },
+  competenzeChiave: { alfabeticaFunzionale: 68, multilinguistica: 65, matematicaScientifica: 70, digitale: 75, personaleSociale: 58, cittadinanza: 62, imprenditoriale: 68, consapevolezzaCulturale: 50 },
+  autonomiaDecisionale: { daSolo: 30, conSupporto: 60, soloConAltri: 10 },
+  percorsiEsplorati: { universita: 8, its: 5, ifts: 3, afam: 2, galattica: 6, forzeArmate: 2, lavoro: 4 },
+  interesseMedioScouting: 7.5,
+  areaInteresse: { tecnica: 40, umanistica: 20, sociale: 10, artistica: 0, scientifica: 0, nonSo: 30 },
+  motivazioneProseguire: { benessere: 20, lavoroMigliore: 30, diploma: 20, futuroMigliore: 20, soldi: 10 }
+};
+
+// ==================== FUNZIONI UTILITY ====================
+function showToast(msg, color) {
+  var t = document.createElement('div'); t.className = 'toast'; t.style.background = color; t.style.color = '#fff'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(function() { if(t.parentNode) t.parentNode.removeChild(t); }, 3000);
+}
+
+function showScreen(id) { document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); }); document.getElementById(id).classList.add('active'); }
+
+function getCurrentIndex() { var idx = 0; for (var m = 0; m < appState.module; m++) idx += OBJECTIVE_QS.filter(function(q) { return q.module === m; }).length; return idx + appState.qIndex; }
+
+function getCurrentQ() { var moduleQuestions = OBJECTIVE_QS.filter(function(q) { return q.module === appState.module; }); if (appState.qIndex >= moduleQuestions.length) return null; return moduleQuestions[appState.qIndex]; }
+
+function spawnConfetti(n) { var c = document.createElement('div'); c.className = 'celebration'; document.body.appendChild(c); var cols = ['#f59e0b', '#10b981', '#f97316', '#06b6d4', '#ef4444', '#8b5cf6', '#ec4899']; for (var i = 0; i < n; i++) { var f = document.createElement('div'); f.className = 'confetti'; f.style.background = cols[Math.floor(Math.random() * cols.length)]; f.style.left = Math.random() * 100 + '%'; f.style.top = '-10px'; f.style.width = (6 + Math.random() * 10) + 'px'; f.style.height = (6 + Math.random() * 10) + 'px'; f.style.animationDelay = Math.random() * 0.5 + 's'; c.appendChild(f); } setTimeout(function() { if(c.parentNode) c.parentNode.removeChild(c); }, 3000); }
+
+function launchConfetti() { if (typeof confetti !== 'undefined') { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#06b6d4'] }); } }
+
+// ==================== TIMER ====================
+function startTimer(reset) {
+  if (appState.timerInterval) clearInterval(appState.timerInterval);
+  if (reset) appState.timerSeconds = 180 * 60;
+  var circumference = 2 * Math.PI * 24;
+  appState.timerInterval = setInterval(function() {
+    if (appState.timerSeconds <= 0) { clearInterval(appState.timerInterval); appState.timerInterval = null; showToast('Tempo scaduto!', '#ef4444'); setTimeout(function() { checkCodeAndContinue(); }, 1500); return; }
+    appState.timerSeconds--;
+    var mins = Math.floor(appState.timerSeconds / 60); var secs = appState.timerSeconds % 60; var h = Math.floor(mins / 60); var m = mins % 60;
+    var tt = document.getElementById('timerText'); if (tt) tt.textContent = mins;
+    var tl = document.getElementById('timerLabel'); if (tl) tl.textContent = h > 0 ? h + ':' + String(m).padStart(2, '0') + ':' + String(secs).padStart(2, '0') : m + ':' + String(secs).padStart(2, '0');
+    var circle = document.getElementById('timerCircle'); if (circle) circle.style.strokeDashoffset = circumference * (1 - appState.timerSeconds / (180 * 60));
+  }, 1000);
+}
+
+function stopTimer() { if (appState.timerInterval) { clearInterval(appState.timerInterval); appState.timerInterval = null; } }
+
+// ==================== FUNZIONI PER RISPOSTE MULTIPLE ====================
+function toggleMultiple(gI, optIndex, btnElement) {
+  var q = getCurrentQ();
+  if (!q) return;
+  if (appState.answers[gI] !== undefined) return;
+  
+  var selected = appState.multipleSel[gI] || [];
+  var pos = selected.indexOf(optIndex);
+  if (pos === -1) {
+    selected.push(optIndex);
+    if (btnElement) btnElement.classList.add('border-emerald-500', 'bg-emerald-500/10');
+  } else {
+    selected.splice(pos, 1);
+    if (btnElement) btnElement.classList.remove('border-emerald-500', 'bg-emerald-500/10');
+  }
+  appState.multipleSel[gI] = selected;
+  renderQuiz();
+}
+
+function confirmMultiple() {
+  var q = getCurrentQ();
+  if (!q) return;
+  var gI = getCurrentIndex();
+  if (appState.answers[gI] !== undefined) return;
+  
+  var selected = appState.multipleSel[gI] || [];
+  var correctArr = q.correct;
+  
+  var ok = (selected.length === correctArr.length && 
+            correctArr.every(function(c) { return selected.indexOf(c) !== -1; }));
+  
+  appState.answers[gI] = { selected: selected, correct: ok };
+  if (ok) appState.score += 10;
+  renderQuiz();
+}
+
+// ==================== RENDER QUIZ ====================
+function renderQuiz() {
+  var q = getCurrentQ(); if (!q) return;
+  var gI = getCurrentIndex(); var prev = appState.answers[gI]; var done = prev !== undefined; var letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  var progressPercent = ((gI + 1) / TOTAL_QS * 100); var progressEl = document.getElementById('globalProgress'); if (progressEl) progressEl.style.width = progressPercent + '%';
+  var progressLabel = document.getElementById('progressLabel'); if (progressLabel) progressLabel.textContent = 'Domanda ' + (gI + 1) + ' di ' + TOTAL_QS;
+  var phaseLabel = document.getElementById('phaseLabel'); if (phaseLabel) phaseLabel.textContent = MODULES[appState.module].title;
+  var phaseBadge = document.getElementById('phaseBadge'); if (phaseBadge) phaseBadge.innerHTML = '<div class="phase-badge"><i class="fa-solid ' + MODULES[appState.module].icon + '"></i> ' + MODULES[appState.module].title + '</div>';
+  var dots = document.getElementById('phaseDots'); if (dots) { dots.innerHTML = ''; for (var i = 0; i < MODULES.length; i++) { var d = document.createElement('div'); d.className = 'phase-dot' + (i === appState.module ? ' active' : '') + (i < appState.module ? ' done' : ''); dots.appendChild(d); } }
+  var tb = (q.icon && q.topic) ? '<div class="topic-badge" style="background:' + q.topicColor + '10;border-color:' + q.topicColor + '30"><i class="fa-solid ' + q.icon + '" style="color:' + q.topicColor + '"></i><span style="color:' + q.topicColor + '">' + q.topic + '</span></div>' : '';
+  var card = document.getElementById('questionContent'); if (!card) return;
+  
+  if (q.type === 'single' || q.type === 'truefalse') {
+    var opts = q.type === 'truefalse' ? ['Vero', 'Falso'] : q.opts;
+    var h = '<p class="text-lg font-semibold mb-6">' + q.q + '</p><div class="space-y-3">';
+    for (var i = 0; i < opts.length; i++) { var cls = 'option-btn' + (done ? ' locked' : ''); if (done && prev.selected === i && i === q.correct) cls += ' correct'; if (done && prev.selected === i && i !== q.correct) cls += ' wrong'; if (done && i === q.correct) cls += ' correct'; h += '<button class="' + cls + '" ' + (done ? 'disabled' : 'onclick="selAns(' + i + ')"') + '><span class="letter">' + letters[i] + '</span><span>' + opts[i] + '</span></button>'; }
+    card.innerHTML = tb + h + '</div>';
+  }
+  else if (q.type === 'completion') {
+    var qt = q.q.replace('______', '<span class="completion-blank" style="display:inline-block;min-width:120px;border-bottom:3px solid #f59e0b;margin:0 0.25rem;font-weight:bold">________</span>');
+    var h2 = '<p class="text-lg font-semibold mb-6">' + qt + '</p><div class="space-y-3">';
+    for (var i = 0; i < q.opts.length; i++) { var cls2 = 'option-btn' + (done ? ' locked' : ''); if (done && prev.selected === i && i === q.correct) cls2 += ' correct'; if (done && prev.selected === i && i !== q.correct) cls2 += ' wrong'; if (done && i === q.correct) cls2 += ' correct'; h2 += '<button class="' + cls2 + '" ' + (done ? 'disabled' : 'onclick="selAns(' + i + ')"') + '><span class="letter">' + letters[i] + '</span><span>' + q.opts[i] + '</span></button>'; }
+    card.innerHTML = tb + h2 + '</div>';
+  }
+  else if (q.type === 'ranking') {
+    var sv2 = appState.rankS[gI] || q.items.map(function(_, i) { return i; }); var h4 = tb + '<p class="text-lg font-semibold mb-6">' + q.q + '</p>';
+    for (var i = 0; i < sv2.length; i++) { h4 += '<div class="ranking-item" style="display:flex;align-items:center;gap:1rem;padding:0.75rem;background:#292524;border-radius:0.5rem;margin:0.5rem 0"><div class="ranking-rank" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#1c1917;border-radius:0.5rem;font-weight:bold">' + (i + 1) + '</div><div class="ranking-text" style="flex:1">' + q.items[sv2[i]] + '</div><button class="ranking-up" style="padding:0.5rem 0.75rem;background:#f59e0b;color:#0c0a09;border-radius:0.5rem;border:none;font-weight:700;cursor:pointer" ' + (done ? 'disabled' : 'onclick="rankMove(' + gI + ',' + i + ',\'up\')"') + '>⬆️</button><button class="ranking-down" style="padding:0.5rem 0.75rem;background:#f59e0b;color:#0c0a09;border-radius:0.5rem;border:none;font-weight:700;cursor:pointer" ' + (done ? 'disabled' : 'onclick="rankMove(' + gI + ',' + i + ',\'down\')"') + '>⬇️</button></div>'; }
+    if (!done) h4 += '<button class="btn-primary w-full mt-4" onclick="subRank(' + gI + ')">✅ Conferma</button>'; if (done) h4 += '<p class="text-center mt-4 text-emerald-400">✓ Ordine confermato!</p>'; card.innerHTML = h4;
+  }
+  else if (q.type === 'sequence') {
+    var sv5 = appState.seqS[gI] || []; var h7 = tb + '<p class="text-lg font-semibold mb-6">' + q.q + '</p><div class="seq-options" style="display:flex;flex-direction:column;gap:0.5rem;margin:1rem 0">';
+    for (var i = 0; i < q.items.length; i++) { var inS = sv5.indexOf(i) !== -1; h7 += '<div class="seq-item' + (inS ? ' selected' : '') + '" style="padding:0.75rem;background:#292524;border:2px solid #44403c;border-radius:0.75rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center"' + (done || inS ? '' : 'onclick="selSeq(' + gI + ',' + i + ')"') + '><span class="seq-text" style="flex:1">' + q.items[i] + '</span>' + (inS ? '<span class="seq-rank" style="width:30px;height:30px;background:#1c1917;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.8rem">' + (sv5.indexOf(i) + 1) + '</span>' : '') + '</div>'; }
+    h7 += '</div><div class="seq-order" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem;padding:0.75rem;background:#1c1917;border-radius:0.75rem">';
+    if (sv5.length) h7 += '<strong>Ordine:</strong> ' + sv5.map(function(idx) { return '<span style="padding:0.25rem 0.75rem;background:rgba(16,185,129,0.2);border-radius:1rem">' + q.items[idx] + '</span>'; }).join(' → ');
+    h7 += '</div>'; if (!done && sv5.length === q.items.length) h7 += '<button class="btn-primary w-full mt-4" onclick="subSeq(' + gI + ')">✅ Conferma</button>';
+    if (done) h7 += '<p class="text-center mt-4 text-emerald-400">✓ Confermato!</p>'; card.innerHTML = h7;
+  }
+  else if (q.type === 'multiple') {
+    var optsMult = q.opts;
+    var selectedMult = appState.multipleSel[gI] || [];
+    var doneMult = appState.answers[gI] !== undefined;
+    
+    var htmlMult = tb + '<p class="text-lg font-semibold mb-6">' + q.q + '</p>';
+    htmlMult += '<p class="text-sm text-muted mb-3"><i class="fa-regular fa-square-check"></i> Scegli tutte le opzioni corrette</p>';
+    htmlMult += '<div class="space-y-3">';
+    
+    for (var i = 0; i < optsMult.length; i++) {
+      var isChecked = selectedMult.indexOf(i) !== -1;
+      var clsMult = 'option-btn';
+      if (doneMult) {
+        clsMult += ' locked';
+        var isCorrectOpt = q.correct.indexOf(i) !== -1;
+        if (isChecked && isCorrectOpt) clsMult += ' correct';
+        else if (isChecked && !isCorrectOpt) clsMult += ' wrong';
+      } else if (isChecked) {
+        clsMult += ' border-emerald-500 bg-emerald-500/10';
+      }
+      htmlMult += '<button class="' + clsMult + '" ' + (doneMult ? 'disabled' : 'onclick="toggleMultiple(' + gI + ',' + i + ', this)"') + ' style="display:flex;align-items:center;gap:0.75rem;">';
+      htmlMult += '<span class="letter">' + letters[i] + '</span>';
+      htmlMult += '<span>' + optsMult[i] + '</span>';
+      if (!doneMult && isChecked) htmlMult += '<span class="ml-auto text-emerald-400"><i class="fa-regular fa-check-circle"></i> Selezionata</span>';
+      htmlMult += '</button>';
+    }
+    
+    htmlMult += '</div>';
+    if (!doneMult && selectedMult.length > 0) {
+      htmlMult += '<button class="btn-primary w-full mt-4" onclick="confirmMultiple()">✅ Conferma risposta</button>';
+    } else if (doneMult) {
+      htmlMult += '<p class="text-center mt-4 text-emerald-400">✓ Risposta confermata!</p>';
+    } else {
+      htmlMult += '<p class="text-center mt-4 text-muted text-sm">Seleziona una o più opzioni, poi conferma</p>';
+    }
+    
+    card.innerHTML = htmlMult;
+  }
+  
+  var exp = document.getElementById('explanationArea'); if (exp) exp.innerHTML = (done && q.explain) ? '<div class="explanation-box"><p class="text-sm">💡 ' + q.explain + '</p></div>' : '';
+  var mq = OBJECTIVE_QS.filter(function(qq) { return qq.module === appState.module; }); var isLast = (appState.module === MODULES.length - 1 && appState.qIndex === mq.length - 1);
+  var nextBtn = document.getElementById('nextBtn'); if (nextBtn) { nextBtn.innerHTML = isLast ? '⏸️ Vai al profilo' : 'Prossima Domanda →'; nextBtn.disabled = !done; }
+  var scoreDisplay = document.getElementById('scoreDisplay'); if (scoreDisplay) scoreDisplay.textContent = appState.score;
+}
+
+function selAns(v) { var q = getCurrentQ(); if (!q) return; if (appState.answers[getCurrentIndex()] !== undefined) return; var gI = getCurrentIndex(); var ok = (v === q.correct); appState.answers[gI] = { selected: v, correct: ok }; if (ok) appState.score += 10; renderQuiz(); }
+function rankMove(g, p, d) { if (appState.answers[g]) return; var q = getCurrentQ(); if (!q) return; var s = (appState.rankS[g] || q.items.map(function(_, i) { return i; })).slice(); if (d === 'up' && p > 0) { var tmp = s[p - 1]; s[p - 1] = s[p]; s[p] = tmp; } if (d === 'down' && p < s.length - 1) { var tmp2 = s[p]; s[p] = s[p + 1]; s[p + 1] = tmp2; } appState.rankS[g] = s; renderQuiz(); }
+function subRank(g) { if (appState.answers[g]) return; var q = getCurrentQ(); if (!q) return; var s = appState.rankS[g]; var ok = true; if (!s) ok = false; else for (var i = 0; i < q.correct.length; i++) if (s[i] !== q.correct[i]) { ok = false; break; } appState.answers[g] = { selected: s, correct: ok }; if (ok) appState.score += 10; renderQuiz(); }
+function selSeq(g, i) { if (appState.answers[g]) return; var sv = (appState.seqS[g] || []).slice(); if (sv.indexOf(i) === -1) { sv.push(i); appState.seqS[g] = sv; renderQuiz(); } }
+function subSeq(g) { if (appState.answers[g]) return; var q = getCurrentQ(); if (!q) return; var sv = appState.seqS[g]; var ok = true; if (!sv || sv.length !== q.correct.length) ok = false; else for (var i = 0; i < q.correct.length; i++) if (sv[i] !== q.correct[i]) { ok = false; break; } appState.answers[g] = { selected: sv, correct: ok }; if (ok) appState.score += 10; renderQuiz(); }
+function nextQ() { var mq = OBJECTIVE_QS.filter(function(q) { return q.module === appState.module; }); if (appState.qIndex < mq.length - 1) { appState.qIndex++; } else if (appState.module < MODULES.length - 1) { appState.module++; appState.qIndex = 0; spawnConfetti(120); showToast('🎉 ' + MODULES[appState.module].title + ' completato!', '#10b981'); } else { stopTimer(); showPause(); return; } renderQuiz(); }
+
+function checkCodeAndContinue() {
+  var codeInput = document.getElementById('accessCode');
+  if (codeInput && codeInput.value === '9911') {
+    startIdentikit();
+  } else {
+    showToast('Codice errato. Riprova.', '#ef4444');
+  }
+}
+
+// Funzione per accesso diretto alla seconda parte con codice 8822
+function showSecondPartModal() {
+  var name = document.getElementById('nameInput').value.trim();
+  if (name.length < 2) {
+    showToast('Inserisci prima il tuo nome e cognome', '#ef4444');
+    return;
+  }
+  appState.name = name;
+  appState.readiness = parseInt(document.getElementById('readinessSlider').value);
+  
+  var modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'codeModal';
+  modal.innerHTML = `
+    <div class="modal-container text-center">
+      <i class="fa-solid fa-key text-4xl text-amber-400 mb-4"></i>
+      <h3 class="text-xl font-bold mb-2">Accesso alla seconda parte</h3>
+      <p class="text-muted text-sm mb-4">Inserisci il codice per accedere direttamente alla compilazione del profilo personale e ai report.</p>
+      <input type="text" id="directAccessCode" placeholder="Codice" class="w-full px-4 py-3 rounded-lg border-2 bg-transparent text-white focus:outline-none focus:border-amber-500 mb-4 text-center text-xl" style="border-color:var(--border)">
+      <div class="flex gap-3">
+        <button class="btn-secondary flex-1" onclick="closeModal()">Annulla</button>
+        <button class="btn-primary flex-1" onclick="verifyDirectAccess()">Verifica</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function closeModal() {
+  var modal = document.getElementById('codeModal');
+  if (modal) modal.remove();
+}
+
+function verifyDirectAccess() {
+  var code = document.getElementById('directAccessCode').value;
+  if (code === '8822') {
+    closeModal();
+    startIdentikit();
+  } else {
+    showToast('Codice errato. Accesso negato.', '#ef4444');
+  }
+}
+
+function showPause() {
+  stopTimer(); var done = 0; for (var i = 0; i < appState.answers.length; i++) if (appState.answers[i] !== undefined) done++;
+  var pct = Math.round(done / TOTAL_QS * 100);
+  document.getElementById('pauseContent').innerHTML = '<div class="glass p-8 text-center"><div class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 text-sm font-semibold"><i class="fa-solid fa-check-double"></i> Quiz completato</div><i class="fa-solid fa-clipboard-check text-6xl mb-4" style="color:#10b981"></i><h2 class="text-2xl font-bold mb-2">Quiz terminato!</h2><p class="mb-4 text-muted">Hai completato <strong>' + done + '/' + TOTAL_QS + '</strong> domande.</p><div class="progress-track mb-4"><div class="progress-fill" style="width:' + pct + '%;background:#10b981"></div></div><p class="mb-4">Inserisci il codice per accedere alla seconda parte:</p><div class="mb-4"><input type="text" id="accessCode" placeholder="Inserisci codice" class="w-full px-4 py-3 rounded-lg border-2 bg-transparent text-white focus:outline-none focus:border-amber-500" style="border-color:var(--border)"></div><button class="btn-primary" onclick="checkCodeAndContinue()"><i class="fa-solid fa-fingerprint mr-2"></i>Verifica e prosegui</button></div>';
+  showScreen('pauseScreen');
+}
+
+// ==================== IDENTIKIT ====================
+var HARD_SKILLS = ['Excel', 'Programmazione', 'Lingue', 'Disegno', 'Contabilità', 'Fotografia', 'Videoediting', 'Scrittura', 'Social Media', 'Riparazioni', 'Cucina', 'Musica'];
+var SOFT_SKILLS = ['Comunicazione', 'Lavoro squadra', 'Problem Solving', 'Leadership', 'Organizzazione', 'Adattabilità', 'Ascolto', 'Gestione conflitti', 'Negoziazione', 'Public Speaking', 'Creatività', 'Gestione stress', 'Puntualità', 'Empatia'];
+var ESPERIENZE_OPTS = ['Stage', 'Erasmus+', 'Apprendistato', 'Volontariato', 'Lavoro part-time', 'Nessuna'];
+var OPZIONI_TALENTO = ['Saper fare (pratico)', 'Saper risolvere (creativo)', 'Saper dire (relazionale)'];
+
+function startIdentikit() { idStep = 0; showScreen('identikitScreen'); renderIdStep(); }
+
+function togglePillRiflessione(val) {
+  var idx = idDataRiflessione.trattiCarattere.indexOf(val);
+  if (idx === -1) idDataRiflessione.trattiCarattere.push(val);
+  else idDataRiflessione.trattiCarattere.splice(idx, 1);
+  renderIdFields(6);
+}
+
+function toggleTalento(val) {
+  var idx = idData.talenti.indexOf(val);
+  if (idx === -1) idData.talenti.push(val);
+  else idData.talenti.splice(idx, 1);
+  renderIdFields(1);
+}
+
+function renderIdStep() {
+  var bar = document.getElementById('idStepBar'); bar.innerHTML = '';
+  var steps = ['Risorse', 'Abilità', 'Ambienti', 'Percorsi', 'Ostacoli', 'Riflessione', 'Feedback', 'Progetto'];
+  for (var i = 0; i < steps.length; i++) { var p = document.createElement('div'); p.className = 'id-step-pill' + (i === idStep ? ' active' : '') + (i < idStep ? ' done' : ''); p.textContent = (i + 1) + '. ' + steps[i]; p.setAttribute('data-idx', i); bar.appendChild(p); }
+  var icons = ['fa-user-circle', 'fa-hand-sparkles', 'fa-building', 'fa-road', 'fa-shield-halved', 'fa-brain', 'fa-comments', 'fa-paper-plane'];
+  var titles = [
+    'Le tue risorse personali',
+    'Le tue abilità',
+    'Gli ambienti compatibili',
+    'I percorsi concreti',
+    'Cosa ti ferma davvero',
+    'La tua riflessione personale',
+    'Feedback e crescita',
+    'Il tuo progetto di vita'
+  ];
+  var descs = [
+    'Personalità, coping, responsabilità, emozioni.',
+    'Hard skill, soft skill, talento, ruolo.',
+    'Settori, dimensioni, mobilità.',
+    'Opportunità formative ed esperienze.',
+    'Ostacoli allo studio e barriere personali.',
+    'Riflessioni su ciò che hai scoperto di te.',
+    'Cosa hai imparato dagli altri e dai feedback.',
+    'Breve, medio e lungo termine.'
+  ];
+  var intros = [
+    'Dai test 16Personalità, SWOT e attività sulle emozioni.',
+    'Dalle simulazioni Skill Check e Market Match.',
+    'Dalle riflessioni su lavoro ideale.',
+    'Da ITS, IFTS, AFAM, Università, Forze Armate.',
+    'Da ciò che ti blocca nello studio quotidiano.',
+    'Dalle attività che ti hanno fatto riflettere su te stesso.',
+    'Dai lavori di gruppo e dai feedback ricevuti dai compagni.',
+    'I tuoi obiettivi nel tempo, dopo aver acquisito consapevolezza.'
+  ];
+  document.getElementById('idStepContent').innerHTML = '<div><span class="id-step-icon"><i class="fa-solid ' + icons[idStep] + '"></i></span><h2 class="id-step-title">' + titles[idStep] + '</h2><p class="id-step-desc">' + descs[idStep] + '</p><div class="id-section-intro"><i class="fa-regular fa-lightbulb mr-1"></i> ' + intros[idStep] + '</div><div id="idFields"></div></div>';
+  document.getElementById('idPrevBtn').style.display = idStep === 0 ? 'none' : 'inline-flex';
+  document.getElementById('idNextBtn').innerHTML = idStep === steps.length - 1 ? '<i class="fa-solid fa-file-pdf mr-2"></i>Genera Report' : 'Avanti <i class="fa-solid fa-arrow-right ml-2"></i>';
+  renderIdFields(idStep);
+  bar.onclick = function(e) { var pill = e.target.closest('.id-step-pill'); if (pill && parseInt(pill.getAttribute('data-idx')) < idStep) { idStep = parseInt(pill.getAttribute('data-idx')); renderIdStep(); } };
+}
+
+function renderIdFields(step) {
+  var f = document.getElementById('idFields'); if (!f) return;
+  
+  if (step === 0) {
+    f.innerHTML = '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-user"></i> Personalità</label><select class="id-select" onchange="idData.personalita=this.value"><option value="">Seleziona</option><option value="Diplomatico">Diplomatico (Empatia)</option><option value="Analista">Analista (Logica)</option><option value="Sentinel">Sentinel (Organizzazione)</option><option value="Esploratore">Esploratore (Flessibilità)</option></select></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-heart"></i> Strategia di coping</label><select class="id-select" onchange="idData.coping=this.value"><option value="">Seleziona</option><option value="Reset Fisico">Reset Fisico</option><option value="Scomposizione">Scomposizione</option><option value="Supporto Sociale">Supporto Sociale</option><option value="Ancoraggio">Ancoraggio</option></select></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-bullseye"></i> A chi attribuisci i tuoi successi?</label><select class="id-select" onchange="idData.responsabilita=this.value"><option value="">Seleziona</option><option value="Alle mie capacità">Alle mie capacità</option><option value="Alla fortuna o agli altri">Alla fortuna o agli altri</option><option value="Un po\' a me e un po\' alla fortuna">Un po\' a me e un po\' alla fortuna</option></select></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-cloud"></i> Emozione che gestisci peggio</label><select class="id-select" onchange="idData.emozionePeggiore=this.value"><option value="">Seleziona</option><option value="Paura">Paura</option><option value="Rabbia">Rabbia</option><option value="Tristezza">Tristezza</option><option value="Ansia">Ansia</option></select></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-cloud-sun"></i> Emozione che gestisci meglio</label><select class="id-select" onchange="idData.emozioneMeglio=this.value"><option value="">Seleziona</option><option value="Paura">Paura</option><option value="Rabbia">Rabbia</option><option value="Tristezza">Tristezza</option><option value="Ansia">Ansia</option><option value="Gioia">Gioia</option><option value="Fiducia">Fiducia</option></select></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-star"></i> Punto di forza SWOT</label><textarea class="id-textarea" placeholder="Es. Sono resiliente..." oninput="idData.puntoForte=this.value">' + (idData.puntoForte || '') + '</textarea></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-triangle-exclamation"></i> Punto di debolezza SWOT</label><textarea class="id-textarea" placeholder="Es. Faccio fatica a gestire le scadenze..." oninput="idData.puntoDebolezza=this.value">' + (idData.puntoDebolezza || '') + '</textarea></div>';
+  } 
+  else if (step === 1) {
+    var hs = '<div class="id-pills-grid">' + HARD_SKILLS.map(function(s) { return '<div class="id-pill' + (idData.hardSkills.indexOf(s) !== -1 ? ' selected' : '') + '" onclick="togglePill(\'hardSkills\',\'' + s + '\')">' + s + '</div>'; }).join('') + '</div>';
+    var ss = '<div class="id-pills-grid">' + SOFT_SKILLS.map(function(s) { return '<div class="id-pill' + (idData.softSkills.indexOf(s) !== -1 ? ' selected' : '') + '" onclick="togglePill(\'softSkills\',\'' + s + '\')">' + s + '</div>'; }).join('') + '</div>';
+    var talentiHtml = '<div class="id-pills-grid">' + OPZIONI_TALENTO.map(function(t) { return '<div class="id-pill' + (idData.talenti.indexOf(t) !== -1 ? ' selected' : '') + '" onclick="toggleTalento(\'' + t + '\')">' + t + '</div>'; }).join('') + '</div>';
+    f.innerHTML = '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-wrench"></i> Hard Skill</label>' + hs + '<textarea class="id-textarea mt-2" placeholder="Altre (es. SEO, AutoCAD)" oninput="idData.altreHard=this.value">' + (idData.altreHard || '') + '</textarea></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-users"></i> Soft Skill</label>' + ss + '<textarea class="id-textarea mt-2" placeholder="Altre (es. negoziazione)" oninput="idData.altreSoft=this.value">' + (idData.altreSoft || '') + '</textarea></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-gem"></i> Talento (puoi selezionare più opzioni)</label>' + talentiHtml + '</div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-user-tie"></i> Ruolo nel gruppo</label><input class="id-textarea" placeholder="CEO, creativo, operativo..." value="' + (idData.ruoloGruppo || '') + '" oninput="idData.ruoloGruppo=this.value"></div>';
+  } 
+  else if (step === 2) {
+    f.innerHTML = '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-briefcase"></i> Settore</label><select class="id-select" onchange="idData.settore=this.value;document.getElementById(\'settoreAltroDiv\').style.display=this.value===\'Altro\'?\'block\':\'none\'"><option value="">Seleziona</option><option value="Digitale/IT">Digitale/IT</option><option value="Commercio">Commercio</option><option value="Arte/Design">Arte/Design</option><option value="Servizi Sociali">Servizi Sociali</option><option value="Industria">Industria</option><option value="Enogastronomia">Enogastronomia</option><option value="Altro">Altro</option></select><div id="settoreAltroDiv" style="display:none;margin-top:8px"><input type="text" class="id-textarea" placeholder="Specifica" oninput="idData.settoreAltro=this.value"></div></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-building"></i> Dimensione</label><select class="id-select" onchange="idData.dimensione=this.value"><option value="">Seleziona</option><option value="Grande azienda">Grande azienda</option><option value="PMI">PMI</option><option value="Start-up">Start-up</option><option value="Libero professionista">Libero professionista</option><option value="Impresa propria">Impresa propria</option></select></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-plane"></i> Mobilità</label><select class="id-select" onchange="idData.mobilita=this.value"><option value="">Seleziona</option><option value="Resto in città">Resto in città</option><option value="Solo Italia">Solo Italia</option><option value="Europa">Anche Europa</option><option value="Mondo">Ovunque</option></select></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-scale-balanced"></i> Condizione indispensabile</label><select class="id-select" onchange="idData.condizione=this.value"><option value="">Seleziona</option><option value="Stipendio alto">Stipendio alto</option><option value="Passione">Passione</option><option value="Tempo libero">Tempo libero</option><option value="Stabilità">Stabilità</option><option value="Crescita">Crescita</option></select></div>';
+  } 
+  else if (step === 3) {
+    var esp = '<div class="id-pills-grid">' + ESPERIENZE_OPTS.map(function(e) { return '<div class="id-pill' + (idData.esperienze.indexOf(e) !== -1 ? ' selected' : '') + '" onclick="togglePill(\'esperienze\',\'' + e + '\')">' + e + '</div>'; }).join('') + '</div>';
+    f.innerHTML = '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-graduation-cap"></i> Dopo il diploma</label><select class="id-select" id="idDopo" onchange="idData.dopoDiploma=this.value;document.getElementById(\'dopoAltroDiv\').style.display=this.value===\'Altro\'?\'block\':\'none\'"><option value="">Seleziona</option><option value="Università">Università</option><option value="ITS Academy">ITS Academy</option><option value="IFTS">IFTS</option><option value="AFAM">AFAM</option><option value="Forze Armate/Polizia">Forze Armate/Polizia</option><option value="Lavoro">Lavoro</option><option value="Altro">Altro</option></select><div id="dopoAltroDiv" style="display:none;margin-top:8px"><input type="text" class="id-textarea" placeholder="Specifica" oninput="idData.dopoDiplomaAltro=this.value"></div></div><div class="id-field"><label class="id-field-label"><i class="fa-regular fa-suitcase"></i> Esperienze desiderate</label>' + esp + '<textarea class="id-textarea mt-2" placeholder="Altre esperienze" oninput="idData.esperienzeAltro=this.value">' + (idData.esperienzeAltro || '') + '</textarea></div>';
+  } 
+  else if (step === 4) {
+    var ostFields = ['soCosaVoglio', 'competenzeAdeguate', 'conoscoTerritorio', 'sostegnoFamiglia', 'pauraFallire', 'telefono', 'stanchezza', 'nonCapisco', 'mancaVoglia'];
+    var ostLabelsMap = { soCosaVoglio: 'So cosa voglio fare dopo il diploma', competenzeAdeguate: 'Le mie competenze sono adeguate', conoscoTerritorio: 'Conosco le opportunità del territorio', sostegnoFamiglia: 'La mia famiglia mi supporta', pauraFallire: 'Ho paura di fallire', telefono: 'Il telefono / i social mi distraggono', stanchezza: 'La stanchezza mi impedisce di studiare', nonCapisco: 'Non capisco la materia', mancaVoglia: 'Mi manca la voglia di studiare' };
+    var html = '<p class="text-sm text-muted mb-4">Da 1 (per niente) a 5 (moltissimo)</p>';
+    for (var i = 0; i < ostFields.length; i++) { var k = ostFields[i]; var val = idData.ostacoli[k]; html += '<div class="id-field"><label class="id-field-label">' + ostLabelsMap[k] + '</label><div class="id-likert">'; for (var v = 1; v <= 5; v++) { html += '<div class="id-likert-btn' + (val === v ? ' selected' : '') + '" onclick="idData.ostacoli.' + k + '=' + v + ';renderIdFields(4)">' + v + '</div>'; } html += '</div><div class="id-likert-labels"><span>Per niente</span><span>Poco</span><span>Abbastanza</span><span>Molto</span><span>Moltissimo</span></div></div>'; }
+    f.innerHTML = html;
+  } 
+  else if (step === 5) {
+    f.innerHTML = '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-compass"></i> Qual è stata l\'attività che ti ha fatto riflettere di più su te stesso? Perché?</label><textarea class="id-textarea" placeholder="Es. L\'attività sulla Finestra di Johari mi ha fatto capire che..." oninput="idDataRiflessione.attivitaSignificativa=this.value">' + (idDataRiflessione.attivitaSignificativa || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-lightbulb"></i> Cosa hai scoperto di te che non sapevi prima di questo percorso?</label><textarea class="id-textarea" placeholder="Es. Ho scoperto di essere più determinato di quanto credessi..." oninput="idDataRiflessione.scopertaSuDiMe=this.value">' + (idDataRiflessione.scopertaSuDiMe || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-clock"></i> Quale momento del corso ti è rimasto più impresso?</label><textarea class="id-textarea" placeholder="Es. Il video del rigore emotivo mi ha colpito perché..." oninput="idDataRiflessione.momentoIndimenticabile=this.value">' + (idDataRiflessione.momentoIndimenticabile || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-star"></i> C\'è un aspetto del tuo carattere che vorresti valorizzare di più?</label><textarea class="id-textarea" placeholder="Es. La mia creatività, perché spesso non la esprimo abbastanza..." oninput="idDataRiflessione.aspettoDaValorizzare=this.value">' + (idDataRiflessione.aspettoDaValorizzare || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-face-frown"></i> Quale paura o insicurezza hai riconosciuto in te stesso durante le attività?</label><textarea class="id-textarea" placeholder="Es. Ho paura di sbagliare e di essere giudicato..." oninput="idDataRiflessione.pauraRiconosciuta=this.value">' + (idDataRiflessione.pauraRiconosciuta || '') + '</textarea></div>';
+  } 
+  else if (step === 6) {
+    var trattiHtml = '<div class="id-pills-grid">';
+    var trattiList = ['socievole', 'timido', 'creativo', 'preciso', 'distratto', 'empatico', 'determinato', 'ansioso', 'paziente', 'leader'];
+    for (var i = 0; i < trattiList.length; i++) { var t = trattiList[i]; var isSelected = idDataRiflessione.trattiCarattere.indexOf(t) !== -1; trattiHtml += '<div class="id-pill' + (isSelected ? ' selected' : '') + '" onclick="togglePillRiflessione(\'' + t + '\')">' + t.charAt(0).toUpperCase() + t.slice(1) + '</div>'; }
+    trattiHtml += '</div>';
+    f.innerHTML = '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-face-smile"></i> Quali tratti del tuo carattere ti rappresentano di più?</label>' + trattiHtml + '<textarea class="id-textarea mt-2" placeholder="Altri tratti che ti descrivono..." oninput="idDataRiflessione.altriTrattiCarattere=this.value">' + (idDataRiflessione.altriTrattiCarattere || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-handshake"></i> Cosa hai imparato dagli altri membri del tuo gruppo?</label><textarea class="id-textarea" placeholder="Es. Ho imparato che ascoltare è importante quanto parlare..." oninput="idDataRiflessione.imparatoDagliAltri=this.value">' + (idDataRiflessione.imparatoDagliAltri || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-message"></i> C\'è stato un feedback ricevuto che ti ha particolarmente colpito?</label><textarea class="id-textarea" placeholder="Es. Un compagno mi ha detto che sono più determinato di quanto pensassi..." oninput="idDataRiflessione.feedbackRicevuto=this.value">' + (idDataRiflessione.feedbackRicevuto || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-heart"></i> Quale qualità dei tuoi compagni hai ammirato o vorresti sviluppare?</label><textarea class="id-textarea" placeholder="Es. La pazienza di Marco, la creatività di Chiara..." oninput="idDataRiflessione.qualitaAmmirata=this.value">' + (idDataRiflessione.qualitaAmmirata || '') + '</textarea></div>';
+  } 
+  else if (step === 7) {
+    f.innerHTML = '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-clock"></i> Breve termine (3-6 mesi)</label><textarea class="id-textarea" placeholder="Cosa vuoi raggiungere nei prossimi mesi?" oninput="idData.progetto.breve=this.value">' + (idData.progetto.breve || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-calendar"></i> Medio termine (1 anno)</label><textarea class="id-textarea" placeholder="Dove ti vedi tra un anno?" oninput="idData.progetto.medio=this.value">' + (idData.progetto.medio || '') + '</textarea></div>' +
+                   '<div class="id-field"><label class="id-field-label"><i class="fa-regular fa-rocket"></i> Lungo termine (5 anni)</label><textarea class="id-textarea" placeholder="Qual è il tuo sogno a lungo termine?" oninput="idData.progetto.lungo=this.value">' + (idData.progetto.lungo || '') + '</textarea></div>';
+  }
+}
+
+function togglePill(arr, val) { var idx = idData[arr].indexOf(val); if (idx === -1) idData[arr].push(val); else idData[arr].splice(idx, 1); renderIdFields(idStep); }
+function idNav(dir) { if (dir === 1 && idStep === 7) { showThankYouScreen(); return; } idStep = Math.max(0, Math.min(7, idStep + dir)); renderIdStep(); }
+
+// ==================== FUNZIONE PER APRIRE REPORT IN MODALE ====================
+function openReportModal(htmlContent, title) {
+  var existingModal = document.querySelector('.report-modal');
+  if (existingModal) existingModal.remove();
+  
+  var modal = document.createElement('div');
+  modal.className = 'report-modal';
+  modal.innerHTML = `
+    <div class="report-modal-content">
+      <div class="report-modal-header">
+        <h3><i class="fa-solid fa-file-alt"></i> ${title}</h3>
+        <button class="close-modal" onclick="this.closest('.report-modal').remove()">&times;</button>
+      </div>
+      <div id="reportContent" style="padding: 1.5rem; max-height: 70vh; overflow-y: auto; background: white;">
+        ${htmlContent}
+      </div>
+      <div class="report-print-footer">
+        <button class="report-print-btn" onclick="printReportFromModalWithCanvas()">
+          <i class="fa-solid fa-print"></i> Stampa / Salva PDF
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  
+  window.printReportFromModalWithCanvas = function() {
+    var canvas = document.getElementById('kiviatCanvasReport');
+    if (canvas && canvas._chart) {
+      setTimeout(function() {
+        try {
+          var imageDataURL = canvas.toDataURL('image/png');
+          var printContent = document.getElementById('reportContent').innerHTML;
+          printContent = printContent.replace('<canvas id="kiviatCanvasReport"', '<img id="kiviatImageReport" src="' + imageDataURL + '" style="max-width:500px; margin:0 auto; display:block;"');
+          printContent = printContent.replace(/width="[^"]*"/g, '');
+          printContent = printContent.replace(/height="[^"]*"/g, '');
+          printContent = printContent.replace('</canvas>', '');
+          
+          var printWindow = window.open('', '_blank');
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>${title}</title>
+              <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+              <style>
+                *{margin:0;padding:0;box-sizing:border-box}
+                body{font-family:'DM Sans',sans-serif;background:white;color:#1a1a1a;padding:2rem}
+                .rpt{max-width:1000px;margin:0 auto}
+                .rpt h1{font-size:1.8rem;color:#0f766e;border-left:4px solid #10b981;padding-left:1rem;margin-bottom:1rem}
+                .rpt h2{font-size:1.2rem;color:#0f766e;margin:1.5rem 0 0.75rem;border-bottom:2px solid #e2e8f0;padding-bottom:0.5rem;display:flex;align-items:center;gap:0.75rem}
+                .rpt h2 i{color:#f59e0b;font-size:1.3rem}
+                .rpt h3{font-size:1rem;color:#0f766e;margin:1rem 0 0.5rem 0;padding-left:0.5rem;border-left:3px solid}
+                .rpt p{font-size:.87rem;color:#475569;line-height:1.6}
+                .rpt-score-card{background:#f0fdf4;border:2px solid #10b981;border-radius:16px;padding:1.5rem;text-align:center;margin:1.5rem 0}
+                .rpt-score-num{font-size:2.5rem;font-weight:800;color:#0d9488}
+                .rpt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+                .rpt-grid-card{background:#f8fafc;border-radius:12px;padding:1rem;text-align:center;border-left:4px solid}
+                .rpt-grid-card .val{font-size:1.3rem;font-weight:700}
+                .rpt-bar{margin:.4rem 0}
+                .rpt-bar-track{height:7px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+                .rpt-bar-fill{height:100%;border-radius:4px}
+                .rpt-tag{display:inline-block;padding:.2rem .6rem;border-radius:1rem;font-size:.72rem;font-weight:600;margin:.15rem;background:#f0fdf4;color:#065f46}
+                .rpt-progetto{background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:1.25rem}
+                .rpt-kiviat{background:#f8fafc;border-radius:16px;padding:1.5rem;margin:1.5rem 0;text-align:center}
+                .rpt-kiviat img{max-width:500px;margin:0 auto;height:auto;display:block}
+                .kiviat-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-top:1rem;font-size:0.85rem}
+                .quote-block{border-left:3px solid #f59e0b;padding:12px 20px;background:rgba(245,158,11,.05);border-radius:0 12px 12px 0;margin:1rem 0;font-style:italic;font-size:.85rem}
+                .pill-group{display:flex;flex-wrap:wrap;gap:0.5rem}
+                .pill{padding:0.45rem 1rem;border-radius:2rem;font-size:0.78rem;font-weight:500;border:1px solid}
+                @media(max-width:640px){.rpt-grid{grid-template-columns:1fr}}
+              </style>
+            </head>
+            <body>
+              <div class="rpt">${printContent}</div>
+              <script>
+                setTimeout(function() { window.print(); setTimeout(function() { window.close(); }, 500); }, 500);
+              <\/script>
+            </body>
+            </html>
+          `);
+          printWindow.document.close();
+        } catch(e) {
+          console.error('Errore nella conversione del canvas:', e);
+          var printContent = document.getElementById('reportContent').innerHTML;
+          var printWindow = window.open('', '_blank');
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <title>${title}</title>
+              <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+              <style>
+                body{font-family:'DM Sans',sans-serif;background:white;color:#1a1a1a;padding:2rem}
+                .rpt{max-width:1000px;margin:0 auto}
+                .rpt h1{font-size:1.8rem;color:#0f766e}
+                .rpt h2{font-size:1.2rem;color:#0f766e;margin:1.5rem 0 .75rem}
+                .rpt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+                .rpt-grid-card{background:#f8fafc;border-radius:12px;padding:1rem;text-align:center}
+              </style>
+            </head>
+            <body>
+              <div class="rpt">${printContent}</div>
+              <script>
+                setTimeout(function() { window.print(); setTimeout(function() { window.close(); }, 500); }, 500);
+              <\/script>
+            </body>
+            </html>
+          `);
+          printWindow.document.close();
+        }
+      }, 300);
+    } else {
+      var printContent = document.getElementById('reportContent').innerHTML;
+      var printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${title}</title>
+          <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+          <style>
+            body{font-family:'DM Sans',sans-serif;background:white;color:#1a1a1a;padding:2rem}
+            .rpt{max-width:1000px;margin:0 auto}
+            .rpt h1{font-size:1.8rem;color:#0f766e}
+            .rpt h2{font-size:1.2rem;color:#0f766e;margin:1.5rem 0 .75rem}
+            .rpt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+            .rpt-grid-card{background:#f8fafc;border-radius:12px;padding:1rem;text-align:center}
+          </style>
+        </head>
+        <body>
+          <div class="rpt">${printContent}</div>
+          <script>
+            setTimeout(function() { window.print(); setTimeout(function() { window.close(); }, 500); }, 500);
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
+}
+
+// ==================== SCHERMATE RINGRAZIAMENTO E FEEDBACK ====================
+function showThankYouScreen() {
+  document.getElementById('feedbackContent').innerHTML = `
+    <div class="text-center py-8">
+      <div class="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 text-sm font-semibold">
+        <i class="fa-solid fa-circle-check"></i> Percorso completato
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold mb-4">Grazie per aver partecipato! 🎉</h1>
+      <p class="text-muted max-w-md mx-auto mb-8">Hai completato tutto il percorso di orientamento. Ora puoi generare i tuoi report.</p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+        <button class="btn-primary py-3 px-6" onclick="generateReportOrientamento()">
+          <i class="fa-solid fa-file-lines mr-2"></i>Report Orientamento
+        </button>
+        <button class="btn-secondary py-3 px-6" onclick="showFeedbackSurvey()">
+          <i class="fa-regular fa-star mr-2"></i>Questionario Gradimento
+        </button>
+      </div>
+      
+      <p class="text-xs text-muted mt-8">Il report di orientamento contiene il tuo profilo personale e professionale.<br>
+      Il questionario di gradimento ci aiuterà a migliorare il corso.</p>
+    </div>
+  `;
+  showScreen('feedbackScreen');
+}
+
+function showFeedbackSurvey() {
+  document.getElementById('feedbackContent').innerHTML = `
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center gap-2 mb-3 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 text-sm font-semibold">
+        <i class="fa-solid fa-star"></i> La tua opinione conta
+      </div>
+      <h1 class="text-2xl md:text-3xl font-bold mb-2">Questionario di Gradimento</h1>
+      <p class="text-sm text-muted">Le tue risposte ci aiuteranno a migliorare il percorso.</p>
+    </div>
+    
+    <div class="max-h-[55vh] overflow-y-auto pr-2 space-y-4">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gradient-to-br from-blue-50/10 to-blue-100/5 rounded-xl p-4 border border-blue-500/20">
+          <label class="block font-semibold mb-3 text-blue-300">📊 Quanto ti è stato utile?</label>
+          <div class="flex justify-between gap-1">
+            ${[1,2,3,4,5].map(v => `<button class="feedback-likert flex-1 py-2 rounded-lg border transition-all ${feedbackRisposte.utilita === v ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-blue-400'}" data-category="utilita" data-value="${v}">${v}</button>`).join('')}
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-500 mt-1"><span>Per niente</span><span>Poco</span><span>Abbast.</span><span>Molto</span><span>Moltissimo</span></div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50/10 to-green-100/5 rounded-xl p-4 border border-green-500/20">
+          <label class="block font-semibold mb-3 text-green-300">👤 Frequenza partecipazione?</label>
+          <div class="flex justify-between gap-1">
+            ${[1,2,3,4,5].map(v => `<button class="feedback-likert flex-1 py-2 rounded-lg border transition-all ${feedbackRisposte.partecipazione === v ? 'bg-green-500 border-green-500 text-white' : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-green-400'}" data-category="partecipazione" data-value="${v}">${v}</button>`).join('')}
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-500 mt-1"><span>Mai</span><span>Raramente</span><span>A volte</span><span>Spesso</span><span>Sempre</span></div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gradient-to-br from-purple-50/10 to-purple-100/5 rounded-xl p-4 border border-purple-500/20">
+          <label class="block font-semibold mb-3 text-purple-300">📈 Quanto ti senti più preparato?</label>
+          <div class="flex justify-between gap-1">
+            ${[1,2,3,4,5].map(v => `<button class="feedback-likert flex-1 py-2 rounded-lg border transition-all ${feedbackRisposte.preparato === v ? 'bg-purple-500 border-purple-500 text-white' : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-purple-400'}" data-category="preparato" data-value="${v}">${v}</button>`).join('')}
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-500 mt-1"><span>Per niente</span><span>Poco</span><span>Abbast.</span><span>Molto</span><span>Moltissimo</span></div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-amber-50/10 to-amber-100/5 rounded-xl p-4 border border-amber-500/20">
+          <label class="block font-semibold mb-3 text-amber-300">🎯 Aspetto più gradito</label>
+          <select id="feedbackAspetto" class="w-full px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-amber-500">
+            <option value="">-- Seleziona --</option>
+            <option value="Attività pratiche" ${feedbackRisposte.aspettoPreferito === 'Attività pratiche' ? 'selected' : ''}>🎮 Attività pratiche</option>
+            <option value="Test e questionari" ${feedbackRisposte.aspettoPreferito === 'Test e questionari' ? 'selected' : ''}>📝 Test e questionari</option>
+            <option value="Lavori di gruppo" ${feedbackRisposte.aspettoPreferito === 'Lavori di gruppo' ? 'selected' : ''}>👥 Lavori di gruppo</option>
+            <option value="Confronto con i compagni" ${feedbackRisposte.aspettoPreferito === 'Confronto con i compagni' ? 'selected' : ''}>💬 Confronto con i compagni</option>
+            <option value="Feedback ricevuto" ${feedbackRisposte.aspettoPreferito === 'Feedback ricevuto' ? 'selected' : ''}>🔄 Feedback ricevuto</option>
+            <option value="La libertà di esprimermi" ${feedbackRisposte.aspettoPreferito === 'La libertà di esprimermi' ? 'selected' : ''}>🕊️ La libertà di esprimermi</option>
+            <option value="Altro">📝 Altro (specifica sotto)</option>
+          </select>
+          <input type="text" id="aspettoAltro" class="w-full mt-2 px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-amber-500" placeholder="Specifica altro aspetto..." style="display: ${feedbackRisposte.aspettoPreferito === 'Altro' ? 'block' : 'none'}" value="${feedbackRisposte.aspettoPreferitoAltro || ''}">
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gradient-to-br from-emerald-50/10 to-emerald-100/5 rounded-xl p-4 border border-emerald-500/20">
+          <label class="block font-semibold mb-3 text-emerald-300">🌱 Competenza più sviluppata</label>
+          <select id="feedbackCompetenza" class="w-full px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-emerald-500">
+            <option value="">-- Seleziona --</option>
+            <option value="Autoconsapevolezza" ${feedbackRisposte.competenzaSviluppata === 'Autoconsapevolezza' ? 'selected' : ''}>🧠 Autoconsapevolezza</option>
+            <option value="Lavoro in team" ${feedbackRisposte.competenzaSviluppata === 'Lavoro in team' ? 'selected' : ''}>🤝 Lavoro in team</option>
+            <option value="Gestione dello stress" ${feedbackRisposte.competenzaSviluppata === 'Gestione dello stress' ? 'selected' : ''}>😌 Gestione dello stress</option>
+            <option value="Conoscenza del territorio" ${feedbackRisposte.competenzaSviluppata === 'Conoscenza del territorio' ? 'selected' : ''}>🗺️ Conoscenza del territorio</option>
+            <option value="Progettazione del futuro" ${feedbackRisposte.competenzaSviluppata === 'Progettazione del futuro' ? 'selected' : ''}>🚀 Progettazione del futuro</option>
+            <option value="Comunicazione" ${feedbackRisposte.competenzaSviluppata === 'Comunicazione' ? 'selected' : ''}>💬 Comunicazione</option>
+            <option value="Altro">📝 Altro (specifica sotto)</option>
+          </select>
+          <input type="text" id="competenzaAltro" class="w-full mt-2 px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-emerald-500" placeholder="Specifica altra competenza..." style="display: ${feedbackRisposte.competenzaSviluppata === 'Altro' ? 'block' : 'none'}" value="${feedbackRisposte.competenzaSviluppataAltro || ''}">
+        </div>
+        
+        <div class="bg-gradient-to-br from-rose-50/10 to-rose-100/5 rounded-xl p-4 border border-rose-500/20">
+          <label class="block font-semibold mb-3 text-rose-300">📚 Livello di difficoltà</label>
+          <select id="feedbackDifficolta" class="w-full px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-rose-500">
+            <option value="">-- Seleziona --</option>
+            <option value="Troppo facile" ${feedbackRisposte.difficolta === 'Troppo facile' ? 'selected' : ''}>😊 Troppo facile</option>
+            <option value="Giusto" ${feedbackRisposte.difficolta === 'Giusto' ? 'selected' : ''}>✓ Giusto</option>
+            <option value="Un po' difficile" ${feedbackRisposte.difficolta === 'Un po\' difficile' ? 'selected' : ''}>🤔 Un po' difficile</option>
+            <option value="Troppo difficile" ${feedbackRisposte.difficolta === 'Troppo difficile' ? 'selected' : ''}>😰 Troppo difficile</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gradient-to-br from-teal-50/10 to-teal-100/5 rounded-xl p-4 border border-teal-500/20">
+          <label class="block font-semibold mb-3 text-teal-300">🔄 Rifaresti questo corso?</label>
+          <div class="flex gap-3">
+            ${['Sì', 'Forse', 'No'].map(v => `<button class="feedback-choice flex-1 py-2 rounded-lg border transition-all ${feedbackRisposte.rifare === v ? 'bg-teal-500 border-teal-500 text-white' : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-teal-400'}" data-category="rifare" data-value="${v}">${v === 'Sì' ? '✅' : v === 'Forse' ? '🤔' : '❌'} ${v}</button>`).join('')}
+          </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-indigo-50/10 to-indigo-100/5 rounded-xl p-4 border border-indigo-500/20">
+          <label class="block font-semibold mb-3 text-indigo-300">📚 Modulo preferito</label>
+          <select id="feedbackModulo" class="w-full px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-indigo-500">
+            <option value="">-- Seleziona --</option>
+            <option value="Modulo 1: Conoscere Se Stessi" ${feedbackRisposte.moduloPreferito === 'Modulo 1: Conoscere Se Stessi' ? 'selected' : ''}>🧠 Modulo 1 - Conoscere Se Stessi</option>
+            <option value="Modulo 2: Competenze e Team" ${feedbackRisposte.moduloPreferito === 'Modulo 2: Competenze e Team' ? 'selected' : ''}>🤝 Modulo 2 - Competenze e Team</option>
+            <option value="Modulo 3: Orientamento e Futuro" ${feedbackRisposte.moduloPreferito === 'Modulo 3: Orientamento e Futuro' ? 'selected' : ''}>🎯 Modulo 3 - Orientamento e Futuro</option>
+            <option value="Tutti" ${feedbackRisposte.moduloPreferito === 'Tutti' ? 'selected' : ''}>🌟 Tutti</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="bg-gradient-to-br from-gray-700/30 to-gray-800/30 rounded-xl p-4 border border-gray-500/30">
+        <div class="font-semibold mb-3 text-gray-300">📝 Le tue impressioni (opzionali)</div>
+        <div class="space-y-3">
+          <div><label class="block text-sm font-medium mb-1 text-gray-400">🎒 Cosa porterai con te?</label><textarea id="feedbackPortoConMe" rows="2" class="w-full px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-amber-500" placeholder="Es. Maggiore consapevolezza, nuovi amici, idee per il futuro...">${feedbackRisposte.portoConMe || ''}</textarea></div>
+          <div><label class="block text-sm font-medium mb-1 text-gray-400">👍 Cosa hai apprezzato di più?</label><textarea id="feedbackApprezzato" rows="2" class="w-full px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-amber-500" placeholder="Es. Le attività pratiche, l'atmosfera...">${feedbackRisposte.apprezzato || ''}</textarea></div>
+          <div><label class="block text-sm font-medium mb-1 text-gray-400">🔧 Cosa miglioreresti?</label><textarea id="feedbackMigliorare" rows="2" class="w-full px-3 py-2 rounded-lg border-2 border-gray-600 bg-gray-800/50 text-white focus:outline-none focus:border-amber-500" placeholder="Es. Più attività pratiche, più tempo...">${feedbackRisposte.migliorare || ''}</textarea></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex gap-3 mt-6">
+      <button class="btn-secondary" onclick="showThankYouScreen()"><i class="fa-solid fa-arrow-left mr-2"></i>Indietro</button>
+      <button class="btn-primary flex-1" onclick="salvaEFeedbackGenera()"><i class="fa-solid fa-file-pdf mr-2"></i>Genera Report Gradimento</button>
+    </div>
+  `;
+  
+  document.getElementById('feedbackAspetto')?.addEventListener('change', function(e) {
+    var altroDiv = document.getElementById('aspettoAltro');
+    if (e.target.value === 'Altro') {
+      altroDiv.style.display = 'block';
+      feedbackRisposte.aspettoPreferito = 'Altro';
+    } else {
+      altroDiv.style.display = 'none';
+      feedbackRisposte.aspettoPreferito = e.target.value;
+    }
+  });
+  document.getElementById('aspettoAltro')?.addEventListener('input', function(e) {
+    feedbackRisposte.aspettoPreferitoAltro = e.target.value;
+  });
+  
+  document.getElementById('feedbackCompetenza')?.addEventListener('change', function(e) {
+    var altroDiv = document.getElementById('competenzaAltro');
+    if (e.target.value === 'Altro') {
+      altroDiv.style.display = 'block';
+      feedbackRisposte.competenzaSviluppata = 'Altro';
+    } else {
+      altroDiv.style.display = 'none';
+      feedbackRisposte.competenzaSviluppata = e.target.value;
+    }
+  });
+  document.getElementById('competenzaAltro')?.addEventListener('input', function(e) {
+    feedbackRisposte.competenzaSviluppataAltro = e.target.value;
+  });
+  
+  document.querySelectorAll('.feedback-likert').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const category = this.dataset.category;
+      const value = parseInt(this.dataset.value);
+      feedbackRisposte[category] = value;
+      const parent = this.parentElement;
+      parent.querySelectorAll('.feedback-likert').forEach(b => {
+        b.classList.remove('bg-blue-500', 'bg-green-500', 'bg-purple-500', 'border-blue-500', 'border-green-500', 'border-purple-500', 'text-white');
+        b.classList.add('border-gray-600', 'bg-gray-800/50', 'text-gray-300');
+      });
+      this.classList.remove('border-gray-600', 'bg-gray-800/50', 'text-gray-300');
+      if (category === 'utilita') this.classList.add('bg-blue-500', 'border-blue-500', 'text-white');
+      else if (category === 'partecipazione') this.classList.add('bg-green-500', 'border-green-500', 'text-white');
+      else if (category === 'preparato') this.classList.add('bg-purple-500', 'border-purple-500', 'text-white');
+    });
+  });
+  
+  document.querySelectorAll('.feedback-choice').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const category = this.dataset.category;
+      const value = this.dataset.value;
+      feedbackRisposte[category] = value;
+      const parent = this.parentElement;
+      parent.querySelectorAll('.feedback-choice').forEach(b => {
+        b.classList.remove('bg-teal-500', 'border-teal-500', 'text-white');
+        b.classList.add('border-gray-600', 'bg-gray-800/50', 'text-gray-300');
+      });
+      this.classList.remove('border-gray-600', 'bg-gray-800/50', 'text-gray-300');
+      this.classList.add('bg-teal-500', 'border-teal-500', 'text-white');
+    });
+  });
+  
+  document.getElementById('feedbackDifficolta')?.addEventListener('change', (e) => { feedbackRisposte.difficolta = e.target.value; });
+  document.getElementById('feedbackModulo')?.addEventListener('change', (e) => { feedbackRisposte.moduloPreferito = e.target.value; });
+  
+  showScreen('feedbackScreen');
+}
+
+function salvaEFeedbackGenera() {
+  feedbackRisposte.portoConMe = document.getElementById('feedbackPortoConMe')?.value || '';
+  feedbackRisposte.apprezzato = document.getElementById('feedbackApprezzato')?.value || '';
+  feedbackRisposte.migliorare = document.getElementById('feedbackMigliorare')?.value || '';
+  feedbackRisposte.aspettoPreferito = document.getElementById('feedbackAspetto')?.value || feedbackRisposte.aspettoPreferito;
+  feedbackRisposte.competenzaSviluppata = document.getElementById('feedbackCompetenza')?.value || feedbackRisposte.competenzaSviluppata;
+  feedbackRisposte.difficolta = document.getElementById('feedbackDifficolta')?.value || feedbackRisposte.difficolta;
+  feedbackRisposte.moduloPreferito = document.getElementById('feedbackModulo')?.value || feedbackRisposte.moduloPreferito;
+  generateFeedbackReport();
+}
+
+function generateFeedbackReport() {
+  const f = feedbackRisposte;
+  const oggi = new Date().toLocaleDateString('it-IT');
+  
+  let aspettoFinale = f.aspettoPreferito;
+  if (aspettoFinale === 'Altro' && f.aspettoPreferitoAltro) aspettoFinale = f.aspettoPreferitoAltro;
+  
+  let competenzaFinale = f.competenzaSviluppata;
+  if (competenzaFinale === 'Altro' && f.competenzaSviluppataAltro) competenzaFinale = f.competenzaSviluppataAltro;
+  
+  let h = '<div class="rpt"><h1><i class="fa-regular fa-star"></i> Report di Gradimento</h1>';
+  h += '<p style="font-size:1.1rem;font-weight:600;color:#334155">' + appState.name + '</p><p style="color:#64748b;margin-bottom:1.5rem;">' + oggi + '</p>';
+  
+  h += '<div style="background:#f0f9ff;border-radius:20px;padding:1.5rem;margin-bottom:1.5rem;"><h3 style="font-size:1rem;color:#0284c7;margin-bottom:1rem;">📊 Le tue valutazioni</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.75rem;">';
+  if (f.utilita) { const col = f.utilita >= 4 ? '#10b981' : (f.utilita >= 3 ? '#f59e0b' : '#ef4444'); h += '<div style="background:#f8fafc;border-radius:16px;padding:0.75rem;text-align:center;border-left:4px solid ' + col + ';"><div style="font-size:1.5rem;font-weight:800;color:' + col + ';">' + f.utilita + '/5</div><div style="font-size:0.75rem;">Utilità percepita</div><div style="height:4px;background:#e2e8f0;margin-top:0.5rem;border-radius:2px;"><div style="width:' + (f.utilita * 20) + '%;height:100%;background:' + col + ';border-radius:2px;"></div></div></div>'; }
+  if (f.partecipazione) { const col = f.partecipazione >= 4 ? '#10b981' : (f.partecipazione >= 3 ? '#f59e0b' : '#ef4444'); h += '<div style="background:#f8fafc;border-radius:16px;padding:0.75rem;text-align:center;border-left:4px solid ' + col + ';"><div style="font-size:1.5rem;font-weight:800;color:' + col + ';">' + f.partecipazione + '/5</div><div style="font-size:0.75rem;">Partecipazione</div><div style="height:4px;background:#e2e8f0;margin-top:0.5rem;border-radius:2px;"><div style="width:' + (f.partecipazione * 20) + '%;height:100%;background:' + col + ';border-radius:2px;"></div></div></div>'; }
+  if (f.preparato) { const col = f.preparato >= 4 ? '#10b981' : (f.preparato >= 3 ? '#f59e0b' : '#ef4444'); h += '<div style="background:#f8fafc;border-radius:16px;padding:0.75rem;text-align:center;border-left:4px solid ' + col + ';"><div style="font-size:1.5rem;font-weight:800;color:' + col + ';">' + f.preparato + '/5</div><div style="font-size:0.75rem;">Preparazione aumentata</div><div style="height:4px;background:#e2e8f0;margin-top:0.5rem;border-radius:2px;"><div style="width:' + (f.preparato * 20) + '%;height:100%;background:' + col + ';border-radius:2px;"></div></div></div>'; }
+  h += '</div></div>';
+  
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.5rem;">';
+  if (aspettoFinale) h += '<div style="background:#f8fafc;border-radius:12px;padding:0.75rem;"><div style="font-weight:700;">🎯 Aspetto più gradito</div><div style="font-size:0.85rem;">' + aspettoFinale + '</div></div>';
+  if (competenzaFinale) h += '<div style="background:#f8fafc;border-radius:12px;padding:0.75rem;"><div style="font-weight:700;">🌱 Competenza sviluppata</div><div style="font-size:0.85rem;">' + competenzaFinale + '</div></div>';
+  if (f.difficolta) h += '<div style="background:#f8fafc;border-radius:12px;padding:0.75rem;"><div style="font-weight:700;">📚 Difficoltà percepita</div><div style="font-size:0.85rem;">' + f.difficolta + '</div></div>';
+  if (f.rifare) { const colRifare = f.rifare === 'Sì' ? '#10b981' : (f.rifare === 'Forse' ? '#f59e0b' : '#ef4444'); h += '<div style="background:#f8fafc;border-radius:12px;padding:0.75rem;"><div style="font-weight:700;">🔄 Rifarebbe il corso</div><div style="font-size:0.85rem;color:' + colRifare + ';">' + f.rifare + '</div></div>'; }
+  if (f.moduloPreferito) h += '<div style="background:#f8fafc;border-radius:12px;padding:0.75rem;"><div style="font-weight:700;">📚 Modulo preferito</div><div style="font-size:0.85rem;">' + f.moduloPreferito + '</div></div>';
+  h += '</div>';
+  
+  if (f.portoConMe) h += '<div style="background:#fefce8;border-radius:16px;padding:1rem;margin-bottom:0.75rem;border-left:4px solid #f59e0b;"><div style="font-weight:700;margin-bottom:0.5rem;">🎒 Cosa porterò con me</div><div style="font-size:0.85rem;">' + f.portoConMe + '</div></div>';
+  if (f.apprezzato) h += '<div style="background:#f0fdf4;border-radius:16px;padding:1rem;margin-bottom:0.75rem;border-left:4px solid #10b981;"><div style="font-weight:700;margin-bottom:0.5rem;">👍 Cosa ho apprezzato di più</div><div style="font-size:0.85rem;">' + f.apprezzato + '</div></div>';
+  if (f.migliorare) h += '<div style="background:#fef2f2;border-radius:16px;padding:1rem;margin-bottom:0.75rem;border-left:4px solid #ef4444;"><div style="font-weight:700;margin-bottom:0.5rem;">🔧 Cosa migliorerei</div><div style="font-size:0.85rem;">' + f.migliorare + '</div></div>';
+  
+  h += '<div style="margin-top:1rem; text-align:center;"><p style="font-size:0.75rem;color:#64748b;">Grazie per il tuo feedback! Le tue opinioni ci aiuteranno a migliorare il corso.</p></div>';
+  h += '</div>';
+  
+  openReportModal(h, 'Report di Gradimento - ' + appState.name);
+}
+
+// ==================== KIVIAT ====================
+function calculateKiviatScores() {
+  var scores = { autoconsapevolezza: 0, competenze: 0, ambiente: 0, conoscenza: 0, gestioneOstacoli: 0, progettualita: 0 };
+  var selfScore = 0; if (idData.personalita) selfScore++; if (idData.coping) selfScore++; if (idData.responsabilita) selfScore++; if (idData.emozionePeggiore) selfScore++; if (idData.emozioneMeglio) selfScore++; scores.autoconsapevolezza = Math.round((selfScore / 5) * 10);
+  var compScore = 0; if (idData.hardSkills.length || idData.altreHard) compScore++; if (idData.softSkills.length || idData.altreSoft) compScore++; if (idData.talenti.length > 0) compScore++; scores.competenze = Math.round((compScore / 3) * 10);
+  var ambScore = 0; if (idData.settore) ambScore++; if (idData.dimensione) ambScore++; if (idData.condizione) ambScore++; scores.ambiente = Math.round((ambScore / 3) * 10);
+  var conoscScore = 0; if (idData.dopoDiploma && idData.dopoDiploma !== 'Altro') conoscScore++; if (idData.esperienze.length || idData.esperienzeAltro) conoscScore++; if (idData.mobilita && idData.mobilita !== 'Resto in città') conoscScore++; scores.conoscenza = Math.round((conoscScore / 3) * 10);
+  var ostVals = Object.values(idData.ostacoli); var ostAvg = ostVals.reduce(function(a, b) { return a + b; }, 0) / ostVals.length; scores.gestioneOstacoli = Math.round((1 - (ostAvg - 1) / 4) * 10); if (scores.gestioneOstacoli < 0) scores.gestioneOstacoli = 0; if (scores.gestioneOstacoli > 10) scores.gestioneOstacoli = 10;
+  var projScore = 0; if (idData.progetto.breve) projScore++; if (idData.progetto.medio) projScore++; if (idData.progetto.lungo) projScore++; scores.progettualita = Math.round((projScore / 3) * 10);
+  return scores;
+}
+
+// ==================== REPORT ORIENTAMENTO ====================
+function generateReportOrientamento() {
+  generateReport();
+}
+
+function generateReport() {
+  var d = idData;
+  var dr = idDataRiflessione;
+  var kiviat = calculateKiviatScores();
+  var modScores = []; var gi = 0;
+  for (var m = 0; m < MODULES.length; m++) { var qs = OBJECTIVE_QS.filter(function(q) { return q.module === m; }); var c = 0; for (var i = 0; i < qs.length; i++) { if (appState.answers[gi + i] && appState.answers[gi + i].correct) c++; } modScores.push({ correct: c, total: qs.length, pct: Math.round(c / qs.length * 100), color: MODULES[m].color, title: MODULES[m].title }); gi += qs.length; }
+  var tot = OBJECTIVE_QS.length * 10; var pct = Math.round(appState.score / tot * 100); var level = pct >= 90 ? 'Visionario' : pct >= 75 ? 'Maestro' : pct >= 60 ? 'Stratega' : pct >= 45 ? 'Navigante' : pct >= 25 ? 'Esploratore' : 'Alla Partenza'; var oggi = new Date().toLocaleDateString('it-IT'); var mins = Math.floor((180 * 60 - appState.timerSeconds) / 60);
+  
+  var h = '<div class="rpt">';
+  
+  h += '<div class="rpt-meta"><h1><i class="fa-regular fa-file-lines"></i> Report di Orientamento</h1><p style="font-size:1.1rem;font-weight:600;color:#334155">' + appState.name + '</p><p>' + oggi + ' · Tempo: ' + mins + ' min · Prontezza: ' + appState.readiness + '/10</p></div>';
+  h += '<div class="rpt-score-card"><div style="font-size:.8rem;color:#059669">PUNTEGGIO QUIZ</div><div class="rpt-score-num">' + appState.score + '<span style="font-size:1rem">/' + tot + '</span></div><div>' + pct + '% corrette</div><div class="rpt-bar mt-2"><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:' + pct + '%;background:#10b981"></div></div></div><span class="rpt-level" style="background:#f59e0b20;color:#f59e0b">' + level + '</span></div>';
+  h += '<div class="rpt-grid">' + modScores.map(function(ms) { return '<div class="rpt-grid-card" style="border-color:' + ms.color + '"><div class="val" style="color:' + ms.color + '">' + ms.correct + '/' + ms.total + '</div><div class="lbl">' + ms.title + '</div><div class="rpt-bar"><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:' + ms.pct + '%;background:' + ms.color + '"></div></div></div></div>'; }).join('') + '</div>';
+  
+  h += '<div style="background:#e8f4f8; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-chart-pie"></i> 🧠 Il Tuo Profilo di Consapevolezza (Kiviat)</h2>';
+  h += '<div class="rpt-kiviat"><canvas id="kiviatCanvasReport" width="500" height="500" style="max-width:100%; height:auto; display:block;"></canvas>';
+  h += '<div class="kiviat-legend" style="margin-top:1.5rem; font-size:0.9rem;">';
+  var kivNames = { autoconsapevolezza: 'Autoconsapevolezza', competenze: 'Competenze', ambiente: 'Ambiente', conoscenza: 'Conoscenza', gestioneOstacoli: 'Gestione ostacoli', progettualita: 'Progettualità' };
+  var kivColors = { autoconsapevolezza: '#f59e0b', competenze: '#10b981', ambiente: '#3b82f6', conoscenza: '#8b5cf6', gestioneOstacoli: '#ef4444', progettualita: '#06b6d4' };
+  for (var k in kiviat) { h += '<span style="font-size:0.85rem; margin:0 0.5rem;"><i class="fa-solid fa-circle" style="color:' + kivColors[k] + ';font-size:0.9rem;"></i> ' + kivNames[k] + ': <strong>' + kiviat[k] + '/10</strong></span>'; }
+  h += '</div>';
+  
+  var valoreMedioProf = (kiviat.autoconsapevolezza + kiviat.competenze + kiviat.ambiente + kiviat.conoscenza + kiviat.gestioneOstacoli + kiviat.progettualita) / 6;
+  var livelloProf = Math.floor(valoreMedioProf / 2); if (livelloProf > 5) livelloProf = 5;
+  var livelliProfTesti = { 0: { icona: '🌱', colore: '#ef4444' }, 1: { icona: '🌱', colore: '#ef4444' }, 2: { icona: '🌿', colore: '#f59e0b' }, 3: { icona: '🌿', colore: '#f59e0b' }, 4: { icona: '🌳', colore: '#10b981' }, 5: { icona: '🌳', colore: '#10b981' } };
+  var livelloInfoProf = livelliProfTesti[livelloProf];
+  h += '<div style="margin-top:1.5rem; padding:1rem; background:#f0fdf4; border-radius:12px; border-left:4px solid #10b981;"><div style="display:flex; align-items:center; justify-content:center; gap:0.75rem; margin-bottom:0.5rem;"><span style="font-size:1.3rem;">🎯</span><span style="font-weight:700; color:#1a2a3a;">Il tuo livello di consapevolezza medio</span><span style="font-size:1.3rem;">' + livelloInfoProf.icona + '</span></div><div style="display:flex; align-items:baseline; justify-content:center; gap:0.5rem;"><span style="font-size:2rem; font-weight:800; color:' + livelloInfoProf.colore + ';">' + Math.round(valoreMedioProf) + '</span><span style="color:#64748b;">/ 10</span></div><div style="height:6px; background:#e2e8f0; border-radius:3px; margin-top:0.5rem; overflow:hidden;"><div style="width:' + (valoreMedioProf / 10) * 100 + '%; height:100%; background:' + livelloInfoProf.colore + '; border-radius:3px;"></div></div><p style="color:#64748b; font-size:0.75rem; text-align:center; margin-top:0.75rem;">🌿 Più alto è il punteggio, più sei pronto per affrontare le scelte del futuro.</p></div>';
+  
+  h += '<div style="margin-top:1rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:0.75rem; text-align:left;"><div style="background:#fef3c7; border-radius:12px; padding:0.75rem;"><div style="font-weight:700; color:#f59e0b;">🧠 Autoconsapevolezza</div><p style="font-size:0.7rem; color:#475569;">Quanto conosci te stesso, le tue emozioni e i tuoi punti di forza/debolezza.</p></div><div style="background:#d1fae5; border-radius:12px; padding:0.75rem;"><div style="font-weight:700; color:#10b981;">🛠️ Competenze</div><p style="font-size:0.7rem; color:#475569;">Le tue Hard e Soft Skill, ciò che sai fare concretamente.</p></div><div style="background:#dbeafe; border-radius:12px; padding:0.75rem;"><div style="font-weight:700; color:#3b82f6;">🌍 Ambiente</div><p style="font-size:0.7rem; color:#475569;">La tua capacità di orientarti nel mondo del lavoro: conoscenza dei settori, delle aziende e delle condizioni lavorative che preferisci.</p></div><div style="background:#ede9fe; border-radius:12px; padding:0.75rem;"><div style="font-weight:700; color:#8b5cf6;">📚 Conoscenza</div><p style="font-size:0.7rem; color:#475569;">Informazione sui percorsi formativi (ITS, Università, IFTS) e sulle esperienze possibili.</p></div><div style="background:#fee2e2; border-radius:12px; padding:0.75rem;"><div style="font-weight:700; color:#ef4444;">🛡️ Gestione ostacoli</div><p style="font-size:0.7rem; color:#475569;">Capacità di affrontare stress, difficoltà e imprevisti nella vita quotidiana.</p></div><div style="background:#cffafe; border-radius:12px; padding:0.75rem;"><div style="font-weight:700; color:#06b6d4;">🚀 Progettualità</div><p style="font-size:0.7rem; color:#475569;">La tua visione del futuro e la capacità di tradurre i sogni in obiettivi concreti.</p></div></div></div>';
+  
+  h += '<div style="background:#f0fdf4; border-radius:16px; padding:1rem; margin:1rem 0;"><h3 style="font-size:1rem; color:#0f766e; margin:0 0 0.5rem 0; padding-left:0.5rem; border-left:3px solid #10b981;"><i class="fa-regular fa-id-card"></i> Il Tuo Identikit: Come Ti Sei Descritto</h3><div style="display:grid; gap:.5rem; margin-bottom:0">';
+  if (d.personalita) h += '<div><strong>🧩 Personalità:</strong> ' + d.personalita + '</div>';
+  if (d.coping) h += '<div><strong>🛡️ Strategia di coping preferita:</strong> ' + d.coping + '</div>';
+  if (d.responsabilita) h += '<div><strong>🎯 Attribuzione dei successi:</strong> ' + d.responsabilita + '</div>';
+  if (d.emozionePeggiore) h += '<div><strong>😰 Emozione che gestisci peggio:</strong> ' + d.emozionePeggiore + '</div>';
+  if (d.emozioneMeglio) h += '<div><strong>😊 Emozione che gestisci meglio:</strong> ' + d.emozioneMeglio + '</div>';
+  if (d.puntoForte) h += '<div><strong>⭐ Punto di forza SWOT:</strong> ' + d.puntoForte + '</div>';
+  if (d.puntoDebolezza) h += '<div><strong>⚠️ Punto di debolezza SWOT:</strong> ' + d.puntoDebolezza + '</div>';
+  if (d.talenti.length > 0) h += '<div><strong>💎 Talenti:</strong> ' + d.talenti.map(function(t) { return '<span class="rpt-tag">' + t + '</span>'; }).join('') + '</div>';
+  if (d.ruoloGruppo) h += '<div><strong>👥 Ruolo nel gruppo:</strong> ' + d.ruoloGruppo + '</div>';
+  var allHard = d.hardSkills.slice(); if (d.altreHard) allHard.push.apply(allHard, d.altreHard.split(',').map(function(s) { return s.trim(); })); if (allHard.length) h += '<div><strong>🔧 Hard Skill:</strong> ' + allHard.map(function(s) { return '<span class="rpt-tag">' + s + '</span>'; }).join('') + '</div>';
+  var allSoft = d.softSkills.slice(); if (d.altreSoft) allSoft.push.apply(allSoft, d.altreSoft.split(',').map(function(s) { return s.trim(); })); if (allSoft.length) h += '<div><strong>🤝 Soft Skill:</strong> ' + allSoft.map(function(s) { return '<span class="rpt-tag">' + s + '</span>'; }).join('') + '</div>';
+  h += '</div></div></div>';
+  
+  h += '<div style="background:#fefce8; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-pen-to-square"></i> Le Tue Riflessioni</h2>';
+  if (dr.attivitaSignificativa) h += '<div class="quote-block" style="margin-top:0.75rem;"><strong>🧭 Attività più significativa:</strong><br>' + dr.attivitaSignificativa + '</div>';
+  if (dr.scopertaSuDiMe) h += '<div class="quote-block" style="margin-top:0.75rem;"><strong>💡 Scoperta su di me:</strong><br>' + dr.scopertaSuDiMe + '</div>';
+  if (dr.momentoIndimenticabile) h += '<div class="quote-block" style="margin-top:0.75rem;"><strong>⏰ Momento più impresso:</strong><br>' + dr.momentoIndimenticabile + '</div>';
+  if (dr.aspettoDaValorizzare) h += '<div class="quote-block" style="margin-top:0.75rem;"><strong>✨ Aspetto da valorizzare:</strong><br>' + dr.aspettoDaValorizzare + '</div>';
+  if (dr.pauraRiconosciuta) h += '<div class="quote-block warning" style="margin-top:0.75rem;"><strong>😟 Paura/insicurezza riconosciuta:</strong><br>' + dr.pauraRiconosciuta + '</div>';
+  h += '</div><div style="background:#e0f2fe; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-handshake"></i> Feedback e Crescita</h2>';
+  if (dr.trattiCarattere.length > 0 || dr.altriTrattiCarattere) { var trattiMostra = dr.trattiCarattere.slice(); if (dr.altriTrattiCarattere) trattiMostra.push(dr.altriTrattiCarattere); h += '<div><strong>🧩 Tratti del carattere:</strong> ' + trattiMostra.map(function(t) { return '<span class="rpt-tag">' + t + '</span>'; }).join('') + '</div>'; }
+  if (dr.imparatoDagliAltri) h += '<div class="quote-block" style="margin-top:0.75rem;"><strong>🤝 Cosa ho imparato dagli altri:</strong><br>' + dr.imparatoDagliAltri + '</div>';
+  if (dr.feedbackRicevuto) h += '<div class="quote-block success" style="margin-top:0.75rem;"><strong>📢 Feedback che mi ha colpito:</strong><br>' + dr.feedbackRicevuto + '</div>';
+  if (dr.qualitaAmmirata) h += '<div><strong>💖 Qualità ammirata nei compagni:</strong> ' + dr.qualitaAmmirata + '</div>';
+  h += '</div><div style="background:#fef3c7; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-building"></i> Ambienti e Percorsi</h2><div style="display:grid;gap:.5rem;margin-bottom:0">';
+  if (d.settore) h += '<div><strong>🏢 Settore:</strong> ' + d.settore + (d.settoreAltro ? ' (' + d.settoreAltro + ')' : '') + '</div>';
+  if (d.dimensione) h += '<div><strong>📏 Dimensione aziendale:</strong> ' + d.dimensione + '</div>';
+  if (d.mobilita) h += '<div><strong>🌍 Mobilità:</strong> ' + d.mobilita + '</div>';
+  if (d.condizione) h += '<div><strong>⚖️ Condizione prioritaria:</strong> ' + d.condizione + '</div>';
+  if (d.dopoDiploma) h += '<div><strong>🎓 Dopo il diploma:</strong> ' + d.dopoDiploma + (d.dopoDiplomaAltro ? ' (' + d.dopoDiplomaAltro + ')' : '') + '</div>';
+  var allEsp = d.esperienze.slice(); if (d.esperienzeAltro) allEsp.push.apply(allEsp, d.esperienzeAltro.split(',').map(function(s) { return s.trim(); })); if (allEsp.length) h += '<div><strong>💼 Esperienze desiderate:</strong> ' + allEsp.map(function(s) { return '<span class="rpt-tag">' + s + '</span>'; }).join('') + '</div>';
+  h += '</div></div><div style="background:#fee2e2; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-shield-halved"></i> I Tuoi Ostacoli (allo studio)</h2><div class="rpt-grid">';
+  var ostLabelsR = { soCosaVoglio: 'So cosa voglio fare', competenzeAdeguate: 'Competenze adeguate', conoscoTerritorio: 'Conosco territorio', sostegnoFamiglia: 'Supporto famiglia', pauraFallire: 'Paura di fallire', telefono: 'Telefono/distrazioni', stanchezza: 'Stanchezza', nonCapisco: 'Non capisco', mancaVoglia: 'Manca voglia' };
+  for (var k in d.ostacoli) { var v = d.ostacoli[k]; var col = v >= 4 ? '#ef4444' : v >= 3 ? '#f59e0b' : '#10b981'; h += '<div class="rpt-grid-card" style="border-color:' + col + '"><div class="val" style="color:' + col + '">' + v + '/5</div><div class="lbl">' + ostLabelsR[k] + '</div><div class="rpt-bar"><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:' + (v * 20) + '%;background:' + col + '"></div></div></div></div>'; }
+  h += '</div></div><div style="background:#fefce8; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-map"></i> Il Tuo Progetto di Vita</h2><div class="rpt-progetto" style="margin:0; background:transparent; padding:0;">';
+  if (d.progetto.breve) h += '<p><strong>🎯 Breve termine (3-6 mesi):</strong> ' + d.progetto.breve + '</p>';
+  if (d.progetto.medio) h += '<p><strong>📅 Medio termine (1 anno):</strong> ' + d.progetto.medio + '</p>';
+  if (d.progetto.lungo) h += '<p><strong>🚀 Lungo termine (5 anni):</strong> ' + d.progetto.lungo + '</p>';
+  if (!d.progetto.breve && !d.progetto.medio && !d.progetto.lungo) h += '<p style="color:#94a3b8">Non compilato</p>';
+  h += '</div></div>';
+  
+  h += '<div style="background:#ede9fe; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-anchor"></i> Le tue Ancora di Carriera</h2>';
+  h += '<p class="text-sm text-muted mb-3">Le ancore di carriera rappresentano ciò che conta davvero per te nel lavoro. Ecco la fotografia della tua classe.</p>';
+  h += '<div class="rpt-grid" style="gap:0.75rem;">';
+  var ancoreList = [
+    { nome: 'Curiosità e competenza', valore: CLASSE.ancoreCarriera.curiositàCompetenza, descrizione: 'Ami imparare cose nuove e approfondire', icona: '📚' },
+    { nome: 'Superare sfide', valore: CLASSE.ancoreCarriera.superareSfide, descrizione: 'Ti piace risolvere problemi difficili', icona: '🏔️' },
+    { nome: 'Creare qualcosa di tuo', valore: CLASSE.ancoreCarriera.creareQualcosa, descrizione: 'Vorresti avere un progetto o un\'azienda tua', icona: '🚀' },
+    { nome: 'Stabilità', valore: CLASSE.ancoreCarriera.stabilità, descrizione: 'Non vuoi preoccuparti di cambiare lavoro', icona: '🛡️' },
+    { nome: 'Autonomia', valore: CLASSE.ancoreCarriera.autonomia, descrizione: 'Preferisci prendere decisioni da solo', icona: '🎮' },
+    { nome: 'Essere capo', valore: CLASSE.ancoreCarriera.essereCapo, descrizione: 'Vuoi responsabilità e leadership', icona: '👑' }
+  ];
+  for (var i = 0; i < ancoreList.length; i++) { var a = ancoreList[i]; var colAncora = a.valore >= 70 ? '#10b981' : (a.valore >= 50 ? '#f59e0b' : '#ef4444'); h += '<div class="rpt-grid-card" style="border-color:' + colAncora + '"><div class="val" style="color:' + colAncora + ';font-size:1rem;">' + a.valore + '%</div><div class="lbl" style="font-size:0.7rem;">' + a.icona + ' ' + a.nome + '</div><div class="rpt-bar"><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:' + a.valore + '%;background:' + colAncora + '"></div></div></div><p style="font-size:0.65rem;color:#64748b;margin-top:4px;">' + a.descrizione + '</p></div>'; }
+  h += '</div></div>';
+  
+  h += '<div style="background:#d1fae5; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-star"></i> Le 8 Competenze Chiave Europee</h2>';
+  h += '<p class="text-sm text-muted mb-3">Secondo la Raccomandazione UE del 22 maggio 2018, queste sono le competenze fondamentali per l\'apprendimento permanente. Ecco come si posiziona la tua classe.</p>';
+  h += '<div class="rpt-grid" style="gap:0.75rem;">';
+  var competenzeList = [
+    { nome: 'Alfabetica funzionale', valore: CLASSE.competenzeChiave.alfabeticaFunzionale || 68, icona: '📖', descrizione: 'Comunicare efficacemente in lingua madre' },
+    { nome: 'Multilinguistica', valore: CLASSE.competenzeChiave.multilinguistica || 65, icona: '🌐', descrizione: 'Comunicare in diverse lingue' },
+    { nome: 'Matematica e scienze', valore: CLASSE.competenzeChiave.matematicaScientifica || 70, icona: '📐', descrizione: 'Usare modelli matematici e scientifici' },
+    { nome: 'Digitale', valore: CLASSE.competenzeChiave.digitale || 75, icona: '💻', descrizione: 'Usare tecnologie digitali con consapevolezza' },
+    { nome: 'Personale e sociale', valore: CLASSE.competenzeChiave.personaleSociale || 58, icona: '🧠', descrizione: 'Imparare a imparare, gestire sé stessi' },
+    { nome: 'Cittadinanza', valore: CLASSE.competenzeChiave.cittadinanza || 62, icona: '🏛️', descrizione: 'Partecipare alla vita civica e sociale' },
+    { nome: 'Imprenditoriale', valore: CLASSE.competenzeChiave.imprenditoriale || 68, icona: '🚀', descrizione: 'Trasformare idee in azioni' },
+    { nome: 'Consapevolezza culturale', valore: CLASSE.competenzeChiave.consapevolezzaCulturale || 50, icona: '🎨', descrizione: 'Apprezzare diverse forme artistiche e culturali' }
+  ];
+  for (var i = 0; i < competenzeList.length; i++) { var c = competenzeList[i]; var colComp = c.valore >= 70 ? '#10b981' : (c.valore >= 50 ? '#f59e0b' : '#ef4444'); h += '<div class="rpt-grid-card" style="border-color:' + colComp + '"><div class="val" style="color:' + colComp + ';font-size:1.2rem;">' + c.valore + '%</div><div class="lbl">' + c.icona + ' ' + c.nome + '</div><div class="rpt-bar"><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:' + c.valore + '%;background:' + colComp + '"></div></div></div><p style="font-size:0.65rem;color:#64748b;margin-top:4px;">' + c.descrizione + '</p></div>'; }
+  h += '</div>';
+  
+  h += '<div class="quote-block mt-3" style="background:#f8fafc;"><strong>📊 Analisi delle competenze della classe</strong><br>• <strong>Punti di forza:</strong> Competenza digitale (' + (CLASSE.competenzeChiave.digitale || 75) + '%) e multilinguistica (' + (CLASSE.competenzeChiave.multilinguistica || 65) + '%) — siete pronti per il mondo digitale e globale.<br>• <strong>Aree di miglioramento:</strong> Consapevolezza culturale (' + (CLASSE.competenzeChiave.consapevolezzaCulturale || 50) + '%) e competenza personale (' + (CLASSE.competenzeChiave.personaleSociale || 58) + '%) — potete lavorare su consapevolezza di sé e gestione delle emozioni.<br>• <strong>Competenza più richiesta dal mercato:</strong> Competenza digitale e imprenditoriale sono le più cercate dalle aziende oggi.</div>';
+  h += '</div>';
+  
+  h += '<div style="background:#fff7ed; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-chart-line"></i> I trend che stanno cambiando il lavoro</h2>';
+  h += '<div class="rpt-roadmap" style="background:linear-gradient(135deg,#e0f2fe,#f0fdf4); margin:0;"><p class="text-sm mb-3" style="color:#475569;">Dal report delle 10 startup analizzate in classe, questi sono i trend che stanno trasformando il mercato del lavoro:</p><div class="rpt-grid" style="gap:1rem;">';
+  if (CLASSE.startupTrend.ai > 0) h += '<div class="rpt-grid-card" style="background:white;text-align:center;"><div style="font-size:1.5rem;">🤖</div><div style="font-weight:700;font-size:0.85rem;">Intelligenza Artificiale</div><div style="font-size:0.7rem;color:#64748b;">' + CLASSE.startupTrend.ai + '/10 startup lo hanno integrato</div></div>';
+  if (CLASSE.startupTrend.sostenibilita > 0) h += '<div class="rpt-grid-card" style="background:white;text-align:center;"><div style="font-size:1.5rem;">🌱</div><div style="font-weight:700;font-size:0.85rem;">Sostenibilità</div><div style="font-size:0.7rem;color:#64748b;">' + CLASSE.startupTrend.sostenibilita + '/10 startup la includono</div></div>';
+  if (CLASSE.startupTrend.digitalizzazione > 0) h += '<div class="rpt-grid-card" style="background:white;text-align:center;"><div style="font-size:1.5rem;">💻</div><div style="font-weight:700;font-size:0.85rem;">Digitalizzazione</div><div style="font-size:0.7rem;color:#64748b;">' + CLASSE.startupTrend.digitalizzazione + '/10 startup la utilizzano</div></div>';
+  h += '</div><div class="quote-block mt-3" style="font-size:0.75rem;">💡 Questi trend ti dicono qualcosa: le aziende di oggi cercano persone che sanno usare l\'AI, pensano sostenibile e lavorano in digitale. Sono competenze che puoi iniziare a costruire già ora.</div></div></div>';
+  
+  h += '<div style="background:#fef3c7; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-map"></i> I percorsi più esplorati dalla classe</h2>';
+  h += '<div class="pill-group" style="margin-bottom:1rem;">';
+  var percorsiMap = { universita: '🎓 Università (' + CLASSE.percorsiEsplorati.universita + ' studenti)', galattica: '🌟 Galattica (' + CLASSE.percorsiEsplorati.galattica + ' studenti)', its: '🏫 ITS Academy (' + CLASSE.percorsiEsplorati.its + ' studenti)', forzeArmate: '⚔️ Forze Armate (' + CLASSE.percorsiEsplorati.forzeArmate + ' studenti)', lavoro: '💼 Lavoro (' + CLASSE.percorsiEsplorati.lavoro + ' studenti)', ifts: '📘 IFTS (' + CLASSE.percorsiEsplorati.ifts + ' studenti)', afam: '🎨 AFAM (' + CLASSE.percorsiEsplorati.afam + ' studenti)' };
+  for (var p in percorsiMap) { if (CLASSE.percorsiEsplorati[p] > 0) { h += '<span class="pill" style="background:rgba(77,150,255,0.1);border-color:rgba(77,150,255,0.3);">' + percorsiMap[p] + '</span>'; } }
+  h += '</div><div class="quote-block">📌 Nella tua classe, l\'interesse medio per i percorsi esplorati è <strong>' + CLASSE.interesseMedioScouting + '/10</strong>. I percorsi più gettonati sono Università e Galattica (formazione regionale).</div></div>';
+  
+  h += '<div style="background:#d1fae5; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-users"></i> La Tua Classe — I numeri che raccontano chi siete</h2><div class="rpt-grid">';
+  h += '<div class="rpt-grid-card" style="border-color:#fbbf24"><div class="val" style="color:#fbbf24">' + CLASSE.motivazione.abbastanza + '%</div><div class="lbl">Si sente abbastanza motivato</div></div>';
+  h += '<div class="rpt-grid-card" style="border-color:#c77dff"><div class="val" style="color:#c77dff">' + CLASSE.mbti.diplomatici + '%</div><div class="lbl">Personalità Diplomatica</div></div>';
+  h += '<div class="rpt-grid-card" style="border-color:#ef4444"><div class="val" style="color:#ef4444">' + (CLASSE.reazioneDifficolta.evita + CLASSE.reazioneDifficolta.rimanda) + '%</div><div class="lbl">Evita o rimanda le difficoltà</div></div>';
+  h += '<div class="rpt-grid-card" style="border-color:#f59e0b"><div class="val" style="color:#f59e0b">' + CLASSE.prioritaLavoro.guadagno + '%</div><div class="lbl">Priorità: guadagnare bene</div></div>';
+  h += '<div class="rpt-grid-card" style="border-color:#10b981"><div class="val" style="color:#10b981">' + CLASSE.apertoAMobilita + '%</div><div class="lbl">Disposto a spostarsi</div></div>';
+  h += '<div class="rpt-grid-card" style="border-color:#3b82f6"><div class="val" style="color:#3b82f6">' + (100 - CLASSE.tempoStudio.meno30 - CLASSE.tempoStudio.trenta60) + '%</div><div class="lbl">Studia almeno 1 ora/giorno</div></div>';
+  h += '<div class="rpt-grid-card" style="border-color:#06b6d4"><div class="val" style="color:#06b6d4">' + CLASSE.motivazioneProseguire.lavoroMigliore + '%</div><div class="lbl">Sogna un lavoro migliore studiando</div></div>';
+  h += '<div class="rpt-grid-card" style="border-color:#8b5cf6"><div class="val" style="color:#8b5cf6">' + CLASSE.autonomiaDecisionale.conSupporto + '%</div><div class="lbl">Decide con supporto di altri</div></div>';
+  h += '</div><div class="quote-block mt-3">📊 <strong>Il ritratto della tua classe</strong><br>• ' + CLASSE.mindsetCrescita + '% ha un mindset di crescita: credete che potete migliorare.<br>• ' + CLASSE.apertoAMobilita + '% è aperto a spostarsi: un vantaggio competitivo enorme.<br>• ' + (CLASSE.reazioneDifficolta.evita + CLASSE.reazioneDifficolta.rimanda) + '% evita le difficoltà: questo è il vero ostacolo da superare.<br>• ' + CLASSE.hardSoftComprensione.capitoGiocando + '% ha capito la differenza tra Hard e Soft Skill giocando.<br>• Il punteggio medio delle vostre startup simulate è stato <strong>' + CLASSE.startupMediaPunteggio + '/100</strong>, con ' + CLASSE.startupFinanziate + ' progetti finanziati.<br></div></div>';
+  
+  var suggerimentiPersonalizzati = getSuggerimentoPersonalizzato(idData, CLASSE);
+  if (suggerimentiPersonalizzati.length > 0) { h += '<div style="background:#e8f4f8; border-radius:16px; padding:1.5rem; margin:1.5rem 0;"><h2 style="margin-top:0;"><i class="fa-regular fa-lightbulb"></i> Suggerimenti per te</h2>'; for (var i = 0; i < suggerimentiPersonalizzati.length; i++) { var s = suggerimentiPersonalizzati[i]; h += '<div class="insight-card" style="margin-bottom:1rem;"><div class="insight-title"><span style="font-size:1.2rem;">' + s.icona + '</span> ' + s.titolo + '</div><div class="insight-text">' + s.testo + '</div></div>'; } h += '</div>'; }
+  
+  h += '<div class="rpt-roadmap"><div class="rpt-roadmap-step"><div class="rpt-roadmap-num">1</div><div class="rpt-roadmap-text">Affronta il tuo ostacolo principale: inizia con una piccola azione concreta oggi stesso.</div></div><div class="rpt-roadmap-step"><div class="rpt-roadmap-num">2</div><div class="rpt-roadmap-text">Informati sul percorso ' + (d.dopoDiploma || 'che ti interessa') + ' e annota le scadenze.</div></div><div class="rpt-roadmap-step"><div class="rpt-roadmap-num">3</div><div class="rpt-roadmap-text">Cerca un mentore o un\'esperienza pratica nel settore che ti interessa.</div></div></div>';
+  
+  h += '<div class="rpt-footer" style="margin-top:2rem; padding-top:1rem;"><strong>OrientAttivo</strong> — La tua bussola per il futuro · ' + oggi + '</div>';
+  h += '</div>';
+  
+  openReportModal(h, 'Report di Orientamento - ' + appState.name);
+  
+  setTimeout(function() {
+    var canvas = document.getElementById('kiviatCanvasReport');
+    if (canvas && typeof Chart !== 'undefined') {
+      if (canvas._chart) canvas._chart.destroy();
+      var ctx = canvas.getContext('2d');
+      var chart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['Autoconsapevolezza', 'Competenze', 'Ambiente', 'Conoscenza', 'Gestione ostacoli', 'Progettualità'],
+          datasets: [{
+            label: 'Il tuo profilo',
+            data: [kiviat.autoconsapevolezza, kiviat.competenze, kiviat.ambiente, kiviat.conoscenza, kiviat.gestioneOstacoli, kiviat.progettualita],
+            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+            borderColor: '#f59e0b',
+            borderWidth: 3,
+            pointBackgroundColor: '#f59e0b',
+            pointBorderColor: '#fff',
+            pointRadius: 6,
+            pointHoverRadius: 8,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: { r: { beginAtZero: true, max: 10, ticks: { stepSize: 2, color: '#475569', font: { size: 12, weight: 'bold' } }, grid: { color: '#e2e8f0' }, pointLabels: { font: { size: 13, weight: 'bold' }, color: '#1e293b' } } },
+          plugins: { tooltip: { bodyFont: { size: 14 }, titleFont: { size: 14 } }, legend: { labels: { font: { size: 14, weight: 'bold' }, color: '#1e293b' } } }
+        }
+      });
+      canvas._chart = chart;
+    }
+  }, 200);
+}
+
+function getSuggerimentoPersonalizzato(idData, CLASSE) {
+  var suggerimenti = [];
+  if (CLASSE.studiaMeno1Ora > 60 && CLASSE.prioritaLavoro.guadagno > 70) {
+    suggerimenti.push({ icona: '⏰', titolo: 'Il gap che può cambiare il tuo futuro', testo: 'Nella tua classe, il 63% studia meno di 1 ora al giorno ma il 71% vuole guadagnare bene. Aggiungi solo 30 minuti al giorno di studio attivo: in un mese sono +10 ore di apprendimento.' });
+  }
+  if (CLASSE.reazioneDifficolta.evita + CLASSE.reazioneDifficolta.rimanda > 70) {
+    suggerimenti.push({ icona: '🧗', titolo: 'La difficoltà non è un muro, è un gradino', testo: 'Il 76% della classe evita o rimanda gli argomenti difficili. Prova la regola dei 5 minuti: inizia l\'argomento difficile e poi decidi se continuare.' });
+  }
+  if (CLASSE.apertoAMobilita > 75) {
+    suggerimenti.push({ icona: '🌍', titolo: 'La tua classe è pronta a spostarsi!', testo: 'L\'80% della classe è aperto a trasferirsi per lavoro. Informati su Erasmus+, ErasmusPro e tirocini all\'estero.' });
+  }
+  if (idData.hardSkills.length === 0 && idData.softSkills.length === 0) {
+    suggerimenti.push({ icona: '🛠️', titolo: 'Le tue competenze sono un tesoro da scoprire', testo: 'Prova a fare un elenco di 5 cose che sai fare bene (anche fuori dalla scuola) e 5 modi in cui aiuti gli altri. Quello è l\'inizio del tuo CV.' });
+  } else if (idData.hardSkills.length > 0 && idData.softSkills.length > 0) {
+    suggerimenti.push({ icona: '🎯', titolo: 'Hai già mappato le tue competenze!', testo: 'Le tue Hard Skill (' + idData.hardSkills.slice(0,3).join(', ') + (idData.hardSkills.length > 3 ? '...' : '') + ') e Soft Skill sono il tuo punto di partenza.' });
+  }
+  if (!idData.progetto.breve && !idData.progetto.medio && !idData.progetto.lungo) {
+    suggerimenti.push({ icona: '🗺️', titolo: 'Il futuro si progetta un passo alla volta', testo: 'Prova a immaginarti tra 5 anni: dove sei? cosa fai? chi sei? Da lì, torna indietro e scrivi i passi intermedi.' });
+  }
+  return suggerimenti;
+}
+
+// ==================== AVVIO ====================
+document.addEventListener('DOMContentLoaded', function() {
+  var nameInput = document.getElementById('nameInput');
+  var startBtn = document.getElementById('startBtn');
+  var skipBtn = document.getElementById('skipToSecondPartBtn');
+  var readinessSlider = document.getElementById('readinessSlider');
+  var readinessValue = document.getElementById('readinessValue');
+  
+  nameInput.addEventListener('input', function() { startBtn.disabled = this.value.trim().length < 2; });
+  readinessSlider.addEventListener('input', function() { appState.readiness = parseInt(this.value); readinessValue.textContent = 'Livello ' + appState.readiness + '/10'; });
+  
+  startBtn.addEventListener('click', function() {
+    appState.name = nameInput.value.trim();
+    appState.readiness = parseInt(readinessSlider.value);
+    appState.module = 0; appState.qIndex = 0; appState.score = 0; appState.answers = []; appState.matchS = {}; appState.rankS = {}; appState.seqS = {}; appState.multipleSel = {};
+    appState.timerSeconds = 180 * 60;
+    showScreen('quizScreen');
+    document.getElementById('quizContainer').innerHTML = '<div class="glass p-6"><div class="flex flex-wrap justify-between items-center gap-4 mb-4"><div class="flex items-center gap-3"><div class="timer-ring"><svg width="56" height="56" viewBox="0 0 56 56"><circle class="track" cx="28" cy="28" r="24"/><circle class="fill" id="timerCircle" cx="28" cy="28" r="24" stroke-dasharray="150.8"/></svg><div class="timer-text" id="timerText">180</div></div><div><div class="text-xs text-muted">MINUTI RIMASTI</div><div class="text-sm font-bold" id="timerLabel">3:00:00</div></div></div><div><div class="text-xs text-muted">PUNTEGGIO</div><div class="text-2xl font-bold text-amber-400" id="scoreDisplay">0</div></div></div><div class="phase-dots mb-4" id="phaseDots"></div><div class="progress-track mb-2"><div class="progress-fill" id="globalProgress" style="width:0%"></div></div><div class="flex justify-between text-xs mb-6 text-muted"><span id="progressLabel">Domanda 1 di ' + TOTAL_QS + '</span><span id="phaseLabel"></span></div><div class="mb-4" id="phaseBadge"></div><div class="glass p-6 mb-6" id="questionCard"><div id="questionContent"></div></div><div id="explanationArea"></div><div class="flex justify-end gap-4 mt-4"><button class="btn-primary" onclick="nextQ()" id="nextBtn" disabled>Prossima Domanda →</button></div></div>';
+    renderQuiz();
+    startTimer(true);
+  });
+  
+  skipBtn.addEventListener('click', function() {
+    showSecondPartModal();
+  });
+  
+  document.getElementById('idPrevBtn').addEventListener('click', function() { idNav(-1); });
+  document.getElementById('idNextBtn').addEventListener('click', function() { idNav(1); });
+  
+  for (var i = 0; i < 40; i++) { var p = document.createElement('div'); p.className = 'particle'; p.style.left = Math.random() * 100 + '%'; p.style.animationDuration = (6 + Math.random() * 14) + 's'; p.style.animationDelay = Math.random() * 10 + 's'; p.style.width = (2 + Math.random() * 4) + 'px'; p.style.height = (2 + Math.random() * 4) + 'px'; document.getElementById('particles').appendChild(p); }
+  
+  window.selAns = selAns; window.rankMove = rankMove; window.subRank = subRank;
+  window.selSeq = selSeq; window.subSeq = subSeq; window.nextQ = nextQ; window.startIdentikit = startIdentikit;
+  window.togglePill = togglePill; window.idNav = idNav; window.generateReportOrientamento = generateReportOrientamento;
+  window.togglePillRiflessione = togglePillRiflessione; window.toggleTalento = toggleTalento; window.checkCodeAndContinue = checkCodeAndContinue;
+  window.showFeedbackSurvey = showFeedbackSurvey; window.showThankYouScreen = showThankYouScreen;
+  window.toggleMultiple = toggleMultiple; window.confirmMultiple = confirmMultiple;
+  window.showSecondPartModal = showSecondPartModal; window.closeModal = closeModal; window.verifyDirectAccess = verifyDirectAccess;
+});
+</script>
+</body>
+</html>
